@@ -135,9 +135,17 @@ function scrollToSection(sectionId) {
 }
 
 function openMap() {
-    // Opens Google Maps to a location in Algiers
-    const mapsUrl = 'https://www.google.com/maps/search/Algiers+Center,+Algeria/@36.7755648,3.0601469,15z';
+    // Opens Google Maps to EDEN PARFUM exact location
+    const mapsUrl = 'https://www.google.com/maps/place/Eden+parfum/@36.7585934,3.0546987,332m/data=!3m2!1e3!4b1!4m6!3m5!1s0x128fb30018c34e03:0x69b304bc5ec91959!8m2!3d36.7585922!4d3.0554277!16s%2Fg%2F11w2cyhqj_?entry=ttu&g_ep=EgoyMDI1MDgxMy4wIKXMDSoASAFQAw%3D%3D';
     window.open(mapsUrl, '_blank');
+}
+
+// WhatsApp functionality
+function openWhatsApp(message = '') {
+    const phoneNumber = '213661808980';
+    const defaultMessage = 'Hello EDEN PARFUM! I would like to inquire about your perfume collection.';
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message || defaultMessage)}`;
+    window.open(whatsappUrl, '_blank');
 }
 
 function showNotification(message, type = 'info') {
