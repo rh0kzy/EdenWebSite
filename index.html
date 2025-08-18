@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDEN PARFUM - Premium Perfumes in Algeria</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">
+                    <img src="photos/eden parfum logo.png" alt="EDEN PARFUM Logo" class="logo-img">
+                    <div class="logo-text">
+                        <h1>EDEN PARFUM</h1>
+                        <span>Premium Fragrance Collection</span>
+                    </div>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="#home" class="nav-link">Home</a></li>
+                    <li><a href="#about" class="nav-link">About</a></li>
+                    <li><a href="#collection" class="nav-link">Collection</a></li>
+                    <li><a href="#location" class="nav-link">Location</a></li>
+                    <li><a href="#contact" class="nav-link">Contact</a></li>
+                </ul>
+                <div class="hamburger">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">EDEN PARFUM</h1>
+            <p class="hero-subtitle">Discover the Essence of Luxury</p>
+            <p class="hero-description">Algeria's premier destination for premium fragrances with over 500 exquisite perfumes</p>
+            <button class="cta-button" onclick="scrollToSection('collection')">
+                <i class="fas fa-spray-can"></i>
+                Explore Collection
+            </button>
+        </div>
+        <div class="hero-image">
+            <div class="perfume-bottle"></div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="container">
+            <div class="section-header">
+                <h2>About EDEN PARFUM</h2>
+                <p>Where fragrance meets passion</p>
+            </div>
+            <div class="about-content">
+                <div class="about-text">
+                    <h3>Our Story</h3>
+                    <p>EDEN PARFUM is Algeria's most prestigious perfume magazine and retailer, curating an exceptional collection of over 500 premium fragrances from around the world. We are passionate about helping you discover your signature scent.</p>
+                    
+                    <h3>What Makes Us Special</h3>
+                    <div class="features">
+                        <div class="feature">
+                            <i class="fas fa-star"></i>
+                            <div>
+                                <h4>Premium Quality</h4>
+                                <p>Only authentic, high-quality perfumes from renowned brands</p>
+                            </div>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-users"></i>
+                            <div>
+                                <h4>Expert Guidance</h4>
+                                <p>Our fragrance experts help you find the perfect scent</p>
+                            </div>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-shipping-fast"></i>
+                            <div>
+                                <h4>Fast Delivery</h4>
+                                <p>Quick and secure delivery across Algeria</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-stats">
+                    <div class="stat">
+                        <h3>500+</h3>
+                        <p>Premium Perfumes</p>
+                    </div>
+                    <div class="stat">
+                        <h3>10K+</h3>
+                        <p>Happy Customers</p>
+                    </div>
+                    <div class="stat">
+                        <h3>15+</h3>
+                        <p>Years of Excellence</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Collection Section -->
+    <section id="collection" class="collection">
+        <div class="container">
+            <div class="section-header">
+                <h2>Our Collection</h2>
+                <p>Explore our exquisite range of fragrances</p>
+            </div>
+            <div class="collection-categories">
+                <div class="category-card" data-category="men">
+                    <div class="category-icon">
+                        <i class="fas fa-male"></i>
+                    </div>
+                    <h3>Men's Fragrances</h3>
+                    <p>Bold, sophisticated scents for the modern gentleman</p>
+                    <div class="category-count">200+ Options</div>
+                </div>
+                <div class="category-card" data-category="women">
+                    <div class="category-icon">
+                        <i class="fas fa-female"></i>
+                    </div>
+                    <h3>Women's Fragrances</h3>
+                    <p>Elegant, captivating perfumes for every occasion</p>
+                    <div class="category-count">250+ Options</div>
+                </div>
+                <div class="category-card" data-category="unisex">
+                    <div class="category-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h3>Unisex Collections</h3>
+                    <p>Versatile fragrances that transcend boundaries</p>
+                    <div class="category-count">50+ Options</div>
+                </div>
+            </div>
+            
+            <!-- Featured Brands -->
+            <div class="featured-brands">
+                <h3>Featured Brands</h3>
+                <div class="brands-grid">
+                    <div class="brand-item">Chanel</div>
+                    <div class="brand-item">Dior</div>
+                    <div class="brand-item">Tom Ford</div>
+                    <div class="brand-item">Creed</div>
+                    <div class="brand-item">Versace</div>
+                    <div class="brand-item">Armani</div>
+                    <div class="brand-item">Hugo Boss</div>
+                    <div class="brand-item">Calvin Klein</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Location Section -->
+    <section id="location" class="location">
+        <div class="container">
+            <div class="section-header">
+                <h2>Visit Our Store</h2>
+                <p>Find us in the heart of Algeria</p>
+            </div>
+            <div class="location-content">
+                <div class="location-info">
+                    <div class="info-card">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div>
+                            <h3>Address</h3>
+                            <p>123 Boulevard Mohamed V<br>
+                            Algiers Center, Algiers 16000<br>
+                            Algeria</p>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <i class="fas fa-clock"></i>
+                        <div>
+                            <h3>Opening Hours</h3>
+                            <p>Monday - Saturday: 9:00 AM - 8:00 PM<br>
+                            Sunday: 10:00 AM - 6:00 PM<br>
+                            Closed on public holidays</p>
+                        </div>
+                    </div>
+                    <div class="info-card">
+                        <i class="fas fa-phone"></i>
+                        <div>
+                            <h3>Contact</h3>
+                            <p>Phone: +213 21 123 4567<br>
+                            WhatsApp: +213 555 123 456<br>
+                            Email: info@edenparfum.dz</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="map-container">
+                    <div class="map-placeholder">
+                        <i class="fas fa-map"></i>
+                        <p>Interactive Map</p>
+                        <button class="map-button" onclick="openMap()">View on Google Maps</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <div class="section-header">
+                <h2>Get in Touch</h2>
+                <p>We'd love to hear from you</p>
+            </div>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <h3>Let's Connect</h3>
+                    <p>Have questions about our fragrances or need personalized recommendations? Our team is here to help!</p>
+                    
+                    <div class="social-links">
+                        <h4>Follow Us</h4>
+                        <div class="social-icons">
+                            <a href="#" class="social-icon"><i class="fab fa-facebook"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-whatsapp"></i></a>
+                            <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <form class="contact-form">
+                    <div class="form-group">
+                        <input type="text" placeholder="Your Name" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" placeholder="Your Email" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="tel" placeholder="Phone Number">
+                    </div>
+                    <div class="form-group">
+                        <textarea placeholder="Your Message" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-paper-plane"></i>
+                        Send Message
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>EDEN PARFUM</h3>
+                    <p>Algeria's premier destination for luxury fragrances. Discover your signature scent with our curated collection of over 500 premium perfumes.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#about">About</a></li>
+                        <li><a href="#collection">Collection</a></li>
+                        <li><a href="#location">Location</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Categories</h4>
+                    <ul>
+                        <li><a href="#">Men's Fragrances</a></li>
+                        <li><a href="#">Women's Fragrances</a></li>
+                        <li><a href="#">Unisex Collections</a></li>
+                        <li><a href="#">Gift Sets</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact Info</h4>
+                    <ul>
+                        <li><i class="fas fa-map-marker-alt"></i> Algiers, Algeria</li>
+                        <li><i class="fas fa-phone"></i> +213 21 123 4567</li>
+                        <li><i class="fas fa-envelope"></i> info@edenparfum.dz</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 EDEN PARFUM. All rights reserved. | Designed with passion in Algeria</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
