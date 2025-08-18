@@ -331,10 +331,41 @@ function initializeCatalog() {
     // Initialize filters
     populateFilters();
     
+    // Check for URL parameters and apply filters
+    const urlParams = new URLSearchParams(window.location.search);
+    const genderParam = urlParams.get('gender');
+    
+    if (genderParam) {
+        // Convert URL parameter to the format used in the database
+        let genderValue = '';
+        if (genderParam === 'men') {
+            genderValue = 'Men';
+        } else if (genderParam === 'women') {
+            genderValue = 'Women';
+        } else if (genderParam === 'unisex') {
+            genderValue = 'Mixte';
+        }
+        
+        // Set the gender filter
+        if (genderValue) {
+            currentGenderFilter = genderValue;
+            const genderFilterSelect = document.getElementById('genderFilter');
+            if (genderFilterSelect) {
+                genderFilterSelect.value = genderValue;
+            }
+        }
+    }
+    
     // Initialize search
     filteredPerfumes = [...perfumesDatabase];
-    displayPerfumes();
-    updateResultsCount();
+    
+    // Apply any URL-based filters
+    if (currentGenderFilter) {
+        filterPerfumes();
+    } else {
+        displayPerfumes();
+        updateResultsCount();
+    }
     
     // Add event listeners
     setupSearchEventListeners();
