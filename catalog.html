@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfume Catalog - EDEN PARFUM</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">
+                    <a href="index.html" class="logo-link">
+                        <img src="photos/eden parfum logo.png" alt="EDEN PARFUM Logo" class="logo-img">
+                        <div class="logo-text">
+                            <h1>EDEN PARFUM</h1>
+                            <span>Premium Fragrance Collection</span>
+                        </div>
+                    </a>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="index.html" class="nav-link">Home</a></li>
+                    <li><a href="index.html#about" class="nav-link">About</a></li>
+                    <li><a href="index.html#collection" class="nav-link">Collection</a></li>
+                    <li><a href="catalog.html" class="nav-link active">Catalog</a></li>
+                    <li><a href="index.html#location" class="nav-link">Location</a></li>
+                    <li><a href="index.html#contact" class="nav-link">Contact</a></li>
+                </ul>
+                <div class="hamburger">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Catalog Hero Section -->
+    <section class="catalog-hero">
+        <div class="container">
+            <div class="catalog-hero-content">
+                <h1>Perfume Catalog</h1>
+                <p>Discover our complete collection of 428+ premium fragrances</p>
+                <div class="catalog-stats">
+                    <div class="stat-item">
+                        <i class="fas fa-female"></i>
+                        <span>253 Women's</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-male"></i>
+                        <span>123 Men's</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-heart"></i>
+                        <span>52 Unisex</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Brands Section -->
+    <section class="catalog-brands">
+        <div class="container">
+            <h2>Featured Luxury Brands</h2>
+            <div class="catalog-brands-grid">
+                <div class="catalog-brand-item">
+                    <img src="photos/chanel.png" alt="Chanel">
+                </div>
+                <div class="catalog-brand-item">
+                    <img src="photos/YSL_Logo.svg.png" alt="Yves Saint Laurent">
+                </div>
+                <div class="catalog-brand-item">
+                    <img src="photos/louis-vuitton-1-logo-black-and-white.png" alt="Louis Vuitton">
+                </div>
+                <div class="catalog-brand-item">
+                    <img src="photos/dolce_gabanna.png" alt="Dolce & Gabbana">
+                </div>
+                <div class="catalog-brand-item">
+                    <img src="photos/logoburberry-1400x433.png" alt="Burberry">
+                </div>
+                <div class="catalog-brand-item">
+                    <img src="photos/ZARA.png" alt="Zara">
+                </div>
+                <div class="catalog-brand-item">
+                    <img src="photos/Diesel_Parfume_Logo.png" alt="Diesel">
+                </div>
+                <div class="catalog-brand-item">
+                    <img src="photos/chloe-Converted.png" alt="Chloé">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Perfume Catalog Section -->
+    <section class="catalog-section">
+        <div class="container">
+            <!-- Search Filters -->
+            <div class="search-container">
+                <div class="search-bar">
+                    <input type="text" id="perfumeSearch" placeholder="Search by perfume name, brand, or reference...">
+                    <i class="fas fa-search"></i>
+                </div>
+                
+                <div class="filters">
+                    <select id="brandFilter">
+                        <option value="">All Brands</option>
+                    </select>
+                    
+                    <select id="genderFilter">
+                        <option value="">All Categories</option>
+                    </select>
+                    
+                    <button id="clearFilters" class="clear-btn">Clear Filters</button>
+                </div>
+            </div>
+            
+            <!-- Results Counter -->
+            <div class="results-info">
+                <span id="resultsCount">Loading perfumes...</span>
+            </div>
+            
+            <!-- Perfume Results -->
+            <div id="perfumeResults" class="perfume-results">
+                <!-- Results will be populated by JavaScript -->
+            </div>
+            
+            <!-- No Results Message -->
+            <div id="noResults" class="no-results" style="display: none;">
+                <i class="fas fa-search"></i>
+                <h3>No perfumes found</h3>
+                <p>Try adjusting your search criteria or contact us directly</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>EDEN PARFUM</h3>
+                    <p>Your premium destination for luxury fragrances in Algeria. Discover the perfect scent for every occasion.</p>
+                    <div class="social-links">
+                        <a href="https://www.instagram.com/eden.parfum/" target="_blank"><i class="fab fa-instagram"></i></a>
+                        <a href="https://www.tiktok.com/@eden.parfum" target="_blank"><i class="fab fa-tiktok"></i></a>
+                        <a href="https://wa.me/213661808980" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="index.html#about">About Us</a></li>
+                        <li><a href="index.html#collection">Collection</a></li>
+                        <li><a href="catalog.html">Catalog</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Contact Info</h4>
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Q354+C5M, Place du 1er Mai<br>Sidi M'Hamed 16000, Algiers</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-phone"></i>
+                        <span>+213 661 808 980</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <span>eden.parfum@yahoo.fr</span>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Store Hours</h4>
+                    <div class="hours-item">
+                        <span>Saturday - Thursday</span>
+                        <span>9:00 AM - 7:00 PM</span>
+                    </div>
+                    <div class="hours-item">
+                        <span>Friday</span>
+                        <span>Closed</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 EDEN PARFUM. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- WhatsApp Floating Button -->
+    <div class="whatsapp-float" onclick="openWhatsApp()">
+        <i class="fab fa-whatsapp"></i>
+    </div>
+
+    <script src="perfumes-data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

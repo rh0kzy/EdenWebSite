@@ -21,8 +21,15 @@ document.addEventListener('DOMContentLoaded', function() {
     // Smooth scrolling for navigation links
     navLinks.forEach(link => {
         link.addEventListener('click', function(e) {
+            const href = this.getAttribute('href');
+            
+            // Don't prevent default for external links (like catalog.html)
+            if (href.includes('.html')) {
+                return; // Let the browser handle the navigation
+            }
+            
             e.preventDefault();
-            const targetId = this.getAttribute('href');
+            const targetId = href;
             const targetSection = document.querySelector(targetId);
             
             if (targetSection) {
@@ -301,4 +308,190 @@ function toggleLanguage(lang) {
     // This function can be expanded to handle multiple languages
     console.log('Switching to language:', lang);
     // Future implementation could switch between Arabic and French
+}
+
+// Perfume Catalog Search Functionality
+let filteredPerfumes = [];
+let currentSearchTerm = '';
+let currentBrandFilter = '';
+let currentGenderFilter = '';
+
+// Initialize catalog when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCatalog();
+});
+
+function initializeCatalog() {
+    // Check if perfumes database is loaded
+    if (typeof perfumesDatabase === 'undefined') {
+        console.error('Perfumes database not loaded');
+        return;
+    }
+    
+    // Initialize filters
+    populateFilters();
+    
+    // Initialize search
+    filteredPerfumes = [...perfumesDatabase];
+    displayPerfumes();
+    updateResultsCount();
+    
+    // Add event listeners
+    setupSearchEventListeners();
+}
+
+function populateFilters() {
+    const brandFilter = document.getElementById('brandFilter');
+    const genderFilter = document.getElementById('genderFilter');
+    
+    // Populate brand filter
+    const brands = getUniqueBrands();
+    brands.forEach(brand => {
+        const option = document.createElement('option');
+        option.value = brand;
+        option.textContent = brand;
+        brandFilter.appendChild(option);
+    });
+    
+    // Populate gender filter
+    const genders = getUniqueGenders();
+    genders.forEach(gender => {
+        const option = document.createElement('option');
+        option.value = gender;
+        option.textContent = gender;
+        genderFilter.appendChild(option);
+    });
+}
+
+function setupSearchEventListeners() {
+    const searchInput = document.getElementById('perfumeSearch');
+    const brandFilter = document.getElementById('brandFilter');
+    const genderFilter = document.getElementById('genderFilter');
+    const clearButton = document.getElementById('clearFilters');
+    
+    // Search input with debounce
+    let searchTimeout;
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            currentSearchTerm = this.value.toLowerCase();
+            filterPerfumes();
+        }, 300);
+    });
+    
+    // Brand filter
+    brandFilter.addEventListener('change', function() {
+        currentBrandFilter = this.value;
+        filterPerfumes();
+    });
+    
+    // Gender filter
+    genderFilter.addEventListener('change', function() {
+        currentGenderFilter = this.value;
+        filterPerfumes();
+    });
+    
+    // Clear filters
+    clearButton.addEventListener('click', function() {
+        searchInput.value = '';
+        brandFilter.value = '';
+        genderFilter.value = '';
+        currentSearchTerm = '';
+        currentBrandFilter = '';
+        currentGenderFilter = '';
+        filterPerfumes();
+    });
+}
+
+function filterPerfumes() {
+    filteredPerfumes = perfumesDatabase.filter(perfume => {
+        // Search term filter
+        const matchesSearch = !currentSearchTerm || 
+            perfume.name.toLowerCase().includes(currentSearchTerm) ||
+            perfume.brand.toLowerCase().includes(currentSearchTerm) ||
+            perfume.reference.toLowerCase().includes(currentSearchTerm);
+        
+        // Brand filter
+        const matchesBrand = !currentBrandFilter || perfume.brand === currentBrandFilter;
+        
+        // Gender filter
+        const matchesGender = !currentGenderFilter || perfume.gender === currentGenderFilter;
+        
+        return matchesSearch && matchesBrand && matchesGender;
+    });
+    
+    displayPerfumes();
+    updateResultsCount();
+}
+
+function displayPerfumes() {
+    const resultsContainer = document.getElementById('perfumeResults');
+    const noResultsDiv = document.getElementById('noResults');
+    
+    if (filteredPerfumes.length === 0) {
+        resultsContainer.style.display = 'none';
+        noResultsDiv.style.display = 'block';
+        return;
+    }
+    
+    resultsContainer.style.display = 'grid';
+    noResultsDiv.style.display = 'none';
+    
+    resultsContainer.innerHTML = '';
+    
+    filteredPerfumes.forEach(perfume => {
+        const perfumeItem = createPerfumeItem(perfume);
+        resultsContainer.appendChild(perfumeItem);
+    });
+}
+
+function createPerfumeItem(perfume) {
+    const item = document.createElement('div');
+    item.className = 'perfume-item';
+    
+    const brandLogo = getBrandLogo(perfume.brand);
+    const brandSection = brandLogo 
+        ? `<div class="perfume-brand">
+               <img src="${brandLogo}" alt="${perfume.brand}" class="brand-logo">
+               <span>${perfume.brand || 'No Brand'}</span>
+           </div>`
+        : `<div class="perfume-brand">
+               <span>${perfume.brand || 'No Brand'}</span>
+           </div>`;
+    
+    item.innerHTML = `
+        <div class="perfume-header">
+            <div class="perfume-name">${perfume.name}</div>
+            <div class="perfume-reference">#${perfume.reference}</div>
+        </div>
+        <div class="perfume-details">
+            ${brandSection}
+            <div class="perfume-gender">${perfume.gender}</div>
+        </div>
+    `;
+    
+    // Add click event to show perfume details or contact
+    item.addEventListener('click', function() {
+        showPerfumeDetails(perfume);
+    });
+    
+    return item;
+}
+
+function showPerfumeDetails(perfume) {
+    const message = `Hi! I'm interested in ${perfume.name} (${perfume.brand}) - Reference #${perfume.reference}. Is it available?`;
+    const whatsappUrl = `https://wa.me/213661808980?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+}
+
+function updateResultsCount() {
+    const countElement = document.getElementById('resultsCount');
+    const total = perfumesDatabase.length;
+    const showing = filteredPerfumes.length;
+    
+    if (showing === total) {
+        countElement.textContent = `Showing all ${total} perfumes`;
+    } else {
+        countElement.textContent = `Showing ${showing} of ${total} perfumes`;
+    }
 }
