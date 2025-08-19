@@ -481,6 +481,8 @@ function createPerfumeItem(perfume) {
     item.className = 'perfume-item';
     
     const brandLogo = getBrandLogo(perfume.brand);
+    const fragranceImage = getFragranceImage(perfume);
+    
     const brandSection = brandLogo 
         ? `<div class="perfume-brand">
                <img src="${brandLogo}" alt="${perfume.brand}" class="brand-logo">
@@ -490,7 +492,14 @@ function createPerfumeItem(perfume) {
                <span>${perfume.brand || 'No Brand'}</span>
            </div>`;
     
+    const imageSection = fragranceImage 
+        ? `<div class="perfume-image">
+               <img src="${fragranceImage}" alt="${perfume.name}" class="fragrance-image">
+           </div>`
+        : '<div class="perfume-image-placeholder"><i class="fas fa-spray-can"></i></div>';
+    
     item.innerHTML = `
+        ${imageSection}
         <div class="perfume-header">
             <div class="perfume-name">${perfume.name}</div>
             <div class="perfume-reference">#${perfume.reference}</div>
@@ -525,4 +534,103 @@ function updateResultsCount() {
     } else {
         countElement.textContent = `Showing ${showing} of ${total} perfumes`;
     }
+}
+
+function getBrandLogo(brand) {
+    const brandLogos = {
+        'Chanel': 'photos/chanel.png',
+        'Yves Saint Laurent': 'photos/YSL_Logo.svg.png',
+        'Louis Vuitton': 'photos/louis-vuitton-1-logo-black-and-white.png',
+        'Dolce & Gabbana': 'photos/dolce_gabanna.png',
+        'Burberry': 'photos/logoburberry-1400x433.png',
+        'Zara': 'photos/ZARA.png',
+        'Diesel': 'photos/Diesel_Parfume_Logo.png',
+        'Chloé': 'photos/chloe-Converted.png'
+    };
+    
+    return brandLogos[brand] || null;
+}
+
+function getFragranceImage(perfume) {
+    // Create a mapping between perfume names and their image files
+    const imageMap = {
+        // Exact matches first
+        '1881': '1881.avif',
+        '5Th Avenue': '5th avenue.avif',
+        'Elle': 'Azzaro elle.avif',
+        'Black Amber': 'Black Amber.avif',
+        'Bulgari Jasmine Noir': 'Bulgari Jasmine Noir.avif',
+        'Cherry Smothie': 'Cherry Smothie.avif',
+        'Creme Bruller': 'Creme Bruller.avif',
+        'Eau Des Bienfaits': 'Eau Des Bienfaits.avif',
+        'Fruite': 'Fruite zara.avif',
+        'Gardenia': 'Gardenia.avif',
+        'Golden Decade': 'Golden Decade.avif',
+        'Good Girl Gone Bad': 'Good Girl Gone Bad.avif',
+        'Incidence': 'Incidence.avif',
+        'Choo': 'jimmy choo.avif',
+        'Love': 'Love killian.avif',
+        'Marc Jacobs Perfect Intens': 'Marc Jacobs Perfect Intense.avif',
+        'Marc Jacobs Perfect Intense': 'Marc Jacobs Perfect Intense.avif',
+        'Melle Eau Tres Belle': 'Melle Eau Tres Belle.avif',
+        'Nudes Bouquet': 'Nudes Bouquet.avif',
+        'Orchid': 'Orchid.avif',
+        'Paradox Intens': 'Paradox Intens.avif',
+        'Paradox': 'Paradox prada.avif',
+        'Peony': 'Peony zara.avif',
+        'Marc Jacobs Perfect': 'perfect.avif',
+        'Perfect': 'perfect.avif',
+        'Femme': 'prada femme.avif',
+        'Rose': 'Rose zara.avif',
+        'Sugar': 'Sugar prada.avif',
+        'Sun Kissed Godess': 'Sun Kissed Godess.avif',
+        'Venice': 'Venice.avif',
+        'Winter': 'Winter zara.avif',
+        'Wonder Rose': 'Wonder Rose zara.avif',
+        'Oriental': 'zara Oriental.avif',
+        'Tropical': 'zara Tropical.avif'
+    };
+    
+    // Try exact match first
+    let imageName = imageMap[perfume.name];
+    
+    // If no exact match, try case-insensitive matching
+    if (!imageName) {
+        const lowerName = perfume.name.toLowerCase();
+        for (const [key, value] of Object.entries(imageMap)) {
+            if (key.toLowerCase() === lowerName) {
+                imageName = value;
+                break;
+            }
+        }
+    }
+    
+    // Try partial matching for common variations
+    if (!imageName) {
+        const lowerName = perfume.name.toLowerCase();
+        
+        // Special handling for common name variations
+        if (lowerName.includes('perfect') && perfume.brand.toLowerCase().includes('marc')) {
+            if (lowerName.includes('intens')) {
+                imageName = 'Marc Jacobs Perfect Intense.avif';
+            } else {
+                imageName = 'perfect.avif';
+            }
+        }
+        else if (lowerName.includes('paradox') && perfume.brand.toLowerCase().includes('prada')) {
+            if (lowerName.includes('intens')) {
+                imageName = 'Paradox Intens.avif';
+            } else {
+                imageName = 'Paradox prada.avif';
+            }
+        }
+        else if (lowerName.includes('jimmy choo') || (lowerName.includes('choo') && perfume.brand.toLowerCase().includes('jimmy'))) {
+            imageName = 'jimmy choo.avif';
+        }
+        else if (lowerName.includes('5th avenue') || lowerName.includes('5th avenue')) {
+            imageName = '5th avenue.avif';
+        }
+    }
+    
+    return imageName ? `photos/Fragrances/${imageName}` : null;
 }

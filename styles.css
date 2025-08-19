@@ -1274,6 +1274,46 @@ body {
     font-weight: 500;
 }
 
+.perfume-image {
+    width: 100%;
+    height: 200px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fragrance-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.perfume-item:hover .fragrance-image {
+    transform: scale(1.05);
+}
+
+.perfume-image-placeholder {
+    width: 100%;
+    height: 200px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    color: #adb5bd;
+    font-size: 3rem;
+}
+
+.perfume-image-placeholder i {
+    opacity: 0.3;
+}
+
 .no-results {
     text-align: center;
     padding: 60px 20px;
@@ -1316,6 +1356,12 @@ body {
     .perfume-results {
         grid-template-columns: 1fr;
         gap: 15px;
+    }
+    
+    .perfume-image,
+    .perfume-image-placeholder {
+        height: 180px;
+        margin-bottom: 12px;
     }
     
     .perfume-header {
