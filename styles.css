@@ -1290,11 +1290,18 @@ body {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .perfume-item:hover .fragrance-image {
-    transform: scale(1.05);
+    object-fit: contain;
+    transform: scale(1.1);
+}
+
+.perfume-item:hover .perfume-image {
+    height: 250px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border-radius: 15px;
 }
 
 .perfume-image-placeholder {
