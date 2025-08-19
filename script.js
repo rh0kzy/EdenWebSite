@@ -557,36 +557,76 @@ function getFragranceImage(perfume) {
         // Exact matches first
         '1881': '1881.avif',
         '5Th Avenue': '5th avenue.avif',
+        'Addict': 'Addict.avif',
         'Elle': 'Azzaro elle.avif',
+        'Bamoboo': 'Bamoboo gucci.avif',
+        'Belle De Jour': 'Belle De Jour.avif',
         'Black Amber': 'Black Amber.avif',
+        'Black': 'gucci black.avif',
+        'Born In Paradise': 'Born In Paradise.avif',
+        'Bright Cristal Absolut': 'Bright Cristal Absolut.avif',
+        'Bright Cristal': 'Bright Cristal.avif',
+        'Brisa Cubana': 'Brisa Cubana.avif',
+        'Bloom': 'gucci Bloom.avif',
         'Bulgari Jasmine Noir': 'Bulgari Jasmine Noir.avif',
+        'Candy Love': 'Candy Love.avif',
+        'Cherry In The Air': 'Cherry In The Air.avif',
         'Cherry Smothie': 'Cherry Smothie.avif',
+        'Collection': 'Collection escada.avif',
         'Creme Bruller': 'Creme Bruller.avif',
+        'Cristal Noir': 'Cristal Noir.avif',
+        'Marc Jacobs Decadence': 'decadence.avif',
+        'Decadence': 'decadence.avif',
+        'Dylan Purple': 'Dylan Purple.avif',
         'Eau Des Bienfaits': 'Eau Des Bienfaits.avif',
+        'Envy Me': 'Envy Me.avif',
+        'Eros': 'Eros Versace.avif',
+        'Fiesta Karioka': 'Fiesta Karioka.avif',
         'Fruite': 'Fruite zara.avif',
         'Gardenia': 'Gardenia.avif',
         'Golden Decade': 'Golden Decade.avif',
         'Good Girl Gone Bad': 'Good Girl Gone Bad.avif',
+        'Happy Hour': 'Happy Hour.avif',
+        'Hypnotic Poison': 'Hypnotic Poison.avif',
         'Incidence': 'Incidence.avif',
+        'J\'Adore In Joy': 'J\'Adore In Joy.avif',
+        'J\'Adore Lumière': 'J\'Adore Lumière.avif',
+        'J\'Adore': 'J\'Adore.avif',
         'Choo': 'jimmy choo.avif',
+        'Joy': 'Joy.avif',
         'Love': 'Love killian.avif',
+        'Loverdose': 'loverdose.avif',
         'Marc Jacobs Perfect Intens': 'Marc Jacobs Perfect Intense.avif',
         'Marc Jacobs Perfect Intense': 'Marc Jacobs Perfect Intense.avif',
         'Melle Eau Tres Belle': 'Melle Eau Tres Belle.avif',
+        'Miss Dior Blooming': 'Miss Dior Blooming.avif',
+        'Miss Dior Cherie': 'Miss Dior Cherie.avif',
         'Nudes Bouquet': 'Nudes Bouquet.avif',
+        'Ocean Lounge': 'Ocean Lounge.avif',
         'Orchid': 'Orchid.avif',
         'Paradox Intens': 'Paradox Intens.avif',
         'Paradox': 'Paradox prada.avif',
         'Peony': 'Peony zara.avif',
         'Marc Jacobs Perfect': 'perfect.avif',
         'Perfect': 'perfect.avif',
+        'Poison': 'Poison dior.avif',
+        'Poison Girl': 'Poison Girl.avif',
         'Femme': 'prada femme.avif',
+        'Red Srobet': 'Red sorbet.avif',
+        'Red Sorbet': 'Red sorbet.avif',
+        'Redkiss': 'redkiss.avif',
         'Rose': 'Rose zara.avif',
+        'Sakura': 'Sakura.avif',
+        'Sexy Graffiti': 'Sexy Graffiti.avif',
+        'Show Me': 'Show Me.avif',
         'Sugar': 'Sugar prada.avif',
         'Sun Kissed Godess': 'Sun Kissed Godess.avif',
+        'Taj': 'Taj.avif',
+        'Vanitas': 'Vanitas.avif',
         'Venice': 'Venice.avif',
         'Winter': 'Winter zara.avif',
         'Wonder Rose': 'Wonder Rose zara.avif',
+        'Yellow Diamond': 'Yellow Diamond.avif',
         'Oriental': 'zara Oriental.avif',
         'Tropical': 'zara Tropical.avif'
     };
@@ -629,6 +669,24 @@ function getFragranceImage(perfume) {
         }
         else if (lowerName.includes('5th avenue') || lowerName.includes('5th avenue')) {
             imageName = '5th avenue.avif';
+        }
+        else if (lowerName.includes('decadence') && perfume.brand.toLowerCase().includes('marc')) {
+            imageName = 'decadence.avif';
+        }
+        else if (lowerName.includes('loverdose') && perfume.brand.toLowerCase().includes('diesel')) {
+            imageName = 'loverdose.avif';
+        }
+        else if (lowerName.includes('redkiss') && perfume.brand.toLowerCase().includes('diesel')) {
+            imageName = 'redkiss.avif';
+        }
+        else if (lowerName.includes('bloom') && perfume.brand.toLowerCase().includes('gucci')) {
+            imageName = 'gucci Bloom.avif';
+        }
+        else if (lowerName.includes('black') && perfume.brand.toLowerCase().includes('gucci')) {
+            imageName = 'gucci black.avif';
+        }
+        else if (lowerName.includes('eros') && perfume.brand.toLowerCase().includes('versace')) {
+            imageName = 'Eros Versace.avif';
         }
     }
     
