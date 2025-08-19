@@ -582,6 +582,7 @@ function getFragranceImage(perfume) {
         'Envy Me': 'Envy Me.avif',
         'Eros': 'Eros Versace.avif',
         'Fiesta Karioka': 'Fiesta Karioka.avif',
+        'Flora': 'gucci flora.avif',
         'Fruite': 'Fruite zara.avif',
         'Gardenia': 'Gardenia.avif',
         'Golden Decade': 'Golden Decade.avif',
@@ -687,6 +688,9 @@ function getFragranceImage(perfume) {
         }
         else if (lowerName.includes('eros') && perfume.brand.toLowerCase().includes('versace')) {
             imageName = 'Eros Versace.avif';
+        }
+        else if (lowerName.includes('flora') && perfume.brand.toLowerCase().includes('gucci')) {
+            imageName = 'gucci flora.avif';
         }
     }
     
