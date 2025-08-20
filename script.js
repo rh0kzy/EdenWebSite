@@ -549,7 +549,6 @@ function getBrandLogo(brand) {
         'Diesel': 'photos/Diesel_Parfume_Logo.png',
         'Chloé': 'photos/chloe-Converted.png',
         'Chloe': 'photos/chloe-Converted.png',
-        // Original brand logos
         'Azzaro': 'photos/Logo_Azzaro.png',
         'Boucheron': 'photos/Logo_of_Boucheron.png',
         'Britney Spears': 'photos/Britney_Spears.png',
@@ -567,7 +566,6 @@ function getBrandLogo(brand) {
         'Prada': 'photos/PRADA.png',
         'Roberto Cavali': 'photos/Roberto-Cavalli-logo.png',
         'Versace': 'photos/versace.png',
-        // New major brand logos
         'Armani': 'photos/armani.png',
         'Calvin Klein': 'photos/calvin klein.svg',
         'Carolina Herrera': 'photos/Carolina Herrera.png',
@@ -595,9 +593,7 @@ function getBrandLogo(brand) {
 }
 
 function getFragranceImage(perfume) {
-    // Create a mapping between perfume names and their image files
     const imageMap = {
-        // Exact matches first
         '1881': '1881.avif',
         '2006': '2006.avif',
         '5Th Avenue': '5th avenue.avif',
@@ -774,7 +770,6 @@ function getFragranceImage(perfume) {
         'Privet Show': 'privet show.avif',
         'Promesse': 'Promesse.avif',
         'Queen': 'queen.avif',
-        // New additions from latest photos
         '212 Vip Rose Smily': '212 Vip Rose Smily.avif',
         '2006': '2006.avif',
         'Black Xs L\'Excès': 'Black Xs L\'Excès.avif',
@@ -806,13 +801,11 @@ function getFragranceImage(perfume) {
         'Ultraviolet': 'Ultraviolet.avif',
         'Women': 'Women.avif',
         'World': 'World.avif',
-        // Additional new photos added
         'Ckin2You': 'Ckin2You.avif',
         'Dahlia Divin': 'Dahlia Divin.avif',
         'La Petite Robe Noir': 'La Petite Robe Noir.avif',
         'Mon Guerlain': 'Mon Guerlain.avif',
         'Shock Street': 'Shock Street.avif',
-        // Latest batch of new photos
         'Afternoon Swim': 'Afternoon Swim.avif',
         'Allure': 'Allure.avif',
         'Chance Eau Tendre': 'Chance Eau Tendre.avif',
@@ -894,10 +887,8 @@ function getFragranceImage(perfume) {
         'هوس': 'هوس.avif'
     };
     
-    // Try exact match first
     let imageName = imageMap[perfume.name];
     
-    // If no exact match, try case-insensitive matching
     if (!imageName) {
         const lowerName = perfume.name.toLowerCase();
         for (const [key, value] of Object.entries(imageMap)) {
@@ -908,7 +899,7 @@ function getFragranceImage(perfume) {
         }
     }
     
-    // Try partial matching for common variations
+
     if (!imageName) {
         const lowerName = perfume.name.toLowerCase();
         
