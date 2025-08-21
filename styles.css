@@ -1207,10 +1207,11 @@ body {
 }
 
 .perfume-item:hover {
-    transform: translateY(-8px) scale(1.02);
+    transform: translateY(-8px);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
     border-left-width: 6px;
     border-left-color: #8b7355;
+    z-index: 10;
 }
 
 .perfume-header {
