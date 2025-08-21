@@ -1,5 +1,8 @@
 // Mobile Navigation Toggle
 document.addEventListener('DOMContentLoaded', function() {
+    // Social Media Popup Functionality
+    initializeSocialPopup();
+
     const hamburger = document.querySelector('.hamburger');
     const navMenu = document.querySelector('.nav-menu');
     const navLinks = document.querySelectorAll('.nav-link');
@@ -1361,3 +1364,119 @@ function getFragranceImage(perfume) {
     
     return imageName ? `photos/Fragrances/${imageName}` : null;
 }
+
+// Social Media Popup Functionality
+function initializeSocialPopup() {
+    const popup = document.getElementById('socialPopup');
+    const closeBtn = document.getElementById('popupClose');
+    const dontShowAgain = document.getElementById('dontShowAgain');
+    const tiktokBtn = document.getElementById('tiktokBtn');
+    const instagramBtn = document.getElementById('instagramBtn');
+
+    // Check if user has chosen not to show popup again
+    const hidePopup = localStorage.getItem('hideSocialPopup');
+    
+    if (!hidePopup) {
+        // Show popup after a short delay
+        setTimeout(() => {
+            showSocialPopup();
+        }, 2000);
+    }
+
+    // Close popup when close button is clicked
+    closeBtn.addEventListener('click', closeSocialPopup);
+
+    // Close popup when clicking outside
+    popup.addEventListener('click', function(e) {
+        if (e.target === popup) {
+            closeSocialPopup();
+        }
+    });
+
+    // Close popup with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && popup.classList.contains('show')) {
+            closeSocialPopup();
+        }
+    });
+
+    // Handle "Don't show again" checkbox
+    dontShowAgain.addEventListener('change', function() {
+        if (this.checked) {
+            localStorage.setItem('hideSocialPopup', 'true');
+        } else {
+            localStorage.removeItem('hideSocialPopup');
+        }
+    });
+
+    // Social media links - using actual EDEN PARFUM URLs
+    tiktokBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        // Using your actual TikTok URL
+        window.open('https://www.tiktok.com/@eden.parfum58?lang=en', '_blank');
+        trackSocialClick('TikTok');
+        closeSocialPopup();
+    });
+
+    instagramBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        // Using your actual Instagram URL
+        window.open('https://www.instagram.com/eden._.parfum/?hl=en', '_blank');
+        trackSocialClick('Instagram');
+        closeSocialPopup();
+    });
+
+    function showSocialPopup() {
+        popup.classList.add('show');
+        document.body.style.overflow = 'hidden';
+        
+        // Add entrance animation
+        setTimeout(() => {
+            popup.querySelector('.social-popup').style.animation = 'popupBounce 0.6s ease-out';
+        }, 100);
+    }
+
+    function closeSocialPopup() {
+        popup.classList.remove('show');
+        document.body.style.overflow = '';
+        
+        // Save that user has seen the popup this session
+        sessionStorage.setItem('socialPopupShown', 'true');
+    }
+
+    function trackSocialClick(platform) {
+        // Optional: Add analytics tracking here
+        console.log(`User clicked ${platform} button`);
+        
+        // You can integrate with Google Analytics or other tracking services
+        if (typeof gtag !== 'undefined') {
+            gtag('event', 'social_follow', {
+                'social_platform': platform,
+                'event_category': 'Social Media',
+                'event_label': 'Popup Follow Button'
+            });
+        }
+    }
+}
+
+// Add CSS animation keyframes dynamically
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes popupBounce {
+        0% {
+            transform: scale(0.3) translateY(-100px);
+            opacity: 0;
+        }
+        50% {
+            transform: scale(1.05) translateY(0);
+        }
+        70% {
+            transform: scale(0.95) translateY(0);
+        }
+        100% {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+    }
+`;
+document.head.appendChild(style);
