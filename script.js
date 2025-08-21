@@ -971,6 +971,7 @@ function getFragranceImage(perfume) {
         'Good Girl Gone Bad': 'Good Girl Gone Bad.avif',
         'Good Girl Velvet': 'Good Girl Velvet.avif',
         'Gucci Black': 'gucci black.avif',
+        'Guilty Black': 'gucci black.avif',
         'Happy Hour': 'Happy Hour.avif',
         'Her': 'Her burberry.avif',
         'Her 2022': 'Her 2022.avif',
@@ -1320,8 +1321,18 @@ function getFragranceImage(perfume) {
     if (!imageName) {
         const lowerName = perfume.name.toLowerCase();
         
+        // Specific fixes for problematic perfumes
+        if (perfume.reference === "1404" && perfume.brand.toLowerCase().includes('gucci')) {
+            imageName = 'gucci black.avif';
+        }
+        else if (perfume.reference === "5402" && perfume.brand.toLowerCase().includes('tom ford')) {
+            imageName = 'Black tom ford.avif';
+        }
+        else if (lowerName.includes('guilty') && lowerName.includes('black') && perfume.brand.toLowerCase().includes('gucci')) {
+            imageName = 'gucci black.avif';
+        }
         // Special handling for common name variations
-        if (lowerName.includes('perfect') && perfume.brand.toLowerCase().includes('marc')) {
+        else if (lowerName.includes('perfect') && perfume.brand.toLowerCase().includes('marc')) {
             if (lowerName.includes('intens')) {
                 imageName = 'Marc Jacobs Perfect Intense.avif';
             } else {
@@ -1353,11 +1364,14 @@ function getFragranceImage(perfume) {
         else if (lowerName.includes('bloom') && perfume.brand.toLowerCase().includes('gucci')) {
             imageName = 'gucci Bloom.avif';
         }
-        else if (lowerName.includes('black') && perfume.brand.toLowerCase().includes('gucci')) {
+        else if ((lowerName === 'black' || lowerName.includes('black')) && perfume.brand.toLowerCase().includes('gucci')) {
             imageName = 'gucci black.avif';
         }
         else if (lowerName.includes('black') && perfume.brand.toLowerCase().includes('burberry')) {
             imageName = 'Black burberry.avif';
+        }
+        else if ((lowerName === 'black' || lowerName.includes('black')) && perfume.brand.toLowerCase().includes('tom ford')) {
+            imageName = 'Black tom ford.avif';
         }
         else if (lowerName.includes('eros') && perfume.brand.toLowerCase().includes('versace')) {
             imageName = 'Eros Versace.avif';
