@@ -353,7 +353,6 @@ const perfumesDatabase = [
     { reference: "4610", name: "1 Million Royal", brand: "Paco Rabbane", gender: "Men" },
     { reference: "4611", name: "1 Million Lucky", brand: "Paco Rabbane", gender: "Men" },
     { reference: "4612", name: "1 Million Elixir", brand: "Paco Rabbane", gender: "Men" },
-    { reference: "4614", name: "Symphony", brand: "Luis Vuitton", gender: "Mixte" },
     
     // Fifth batch - Men's Collection References 5101-6611 + 3616
     { reference: "5101", name: "Le Beau", brand: "Jean Paul Gaultier", gender: "Men" },

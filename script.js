@@ -586,7 +586,26 @@ function getBrandLogo(brand) {
         'Tom Ford': 'photos/tom ford.png',
         'Valentino': 'photos/Valentino.png',
         'Viktor&Rolf': 'photos/Viktor & Rolf.png',
-        'Xerjoff': 'photos/Xerjoff.webp'
+        'Xerjoff': 'photos/Xerjoff.webp',
+        
+        // Additional brands
+        'Lattafa': 'photos/LATTAFA.svg',
+        'Nina Ricci': 'photos/NINA RICCI.png',
+        'Al Rehab': 'photos/al rehab.png',
+        'Antonio Banderas': 'photos/Antonio Banderas.jpg',
+        'Ariana Grande': 'photos/Ariana Grande.jpg',
+        'Arte Profumi': 'photos/Arte Profumi.jpg',
+        'Cacharel': 'photos/Cacharel.jpg',
+        'Creed': 'photos/creed.png',
+        'Davidoff': 'photos/Davidoff.svg',
+        'Ferrari': 'photos/Ferrari.png',
+        'Issey Miyake': 'photos/Issey Miyake.jpg',
+        'Kajal': 'photos/Kajal.avif',
+        'Kayali': 'photos/Kayali.jpg',
+        'Lancome': 'photos/Lancome.png',
+        'Nasomatto': 'photos/Nasomatto.jpg',
+        'Ted Lapidus': 'photos/Ted Lapidus.jpg',
+        'Tiziana Tirenzi': 'photos/Tiziana Tirenzi.png'
     };
     
     return brandLogos[brand] || null;
@@ -622,6 +641,8 @@ function getFragranceImage(perfume) {
         'Blue Touch': 'Blue Touch.avif',
         'Bois Dargent': 'Bois Dargent.avif',
         'Bois De Oud': 'Bois De Oud.avif',
+        'Body Kouros': 'Body kouros.avif',
+        'Body Kourous': 'Body kouros.avif',
         'Booster': 'Booster.avif',
         'Botled': 'Botled.avif',
         'Botled Intense': 'Botled Intense.avif',
@@ -665,6 +686,7 @@ function getFragranceImage(perfume) {
         'Eternity Flame': 'Eternity Flame.avif',
         'Fahrenheit': 'Fahrenheit.avif',
         'Fucking Fabulous': 'Fucking Fabulous.avif',
+        'Fuel For Life': 'Fuel for life.avif',
         'Gentlemen': 'Gentlemen.avif',
         'Gentlemen Reserve Prive': 'Gentlemen Reserve Prive.avif',
         'Gentlemen Society': 'Gentlemen Society.avif',
@@ -684,6 +706,7 @@ function getFragranceImage(perfume) {
         'Intense': 'Intense.avif',
         'Invictus': 'Invictus.avif',
         'Invictus Platinium': 'Invictus Platinium.avif',
+        'Invictus Victory': 'Invictus Victory.avif',
         'Invictus Victory Elixir': 'Invictus Victory Elixir.avif',
         'Jean Paul Gautier Le Beau Paradise Garden': 'Jean Paul Gautier Le Beau Paradise Garden.avif',
         'Jean Paul Gautier Scandal Absolut -H-': 'Jean Paul Gautier Scandal Absolut -H-.avif',
@@ -703,6 +726,7 @@ function getFragranceImage(perfume) {
         'Lhomme Ideal': 'Lhomme Ideal.avif',
         'Lhomme Intens': 'Lhomme Intens.avif',
         'Lhomme Libre': 'Lhomme Libre.avif',
+        'Light Blue Forever -H-': 'Light blue forever -h-.avif',
         'Linstant': 'Linstant.avif',
         'London': 'London.avif',
         'Lost Cherry': 'Lost Cherry.avif',
@@ -756,6 +780,7 @@ function getFragranceImage(perfume) {
         'Ultra Bleu': 'Ultra Bleu.avif',
         'Ultra Male': 'Ultra Male.avif',
         'Ultraviolet Men': 'Ultraviolet men.avif',
+        'Urban Journey': 'urban journey.avif',
         'V Valentino': 'V valentino.avif',
         'Velvet Orchid': 'Velvet Orchid.avif',
         'Velvet Tendre Oud': 'Velvet Tendre Oud.avif',
@@ -786,6 +811,7 @@ function getFragranceImage(perfume) {
         'Alien Hypersense': 'Alien Hypersense.avif',
         'Allure': 'Allure.avif',
         'Allure Edition Blanche': 'Alure Edition Blanche.avif',
+        'Alure Edition Blanche': 'Alure Edition Blanche.avif',
         'Almaz': 'Almaz.avif',
         'Amarige': 'Amarige.avif',
         'Ambre Eternelle': 'Ambre Eternelle.avif',
@@ -1057,6 +1083,7 @@ function getFragranceImage(perfume) {
         'Sun Java': 'Sun Java women.avif',
         'Sun Kissed Godess': 'Sun Kissed Godess.avif',
         'Suprême Bouquet': 'Suprême Bouquet.avif',
+        'Symphony': 'symphony.avif',
         'Taj': 'Taj.avif',
         'The One': 'The One for women.avif',
         'The One Desir': 'The One Desir.avif',
@@ -1112,7 +1139,17 @@ function getFragranceImage(perfume) {
         'وصال الذهب': 'وصال الذهب.webp',
         'أمير العود': 'أمير العود.webp',
         'جدور العود': 'جدور العود.jpg',
-        'جواد الليل': 'جواد الليل.jpg'
+        'جواد الليل': 'جواد الليل.jpg',
+        
+        // Additional name variations and mappings
+        'V': 'V valentino.avif',
+        'Mr': 'Mr burberry.avif',
+        'Iesel': 'diesel iesel.avif',
+        'Dhermes': 'Terre dhermes.avif',
+        'Strong Me': 'Strong Me.avif',
+        'Marly': 'Carlisle marly.avif',
+        'Black Tom Ford': 'Black tom ford.avif',
+        'Tom Ford Black': 'Black tom ford.avif'
     };
     
     let imageName = imageMap[perfume.name];
