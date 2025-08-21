@@ -499,6 +499,7 @@ function createPerfumeItem(perfume) {
         : '<div class="perfume-image-placeholder"><i class="fas fa-spray-can"></i></div>';
     
     item.innerHTML = `
+        ${perfume.multiplier ? `<div class="price-multiplier">${perfume.multiplier}</div>` : ''}
         ${imageSection}
         <div class="perfume-header">
             <div class="perfume-name">${perfume.name}</div>
