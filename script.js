@@ -547,7 +547,8 @@ function getBrandLogo(brand) {
         'Louis Vuitton': 'photos/louis-vuitton-1-logo-black-and-white.png',
         'Luis Vuitton': 'photos/louis-vuitton-1-logo-black-and-white.png',
         'Dolce & Gabbana': 'photos/dolce_gabanna.png',
-        'Dolce&Gabanna': 'photos/dolce_gabanna.png',
+        'Dolce&Gabbana': 'photos/dolce_gabanna.png',
+        'Dolce&Gabanna': 'photos/Dolce&Gabanna.jpg',
         'Burberry': 'photos/logoburberry-1400x433.png',
         'Zara': 'photos/ZARA.png',
         'Diesel': 'photos/Diesel_Parfume_Logo.png',
@@ -569,6 +570,7 @@ function getBrandLogo(brand) {
         'Paco Rabbane': 'photos/PACO RABBANE.png',
         'Prada': 'photos/PRADA.png',
         'Roberto Cavali': 'photos/Roberto-Cavalli-logo.png',
+        'Roberto Cavalli': 'photos/Roberto-Cavalli-logo.png',
         'Versace': 'photos/versace.png',
         'Armani': 'photos/armani.png',
         'Calvin Klein': 'photos/calvin klein.svg',
@@ -594,6 +596,7 @@ function getBrandLogo(brand) {
         
         // Additional brands
         'Lattafa': 'photos/LATTAFA.svg',
+        'Lataffa': 'photos/LATTAFA.svg',
         'Nina Ricci': 'photos/NINA RICCI.png',
         'Al Rehab': 'photos/al rehab.png',
         'Antonio Banderas': 'photos/Antonio Banderas.jpg',
@@ -609,7 +612,40 @@ function getBrandLogo(brand) {
         'Lancome': 'photos/Lancome.png',
         'Nasomatto': 'photos/Nasomatto.jpg',
         'Ted Lapidus': 'photos/Ted Lapidus.jpg',
-        'Tiziana Tirenzi': 'photos/Tiziana Tirenzi.png'
+        'Tiziana Tirenzi': 'photos/Tiziana Tirenzi.png',
+        
+        // Recently added brands
+        'Banafaa': 'photos/Banafaa.jpg',
+        'Bdk': 'photos/Bdk.webp',
+        'Caron': 'photos/Caron.jpg',
+        'Cerruti': 'photos/Cerruti.svg',
+        'Clinique': 'photos/Clinique.png',
+        'Denhil': 'photos/Denhil.jpg',
+        'Elisabeth Arden': 'photos/Elisabeth Arden.png',
+        'Etro': 'photos/Etro.png',
+        'Evaflor': 'photos/Evaflor.webp',
+        'Franck Olivier': 'photos/Franck Olivier.png',
+        'Frédéric Malle': 'photos/Frédéric Malle.png',
+        'Guy Laroche': 'photos/Guy Laroche.png',
+        'Joop!': 'photos/Joop!.png',
+        'La Lique': 'photos/La Lique.png',
+        'Laverne': 'photos/Laverne.png',
+        'Lolita Land': 'photos/Lolita Land.jpg',
+        'Mateu': 'photos/Mateu.jpg',
+        'Nautica': 'photos/Nautica.jpg',
+        'Nicos': 'photos/Nicos.webp',
+        'Nishane': 'photos/Nishane.webp',
+        'Parfums de Marly': 'photos/Parfums de Marly.png',
+        'Polo': 'photos/Polo.png',
+        'Repetto': 'photos/Repetto.jpg',
+        'Rochas': 'photos/Rochas.jpg',
+        'Roger Gallet': 'photos/Roger Gallet.jpg',
+        'Solinote': 'photos/Solinote.png',
+        'Sospiro': 'photos/Sospiro.avif',
+        'Victoria\'S Secret': 'photos/Victoria\'S Secret.png',
+        'Yves De Sistelle': 'photos/Yves De Sistelle.png',
+        'Yves Rocher': 'photos/Yves Rocher.png',
+        'Shalis': 'photos/Shalis.png'
     };
     
     return brandLogos[brand] || null;
