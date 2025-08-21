@@ -1200,14 +1200,17 @@ body {
     border-radius: 15px;
     padding: 20px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     border-left: 4px solid #a58b4c;
     position: relative;
+    overflow: hidden;
 }
 
 .perfume-item:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    border-left-width: 6px;
+    border-left-color: #8b7355;
 }
 
 .perfume-header {
@@ -1223,6 +1226,7 @@ body {
     color: #333;
     margin-bottom: 5px;
     line-height: 1.3;
+    transition: all 0.3s ease;
 }
 
 .perfume-reference {
@@ -1232,6 +1236,18 @@ body {
     border-radius: 20px;
     font-size: 12px;
     font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.perfume-item:hover .perfume-name {
+    color: #8b7355;
+    font-weight: 700;
+}
+
+.perfume-item:hover .perfume-reference {
+    background: #8b7355;
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(139, 115, 85, 0.3);
 }
 
 .price-multiplier {
@@ -1268,11 +1284,13 @@ body {
     height: 25px;
     object-fit: contain;
     opacity: 0.8;
-    transition: opacity 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .perfume-item:hover .brand-logo {
     opacity: 1;
+    transform: scale(1.1);
+    filter: brightness(1.1);
 }
 
 .perfume-brand span {
@@ -1286,6 +1304,13 @@ body {
     border-radius: 15px;
     font-size: 12px;
     font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.perfume-item:hover .perfume-gender {
+    background: #e9ecef;
+    color: #333;
+    transform: scale(1.05);
 }
 
 .perfume-image {
@@ -1298,24 +1323,30 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .fragrance-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 10px;
 }
 
 .perfume-item:hover .fragrance-image {
     object-fit: contain;
-    transform: scale(1.1);
+    transform: scale(1.15);
+    filter: brightness(1.1) contrast(1.05);
 }
 
 .perfume-item:hover .perfume-image {
-    height: 250px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    height: 280px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
     border-radius: 15px;
+    background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+    transform: translateY(-10px);
 }
 
 .perfume-image-placeholder {
@@ -1329,10 +1360,28 @@ body {
     margin-bottom: 15px;
     color: #adb5bd;
     font-size: 3rem;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
 }
 
 .perfume-image-placeholder i {
     opacity: 0.3;
+    transition: all 0.4s ease;
+}
+
+.perfume-item:hover .perfume-image-placeholder {
+    height: 280px;
+    background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+    transform: translateY(-10px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    border-radius: 15px;
+}
+
+.perfume-item:hover .perfume-image-placeholder i {
+    opacity: 0.6;
+    transform: scale(1.2);
+    color: #a58b4c;
 }
 
 .no-results {
