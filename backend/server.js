@@ -83,9 +83,8 @@ async function startServer() {
         console.log('🔗 Testing database connection...');
         await testConnection();
         
-        // Initialize database tables
-        console.log('🗄️  Initializing database...');
-        await initializeDatabase();
+        // Note: Skipping database re-initialization since it's already done
+        console.log('� Database is ready!');
         
         // Start the server
         app.listen(PORT, () => {
