@@ -1,5 +1,34 @@
 # Deployment Guide for Eden Parfum Website
 
+## 🚨 IMPORTANT: This is a Static Website (No Database/MySQL Needed)
+
+**If you're seeing MySQL/MariaDB errors:** Your build system is incorrectly detecting your project type. This is a **pure HTML/CSS/JavaScript** website with **NO database dependencies**.
+
+### ✅ Correct Solution for MySQL/Database Build Errors:
+
+The MySQL error occurs because the build system thinks you're deploying a Python/Django project. Here's how to fix it:
+
+#### **Step 1: Force Static Site Detection**
+1. Use the updated `netlify.toml` configuration (already fixed)
+2. The `.netlifyignore` file prevents incorrect auto-detection
+3. Empty build command prevents any package installation
+
+#### **Step 2: Alternative Manual Settings**
+In your Netlify Dashboard:
+- **Build command**: (leave completely empty)
+- **Publish directory**: `frontend`  
+- **Base directory**: (leave empty)
+- **Environment variables**: None needed
+
+#### **Step 3: If Still Getting MySQL Errors**
+1. **Clear build cache** in Netlify deploy settings
+2. **Trigger a manual deploy** 
+3. **Use drag-and-drop**: Just upload the `frontend` folder directly
+
+## 🚨 Build Failure Fix - Missing Dependencies
+
+If you're getting dependency errors during deployment, here are the solutions:loyment Guide for Eden Parfum Website
+
 ## � Build Failure Fix - Missing Dependencies
 
 If you're getting dependency errors during deployment, here are the solutions:

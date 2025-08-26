@@ -1,0 +1,13 @@
+# Ignore backend and any files that might trigger auto-detection
+backend/
+node_modules/
+package.json
+package-lock.json
+.git/
+.github/
+*.md
+*.txt
+.env*
+
+# Only deploy frontend files
+!frontend/
