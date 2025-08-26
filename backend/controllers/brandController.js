@@ -1,19 +1,37 @@
-const { getUniqueBrands, getBrandLogo } = require('../data/perfumes');
+const { executeQuery } = require('../config/database');
 
 // Get all brands
-const getAllBrands = (req, res) => {
+const getAllBrands = async (req, res) => {
     try {
-        const brands = getUniqueBrands();
-        const brandsWithLogos = brands.map(brand => ({
-            name: brand,
-            logo: getBrandLogo(brand),
-            slug: brand.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-')
+        const query = `
+            SELECT *
+            FROM brands
+            WHERE isActive = 1
+            ORDER BY name ASC
+        `;
+
+        const result = await executeQuery(query);
+        
+        if (!result.success) {
+            throw new Error(result.error);
+        }
+
+        const brandsWithData = result.data.map(brand => ({
+            id: brand.id,
+            name: brand.name,
+            logo: brand.logoUrl,
+            description: brand.description,
+            origin: brand.origin,
+            website: brand.website,
+            slug: brand.name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-'),
+            perfumeCount: brand.perfumeCount,
+            featured: brand.featured
         }));
 
         res.json({
             success: true,
-            data: brandsWithLogos,
-            total: brands.length
+            data: brandsWithData,
+            total: brandsWithData.length
         });
     } catch (error) {
         console.error('Error in getAllBrands:', error);
@@ -26,13 +44,23 @@ const getAllBrands = (req, res) => {
 };
 
 // Get brand by name
-const getBrandByName = (req, res) => {
+const getBrandByName = async (req, res) => {
     try {
         const { name } = req.params;
-        const brands = getUniqueBrands();
-        const brand = brands.find(b => b.toLowerCase() === name.toLowerCase());
+        
+        const query = `
+            SELECT *
+            FROM brands
+            WHERE name = ? AND isActive = 1
+        `;
 
-        if (!brand) {
+        const result = await executeQuery(query, [name]);
+        
+        if (!result.success) {
+            throw new Error(result.error);
+        }
+
+        if (result.data.length === 0) {
             return res.status(404).json({
                 success: false,
                 error: 'Brand not found',
@@ -40,12 +68,19 @@ const getBrandByName = (req, res) => {
             });
         }
 
+        const brand = result.data[0];
         res.json({
             success: true,
             data: {
-                name: brand,
-                logo: getBrandLogo(brand),
-                slug: brand.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-')
+                id: brand.id,
+                name: brand.name,
+                logo: brand.logoUrl,
+                description: brand.description,
+                origin: brand.origin,
+                website: brand.website,
+                slug: brand.name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-'),
+                perfumeCount: brand.perfumeCount,
+                featured: brand.featured
             }
         });
     } catch (error) {
@@ -59,31 +94,39 @@ const getBrandByName = (req, res) => {
 };
 
 // Get featured brands (brands with most perfumes)
-const getFeaturedBrands = (req, res) => {
+const getFeaturedBrands = async (req, res) => {
     try {
-        const { perfumesDatabase } = require('../data/perfumes');
         const { limit = 12 } = req.query;
         
-        const brandCounts = {};
-        perfumesDatabase.forEach(perfume => {
-            if (perfume.brand) {
-                brandCounts[perfume.brand] = (brandCounts[perfume.brand] || 0) + 1;
-            }
-        });
+        const query = `
+            SELECT *
+            FROM brands
+            WHERE isActive = 1 AND perfumeCount > 0
+            ORDER BY perfumeCount DESC, name ASC
+            LIMIT ?
+        `;
 
-        const sortedBrands = Object.entries(brandCounts)
-            .sort(([,a], [,b]) => b - a)
-            .slice(0, parseInt(limit))
-            .map(([brand, count]) => ({
-                name: brand,
-                logo: getBrandLogo(brand),
-                slug: brand.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-'),
-                perfumeCount: count
-            }));
+        const result = await executeQuery(query, [parseInt(limit)]);
+        
+        if (!result.success) {
+            throw new Error(result.error);
+        }
+
+        const featuredBrands = result.data.map(brand => ({
+            id: brand.id,
+            name: brand.name,
+            logo: brand.logoUrl,
+            description: brand.description,
+            origin: brand.origin,
+            website: brand.website,
+            slug: brand.name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-'),
+            perfumeCount: brand.perfumeCount,
+            featured: brand.featured
+        }));
 
         res.json({
             success: true,
-            data: sortedBrands
+            data: featuredBrands
         });
     } catch (error) {
         console.error('Error in getFeaturedBrands:', error);

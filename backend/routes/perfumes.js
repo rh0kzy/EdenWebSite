@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {
     getAllPerfumes,
-    getPerfumeByReference,
+    getPerfumeById,
     getPerfumesByBrand,
     getPerfumesByGender,
     getRandomPerfumes,
@@ -34,9 +34,9 @@ router.get('/brand/:brand', getPerfumesByBrand);
 // @access  Public
 router.get('/gender/:gender', getPerfumesByGender);
 
-// @route   GET /api/perfumes/:reference
-// @desc    Get perfume by reference
+// @route   GET /api/perfumes/:id
+// @desc    Get perfume by ID
 // @access  Public
-router.get('/:reference', getPerfumeByReference);
+router.get('/:id', getPerfumeById);
 
 module.exports = router;
