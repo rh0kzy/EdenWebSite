@@ -1,0 +1,28 @@
+# Netlify Build Settings Alternative
+# If you're still having dependency issues, use these settings in Netlify UI:
+
+# Build command: 
+# (leave empty or use: echo "Static site")
+
+# Publish directory: 
+# frontend
+
+# Base directory: 
+# (leave empty)
+
+# Environment variables (if needed):
+# NODE_VERSION=18
+# SKIP_YARN_INTEGRITY_CHECK=1
+
+# Alternative netlify.toml (rename current one to netlify.toml.backup and use this):
+[build]
+  publish = "frontend"
+  
+[build.environment]
+  SKIP_YARN_INTEGRITY_CHECK = "1"
+  NODE_VERSION = "18"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

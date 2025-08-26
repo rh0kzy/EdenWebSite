@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "description": "Frontend for Eden Parfum perfume catalog website",
   "main": "index.html",
+  "private": true,
   "scripts": {
     "dev": "live-server --port=8080 --open=/index.html",
     "build": "echo 'Static site - no build needed'",
+    "start": "echo 'Static files ready to serve'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -17,6 +19,9 @@
   ],
   "author": "Eden Parfum",
   "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "devDependencies": {
     "live-server": "^1.2.2"
   }

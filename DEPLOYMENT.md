@@ -1,6 +1,31 @@
 # Deployment Guide for Eden Parfum Website
 
-## 🚀 Quick Fix for Current Issues
+## � Build Failure Fix - Missing Dependencies
+
+If you're getting dependency errors during deployment, here are the solutions:
+
+### Quick Fix Options:
+
+#### **Option 1: Use Simple Netlify Config**
+1. Rename current `netlify.toml` to `netlify.toml.backup`
+2. Rename `netlify-simple.toml` to `netlify.toml`
+3. Redeploy
+
+#### **Option 2: Manual Netlify Settings**
+In Netlify Dashboard, set:
+- **Build command**: (leave empty)
+- **Publish directory**: `frontend`
+- **Base directory**: (leave empty)
+
+#### **Option 3: Skip npm install entirely**
+Add this to your netlify.toml:
+```toml
+[build]
+  publish = "frontend"
+  ignore = "exit 0"
+```
+
+## �🚀 Quick Fix for Current Issues
 
 Your website wasn't loading because you were trying to deploy a full-stack app to static hosting platforms. Here's how to fix it:
 
@@ -8,7 +33,7 @@ Your website wasn't loading because you were trying to deploy a full-stack app t
 
 1. **In Netlify Dashboard:**
    - Set **Publish directory** to: `frontend`
-   - Set **Build command** to: `echo 'Static site'`
+   - Set **Build command** to: (leave empty or `echo 'Static site'`)
    - The `netlify.toml` file will handle the rest
 
 2. **If using manual upload:**
