@@ -6,10 +6,6 @@ const rateLimit = require('express-rate-limit');
 const path = require('path');
 require('dotenv').config();
 
-// Import database connection and initialization
-const { testConnection } = require('./config/database');
-const { initializeDatabase } = require('./database/init');
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -17,7 +13,6 @@ const PORT = process.env.PORT || 3000;
 const perfumeRoutes = require('./routes/perfumes');
 const brandRoutes = require('./routes/brands');
 const searchRoutes = require('./routes/search');
-const adminRoutes = require('./routes/admin');
 
 // Middleware
 app.use(helmet());
@@ -45,7 +40,6 @@ app.use(express.static(path.join(__dirname, '../frontend')));
 app.use('/api/perfumes', perfumeRoutes);
 app.use('/api/brands', brandRoutes);
 app.use('/api/search', searchRoutes);
-app.use('/api/admin', adminRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -78,27 +72,14 @@ app.use('/api/*', (req, res) => {
     res.status(404).json({ error: 'API endpoint not found' });
 });
 
-// Initialize database and start server
-async function startServer() {
-    try {
-        // Test database connection
-        console.log('🔗 Testing database connection...');
-        await testConnection();
-        
-        // Note: Skipping database re-initialization since it's already done
-        console.log('� Database is ready!');
-        
-        // Start the server
-        app.listen(PORT, () => {
-            console.log(`🌸 Eden Parfum Backend Server running on port ${PORT}`);
-            console.log(`🚀 API Base URL: http://localhost:${PORT}/api`);
-            console.log(`📱 Frontend URL: http://localhost:${PORT}`);
-            console.log(`💾 Database: Connected to MySQL`);
-        });
-    } catch (error) {
-        console.error('❌ Failed to start server:', error.message);
-        process.exit(1);
-    }
+// Initialize and start server
+function startServer() {
+    // Start the server
+    app.listen(PORT, () => {
+        console.log(`🌸 Eden Parfum Backend Server running on port ${PORT}`);
+        console.log(`🚀 API Base URL: http://localhost:${PORT}/api`);
+        console.log(`📱 Frontend URL: http://localhost:${PORT}`);
+    });
 }
 
 // Start the server
