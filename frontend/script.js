@@ -145,8 +145,8 @@ function scrollToSection(sectionId) {
 }
 
 function openMap() {
-    // Opens Google Maps to EDEN PARFUM exact location
-    const mapsUrl = 'https://www.google.com/maps/place/Eden+parfum/@36.7585934,3.0546987,332m/data=!3m2!1e3!4b1!4m6!3m5!1s0x128fb30018c34e03:0x69b304bc5ec91959!8m2!3d36.7585922!4d3.0554277!16s%2Fg%2F11w2cyhqj_?entry=ttu&g_ep=EgoyMDI1MDgxMy4wIKXMDSoASAFQAw%3D%3D';
+    // Opens Google Maps to EDEN PARFUM exact location using place ID for reliability
+    const mapsUrl = 'https://www.google.com/maps/place/Eden+parfum/@36.7585922,3.0554277,17z/data=!3m1!4b1!4m6!3m5!1s0x128fb30018c34e03:0x69b304bc5ec91959!8m2!3d36.7585922!4d3.0554277!16s%2Fg%2F11w2cyhqj_';
     window.open(mapsUrl, '_blank');
 }
 
@@ -1530,3 +1530,142 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+// Google Maps Error Handling
+function handleMapError() {
+    const mapContainer = document.querySelector('.map-container');
+    if (mapContainer) {
+        const iframe = mapContainer.querySelector('iframe');
+        if (iframe) {
+            // Set up error handler
+            iframe.onerror = function() {
+                console.warn('Google Maps iframe failed to load');
+                showMapFallback();
+            };
+            
+            // Check if map loads within 15 seconds
+            setTimeout(() => {
+                checkMapLoaded();
+            }, 15000);
+        }
+    }
+}
+
+function showMapFallback() {
+    const mapContainer = document.querySelector('.map-container');
+    if (mapContainer) {
+        mapContainer.innerHTML = `
+            <div class="map-fallback">
+                <div class="fallback-content">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <h3>Interactive Map</h3>
+                    <p><strong>EDEN PARFUM</strong><br>
+                    Q354+C5M, Place du 1er Mai<br>
+                    Sidi M'Hamed 16000<br>
+                    Algiers, Algeria</p>
+                    <div class="map-actions">
+                        <button class="map-button" onclick="openMap()">
+                            <i class="fas fa-external-link-alt"></i>
+                            Open in Google Maps
+                        </button>
+                        <button class="map-button" onclick="copyAddress()">
+                            <i class="fas fa-copy"></i>
+                            Copy Address
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+}
+
+function copyAddress() {
+    const address = "Q354+C5M, Place du 1er Mai, Sidi M'Hamed 16000, Algiers, Algeria";
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(address).then(() => {
+            showNotification('Address copied to clipboard!');
+        }).catch(() => {
+            fallbackCopyAddress(address);
+        });
+    } else {
+        fallbackCopyAddress(address);
+    }
+}
+
+function fallbackCopyAddress(text) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+        document.execCommand('copy');
+        showNotification('Address copied to clipboard!');
+    } catch (err) {
+        showNotification('Could not copy address. Please copy manually.');
+    }
+    document.body.removeChild(textArea);
+}
+
+function showNotification(message) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = 'copy-notification';
+    notification.textContent = message;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #a58b4c;
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        z-index: 1000;
+        animation: slideIn 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 3000);
+}
+
+function checkMapLoaded() {
+    const iframe = document.querySelector('.google-map');
+    if (iframe && iframe.parentNode) {
+        // Check if iframe is still in DOM and visible
+        const rect = iframe.getBoundingClientRect();
+        if (rect.height === 0) {
+            console.warn('Google Maps iframe appears to be blocked or failed to load');
+            showMapFallback();
+        } else {
+            console.log('Google Maps appears to be loaded successfully');
+        }
+    }
+}
+
+// Add CSS for notification animation
+const notificationStyle = document.createElement('style');
+notificationStyle.textContent = `
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+`;
+document.head.appendChild(notificationStyle);
+
+// Initialize map error handling when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    handleMapError();
+});
