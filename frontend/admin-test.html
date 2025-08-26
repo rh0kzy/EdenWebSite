@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin API Test</title>
+</head>
+<body>
+    <h1>Admin API Test</h1>
+    <div id="results"></div>
+    
+    <script>
+        async function testAdminAPI() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p>Testing admin API endpoints...</p>';
+            
+            try {
+                // Test analytics
+                console.log('Testing analytics endpoint...');
+                const analyticsResponse = await fetch('/api/admin/analytics');
+                console.log('Analytics response status:', analyticsResponse.status);
+                
+                if (analyticsResponse.ok) {
+                    const analyticsData = await analyticsResponse.json();
+                    console.log('Analytics data:', analyticsData);
+                    resultsDiv.innerHTML += '<p>✅ Analytics: ' + JSON.stringify(analyticsData) + '</p>';
+                } else {
+                    const error = await analyticsResponse.text();
+                    console.error('Analytics error:', error);
+                    resultsDiv.innerHTML += '<p>❌ Analytics failed: ' + error + '</p>';
+                }
+                
+                // Test brands
+                console.log('Testing brands endpoint...');
+                const brandsResponse = await fetch('/api/admin/brands');
+                console.log('Brands response status:', brandsResponse.status);
+                
+                if (brandsResponse.ok) {
+                    const brandsData = await brandsResponse.json();
+                    console.log('Brands data length:', brandsData.length);
+                    resultsDiv.innerHTML += '<p>✅ Brands: Found ' + brandsData.length + ' brands</p>';
+                } else {
+                    const error = await brandsResponse.text();
+                    console.error('Brands error:', error);
+                    resultsDiv.innerHTML += '<p>❌ Brands failed: ' + error + '</p>';
+                }
+                
+                // Test perfumes
+                console.log('Testing perfumes endpoint...');
+                const perfumesResponse = await fetch('/api/admin/perfumes?page=1&limit=5');
+                console.log('Perfumes response status:', perfumesResponse.status);
+                
+                if (perfumesResponse.ok) {
+                    const perfumesData = await perfumesResponse.json();
+                    console.log('Perfumes data:', perfumesData);
+                    resultsDiv.innerHTML += '<p>✅ Perfumes: Found ' + (perfumesData.perfumes ? perfumesData.perfumes.length : 0) + ' perfumes</p>';
+                } else {
+                    const error = await perfumesResponse.text();
+                    console.error('Perfumes error:', error);
+                    resultsDiv.innerHTML += '<p>❌ Perfumes failed: ' + error + '</p>';
+                }
+                
+            } catch (error) {
+                console.error('Fetch error:', error);
+                resultsDiv.innerHTML += '<p>❌ Network error: ' + error.message + '</p>';
+            }
+        }
+        
+        // Run test when page loads
+        window.addEventListener('load', testAdminAPI);
+    </script>
+</body>
+</html>
