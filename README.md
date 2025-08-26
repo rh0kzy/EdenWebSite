@@ -102,6 +102,39 @@ NODE_ENV=development
 FRONTEND_URL=http://localhost:8080
 ```
 
+## Deployment Options
+
+### Option 1: Static Site Deployment (Recommended for GitHub Pages/Netlify)
+
+The frontend can be deployed as a static site since it's self-contained:
+
+#### **Netlify Deployment:**
+1. **Automatic:** Connect your GitHub repo to Netlify
+   - Build command: `echo 'Static site'`
+   - Publish directory: `frontend`
+   - The `netlify.toml` file is already configured
+
+2. **Manual:** Drag and drop the `frontend` folder to Netlify
+
+#### **GitHub Pages Deployment:**
+1. Enable GitHub Pages in repository settings
+2. Use GitHub Actions (`.github/workflows/deploy.yml` is configured)
+3. Set source to "GitHub Actions"
+
+### Option 2: Full-Stack Deployment (For both frontend + backend)
+
+For platforms like Heroku, Railway, or VPS:
+
+1. **Build and start backend:**
+   ```bash
+   cd backend
+   npm install --production
+   npm start
+   ```
+
+2. **Serve frontend through backend:**
+   The backend can serve the frontend files at the root URL.
+
 ## Production Deployment
 
 1. **Build and start backend:**

@@ -9,8 +9,11 @@
     "backend:dev": "cd backend && npm run dev",
     "backend:start": "cd backend && npm start",
     "frontend:dev": "cd frontend && npm run dev",
+    "frontend:preview": "cd frontend && live-server --port=8080 --open=/index.html",
     "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
-    "build": "echo 'Building project...' && cd frontend && npm run build",
+    "build": "echo 'Static site - copying frontend files for deployment'",
+    "deploy:netlify": "echo 'Deploy to Netlify: Set publish directory to frontend/'",
+    "deploy:github": "echo 'Deploy to GitHub Pages: Push to main branch with GitHub Actions'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [

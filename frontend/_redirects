@@ -1,0 +1,6 @@
+# Netlify redirects file
+/*    /index.html   200
+
+# Optional: Redirect old URLs to new ones
+/home /index.html 301
+/perfumes /catalog.html 301
