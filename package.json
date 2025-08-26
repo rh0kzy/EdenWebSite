@@ -1,0 +1,32 @@
+{
+  "name": "eden-parfum-website",
+  "version": "1.0.0",
+  "description": "Full-stack Eden Parfum website with frontend and backend",
+  "main": "backend/server.js",
+  "scripts": {
+    "dev": "concurrently \"npm run backend:dev\" \"npm run frontend:dev\"",
+    "start": "npm run backend:start",
+    "backend:dev": "cd backend && npm run dev",
+    "backend:start": "cd backend && npm start",
+    "frontend:dev": "cd frontend && npm run dev",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "build": "echo 'Building project...' && cd frontend && npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "perfume",
+    "website",
+    "fullstack",
+    "nodejs",
+    "express"
+  ],
+  "author": "Eden Parfum",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  },
+  "workspaces": [
+    "frontend",
+    "backend"
+  ]
+}

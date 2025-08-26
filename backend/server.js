@@ -33,8 +33,8 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 // Static files - serve frontend assets
-app.use('/photos', express.static(path.join(__dirname, '../photos')));
-app.use(express.static(path.join(__dirname, '../')));
+app.use('/photos', express.static(path.join(__dirname, '../frontend/photos')));
+app.use(express.static(path.join(__dirname, '../frontend')));
 
 // API Routes
 app.use('/api/perfumes', perfumeRoutes);
@@ -56,7 +56,7 @@ app.get('*', (req, res) => {
     if (req.path.startsWith('/api/')) {
         return res.status(404).json({ error: 'API endpoint not found' });
     }
-    res.sendFile(path.join(__dirname, '../index.html'));
+    res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
 // Error handling middleware
