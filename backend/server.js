@@ -13,6 +13,7 @@ const PORT = process.env.PORT || 3000;
 const perfumeRoutes = require('./routes/perfumes');
 const brandRoutes = require('./routes/brands');
 const searchRoutes = require('./routes/search');
+const enhancedPerfumeRoutes = require('./routes/enhancedPerfumes');
 
 // Middleware
 app.use(helmet());
@@ -40,6 +41,7 @@ app.use(express.static(path.join(__dirname, '../frontend')));
 app.use('/api/perfumes', perfumeRoutes);
 app.use('/api/brands', brandRoutes);
 app.use('/api/search', searchRoutes);
+app.use('/api/enhanced', enhancedPerfumeRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

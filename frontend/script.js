@@ -514,10 +514,50 @@ function createPerfumeItem(perfume) {
         </div>
     `;
     
-    // Click event removed - no longer redirects to WhatsApp
-    // item.addEventListener('click', function() {
-    //     showPerfumeDetails(perfume);
-    // });
+    // Add click event to navigate to detailed perfume page
+    item.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Add loading state
+        const originalContent = this.innerHTML;
+        this.style.opacity = '0.7';
+        this.style.pointerEvents = 'none';
+        
+        // Add loading spinner
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'loading-overlay';
+        loadingDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+        loadingDiv.style.cssText = `
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #333;
+            z-index: 100;
+        `;
+        this.appendChild(loadingDiv);
+        
+        // Navigate to detailed page after brief delay for UX
+        setTimeout(() => {
+            window.location.href = `perfume-detail.html?ref=${perfume.reference}`;
+        }, 300);
+    });
+    
+    // Add hover effect for better UX
+    item.style.cursor = 'pointer';
+    item.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-4px)';
+        this.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.15)';
+    });
+    
+    item.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0)';
+        this.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+    });
     
     return item;
 }

@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marc Jacobs Decadence - EDEN PARFUM</title>
+    <link rel="icon" type="image/png" href="photos/eden parfum logo.png">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .perfume-detail {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .perfume-header {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .perfume-image {
+            position: relative;
+        }
+
+        .perfume-image img {
+            width: 100%;
+            max-width: 300px;
+            height: auto;
+            border-radius: 15px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .perfume-info h1 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .perfume-info .brand {
+            font-size: 1.2rem;
+            color: #e91e63;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .rating-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stars {
+            color: #ffd700;
+            font-size: 1.2rem;
+        }
+
+        .rating-text {
+            color: #666;
+        }
+
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .section {
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            border-bottom: 3px solid #e91e63;
+            padding-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        .fragrance-pyramid {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+        }
+
+        .notes-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .note-category {
+            text-align: center;
+        }
+
+        .note-category h4 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .note-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .note-item {
+            background: white;
+            padding: 0.7rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .pyramid-metrics {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .metric {
+            text-align: center;
+        }
+
+        .metric-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            margin: 0.5rem 0;
+            overflow: hidden;
+        }
+
+        .metric-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #e91e63, #673ab7);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .similar-perfumes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .similar-item {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            border: 1px solid #f0f0f0;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .similar-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .similarity-score {
+            background: #e91e63;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        .brand-story {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+        }
+
+        .brand-values {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .value-tag {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .characteristics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .characteristic-card {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid #e91e63;
+        }
+
+        .wearability-chart {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .chart-section h5 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        .chart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.8rem;
+        }
+
+        .chart-bar {
+            width: 60%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .chart-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #e91e63, #673ab7);
+            border-radius: 3px;
+        }
+
+        .back-button {
+            background: linear-gradient(135deg, #a58b4c 0%, #8b7355 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(165, 139, 76, 0.3);
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(165, 139, 76, 0.4);
+            background: linear-gradient(135deg, #8b7355 0%, #a58b4c 100%);
+        }
+
+        .back-button i {
+            font-size: 12px;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 14px;
+            color: #666;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 0.8rem 1.2rem;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .breadcrumb a {
+            color: #a58b4c;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .breadcrumb a:hover {
+            color: #8b7355;
+            text-decoration: underline;
+        }
+
+        .breadcrumb span:not(#breadcrumbPerfumeName) {
+            color: #999;
+        }
+
+        .breadcrumb span#breadcrumbPerfumeName {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .perfume-header {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .notes-container {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .pyramid-metrics {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .quick-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">
+                    <a href="index.html" class="logo-link">
+                        <img src="photos/eden parfum logo.png" alt="EDEN PARFUM Logo" class="logo-img">
+                        <div class="logo-text">
+                            <h1>EDEN PARFUM</h1>
+                            <span>Premium Fragrance Collection</span>
+                        </div>
+                    </a>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="index.html" class="nav-link">Home</a></li>
+                    <li><a href="index.html#about" class="nav-link">About</a></li>
+                    <li><a href="index.html#collection" class="nav-link">Collection</a></li>
+                    <li><a href="catalog.html" class="nav-link">Catalog</a></li>
+                    <li><a href="index.html#location" class="nav-link">Location</a></li>
+                    <li><a href="index.html#contact" class="nav-link">Contact</a></li>
+                </ul>
+                <div class="hamburger">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main style="padding-top: 100px; min-height: 100vh; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
+        <div class="container">
+            <!-- Breadcrumb Navigation -->
+            <nav class="breadcrumb" style="margin-bottom: 1rem;">
+                <a href="index.html">Home</a>
+                <span>/</span>
+                <a href="catalog.html">Catalog</a>
+                <span>/</span>
+                <span id="breadcrumbPerfumeName">Perfume Details</span>
+            </nav>
+            
+            <!-- Back Button -->
+            <div style="margin-bottom: 2rem;">
+                <button onclick="history.back()" class="back-button">
+                    <i class="fas fa-arrow-left"></i> Back to Catalog
+                </button>
+            </div>
+            
+            <div class="perfume-detail">
+                <!-- Perfume Header -->
+                <div class="perfume-header">
+                    <div class="perfume-image">
+                        <img src="photos/marc-jacobs-fragrances-logo-png_seeklogo-476210.png" alt="Marc Jacobs Decadence" id="perfumeImage">
+                    </div>
+                    <div class="perfume-info">
+                        <h1 id="perfumeName">Decadence</h1>
+                        <div class="brand" id="perfumeBrand">Marc Jacobs</div>
+                        <div class="rating-container">
+                            <div class="stars">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <span class="rating-text">4.3/5 (1,247 reviews)</span>
+                        </div>
+                        <p id="perfumeDescription">A captivating and luxurious fragrance that embodies the spirit of feminine decadence. This rich and opulent scent opens with the exotic sweetness of Italian plum and the warmth of saffron, creating an immediately intoxicating experience.</p>
+                        
+                        <div class="quick-stats">
+                            <div class="stat-item">
+                                <span class="stat-value">8/10</span>
+                                <span class="stat-label">Longevity</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">7/10</span>
+                                <span class="stat-label">Sillage</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value">2015</span>
+                                <span class="stat-label">Launch Year</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fragrance Pyramid Section -->
+                <div class="section">
+                    <h2 class="section-title">
+                        <i class="fas fa-layer-group"></i> Fragrance Pyramid
+                    </h2>
+                    <div class="fragrance-pyramid">
+                        <div class="notes-container">
+                            <div class="note-category">
+                                <h4><i class="fas fa-arrow-up"></i> Top Notes</h4>
+                                <div class="note-list">
+                                    <div class="note-item">Italian Plum</div>
+                                    <div class="note-item">Saffron</div>
+                                    <div class="note-item">Bulgarian Rose</div>
+                                </div>
+                            </div>
+                            <div class="note-category">
+                                <h4><i class="fas fa-heart"></i> Middle Notes</h4>
+                                <div class="note-list">
+                                    <div class="note-item">Orris</div>
+                                    <div class="note-item">Sambac Jasmine</div>
+                                    <div class="note-item">Rose</div>
+                                </div>
+                            </div>
+                            <div class="note-category">
+                                <h4><i class="fas fa-arrow-down"></i> Base Notes</h4>
+                                <div class="note-list">
+                                    <div class="note-item">Liquid Amber</div>
+                                    <div class="note-item">Vetiver</div>
+                                    <div class="note-item">Papyrus Wood</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pyramid-metrics">
+                            <div class="metric">
+                                <h5>Longevity</h5>
+                                <div class="metric-bar">
+                                    <div class="metric-fill" style="width: 80%"></div>
+                                </div>
+                                <span>8/10</span>
+                            </div>
+                            <div class="metric">
+                                <h5>Sillage</h5>
+                                <div class="metric-bar">
+                                    <div class="metric-fill" style="width: 70%"></div>
+                                </div>
+                                <span>7/10</span>
+                            </div>
+                            <div class="metric">
+                                <h5>Projection</h5>
+                                <div class="metric-bar">
+                                    <div class="metric-fill" style="width: 60%"></div>
+                                </div>
+                                <span>6/10</span>
+                            </div>
+                            <div class="metric">
+                                <h5>Complexity</h5>
+                                <div class="metric-bar">
+                                    <div class="metric-fill" style="width: 80%"></div>
+                                </div>
+                                <span>8/10</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Brand Information Section -->
+                <div class="section">
+                    <h2 class="section-title">
+                        <i class="fas fa-building"></i> Brand Information
+                    </h2>
+                    <div class="brand-story">
+                        <h3>Marc Jacobs</h3>
+                        <p><strong>Founded:</strong> 1984 | <strong>Founder:</strong> Marc Jacobs | <strong>Country:</strong> United States</p>
+                        <p>Marc Jacobs is a world-renowned American fashion designer known for his grunge aesthetic and eclectic designs. His fragrance line reflects his bold, unconventional approach to fashion.</p>
+                        <div class="brand-values">
+                            <span class="value-tag">Creativity</span>
+                            <span class="value-tag">Individuality</span>
+                            <span class="value-tag">Modern Luxury</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Release Information Section -->
+                <div class="section">
+                    <h2 class="section-title">
+                        <i class="fas fa-info-circle"></i> Release Information
+                    </h2>
+                    <div class="characteristics-grid">
+                        <div class="characteristic-card">
+                            <h4><i class="fas fa-calendar"></i> Launch Year</h4>
+                            <p>2015</p>
+                        </div>
+                        <div class="characteristic-card">
+                            <h4><i class="fas fa-user"></i> Perfumer</h4>
+                            <p>Annie Buzantian</p>
+                        </div>
+                        <div class="characteristic-card">
+                            <h4><i class="fas fa-flask"></i> Concentration</h4>
+                            <p>Eau de Parfum</p>
+                        </div>
+                        <div class="characteristic-card">
+                            <h4><i class="fas fa-check-circle"></i> Availability</h4>
+                            <p>Available</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Wearability Guide -->
+                <div class="section">
+                    <h2 class="section-title">
+                        <i class="fas fa-chart-line"></i> Wearability Guide
+                    </h2>
+                    <div class="wearability-chart">
+                        <div class="chart-section">
+                            <h5>Seasons</h5>
+                            <div class="chart-item">
+                                <span>Spring</span>
+                                <div class="chart-bar">
+                                    <div class="chart-fill" style="width: 30%"></div>
+                                </div>
+                            </div>
+                            <div class="chart-item">
+                                <span>Summer</span>
+                                <div class="chart-bar">
+                                    <div class="chart-fill" style="width: 20%"></div>
+                                </div>
+                            </div>
+                            <div class="chart-item">
+                                <span>Fall</span>
+                                <div class="chart-bar">
+                                    <div class="chart-fill" style="width: 100%"></div>
+                                </div>
+                            </div>
+                            <div class="chart-item">
+                                <span>Winter</span>
+                                <div class="chart-bar">
+                                    <div class="chart-fill" style="width: 100%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chart-section">
+                            <h5>Occasions</h5>
+                            <div class="chart-item">
+                                <span>Daily</span>
+                                <div class="chart-bar">
+                                    <div class="chart-fill" style="width: 20%"></div>
+                                </div>
+                            </div>
+                            <div class="chart-item">
+                                <span>Office</span>
+                                <div class="chart-bar">
+                                    <div class="chart-fill" style="width: 30%"></div>
+                                </div>
+                            </div>
+                            <div class="chart-item">
+                                <span>Evening</span>
+                                <div class="chart-bar">
+                                    <div class="chart-fill" style="width: 100%"></div>
+                                </div>
+                            </div>
+                            <div class="chart-item">
+                                <span>Special Events</span>
+                                <div class="chart-bar">
+                                    <div class="chart-fill" style="width: 100%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Similar Fragrances Section -->
+                <div class="section">
+                    <h2 class="section-title">
+                        <i class="fas fa-heart"></i> Similar Fragrances
+                    </h2>
+                    <div class="similar-perfumes">
+                        <div class="similar-item">
+                            <div class="similarity-score">85% Match</div>
+                            <h4>Marc Jacobs Perfect</h4>
+                            <p class="brand">Marc Jacobs</p>
+                            <p>Same brand, similar fruity-floral profile</p>
+                        </div>
+                        <div class="similar-item">
+                            <div class="similarity-score">80% Match</div>
+                            <h4>Marc Jacobs Perfect Intense</h4>
+                            <p class="brand">Marc Jacobs</p>
+                            <p>Intensified version with similar DNA</p>
+                        </div>
+                        <div class="similar-item">
+                            <div class="similarity-score">75% Match</div>
+                            <h4>Tom Ford Black Orchid</h4>
+                            <p class="brand">Tom Ford</p>
+                            <p>Similar dark, luxurious, and seductive character</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <img src="photos/eden parfum logo.png" alt="EDEN PARFUM Logo">
+                        <h3>EDEN PARFUM</h3>
+                    </div>
+                    <p>Premium fragrance collection bringing you the finest scents from around the world.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="catalog.html">Catalog</a></li>
+                        <li><a href="index.html#about">About</a></li>
+                        <li><a href="index.html#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact Info</h4>
+                    <div class="contact-info">
+                        <p><i class="fas fa-map-marker-alt"></i> Casablanca, Morocco</p>
+                        <p><i class="fas fa-phone"></i> +212 XXX-XXXX</p>
+                        <p><i class="fas fa-envelope"></i> info@edenparfum.ma</p>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 EDEN PARFUM. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script src="perfume-detail.js"></script>
+</body>
+</html>
