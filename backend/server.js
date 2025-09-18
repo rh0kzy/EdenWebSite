@@ -15,6 +15,11 @@ const brandRoutes = require('./routes/brands');
 const searchRoutes = require('./routes/search');
 const enhancedPerfumeRoutes = require('./routes/enhancedPerfumes');
 
+// Import new Supabase routes
+const supabasePerfumeRoutes = require('./routes/supabasePerfumes');
+const supabaseBrandRoutes = require('./routes/supabaseBrands');
+const photoRoutes = require('./routes/photos');
+
 // Middleware
 app.use(helmet());
 app.use(cors({
@@ -38,10 +43,16 @@ app.use('/photos', express.static(path.join(__dirname, '../frontend/photos')));
 app.use(express.static(path.join(__dirname, '../frontend')));
 
 // API Routes
+// Legacy routes (old static data)
 app.use('/api/perfumes', perfumeRoutes);
 app.use('/api/brands', brandRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/enhanced', enhancedPerfumeRoutes);
+
+// New Supabase routes (recommended)
+app.use('/api/v2/perfumes', supabasePerfumeRoutes);
+app.use('/api/v2/brands', supabaseBrandRoutes);
+app.use('/api/v2/photos', photoRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
