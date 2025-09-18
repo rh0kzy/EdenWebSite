@@ -30,8 +30,9 @@ const corsOptions = {
             'http://127.0.0.1:3000',
             'http://127.0.0.1:8080',
             process.env.FRONTEND_URL,
-            // Add your Netlify domain
-            'https://your-netlify-domain.netlify.app'
+            // Add your Netlify domain (update with your actual domain)
+            'https://edenparfum.netlify.app',
+            'https://your-custom-domain.com'
         ].filter(Boolean); // Remove undefined values
         
         if (allowedOrigins.includes(origin)) {

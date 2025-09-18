@@ -9,11 +9,10 @@
   NETLIFY_SKIP_YARN_INTEGRITY_CHECK = "1"
   NODE_VERSION = "18"
 
-# API redirects for production backend
+# API redirects for production backend (Render)
 [[redirects]]
-  # Redirect API calls to production backend server
   from = "/api/*"
-  to = "https://your-backend-domain.com/api/:splat"
+  to = "https://edenwebsite.onrender.com/api/:splat"
   status = 200
 
 [[redirects]]

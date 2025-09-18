@@ -16,6 +16,9 @@ class EdenParfumAPI {
         if (hostname === 'localhost' || hostname === '127.0.0.1') {
             // Development environment
             return 'http://localhost:3000/api/v2';
+        } else if (hostname === 'edenwebsite.onrender.com') {
+            // Direct access through Render
+            return 'https://edenwebsite.onrender.com/api/v2';
         } else {
             // Production environment - API calls will be proxied by Netlify
             return '/api/v2';

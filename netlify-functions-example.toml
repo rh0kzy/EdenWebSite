@@ -1,0 +1,14 @@
+# Option 2: Netlify Functions Configuration
+# Replace the redirects section in netlify.toml with:
+
+[build]
+  publish = "frontend"
+  functions = "netlify/functions"
+  command = "echo 'No build process needed for static frontend'"
+
+# No API redirects needed - functions will handle /api/* automatically
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = false
