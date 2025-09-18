@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fast Image Loading Demo - EDEN PARFUM</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .demo-section {
+            margin-bottom: 3rem;
+            padding: 2rem;
+            border: 2px solid #ff6b9d;
+            border-radius: 15px;
+            background: white;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .demo-card {
+            text-align: center;
+            padding: 1rem;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            background: #f9f9f9;
+        }
+        
+        .demo-card img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .loading-stats {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #ff6b9d;
+            color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            font-size: 14px;
+            z-index: 1000;
+            min-width: 200px;
+        }
+        
+        .performance-meter {
+            background: #333;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 5px;
+            margin: 0.5rem 0;
+        }
+        
+        .fast-indicator {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        
+        .slow-indicator {
+            color: #f44336;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1 style="text-align: center; color: #ff6b9d; margin-bottom: 2rem;">
+            🚀 Fast Image Loading Demo
+        </h1>
+        
+        <div class="loading-stats" id="loadingStats">
+            <div><strong>Performance Monitor</strong></div>
+            <div>Images loaded: <span id="loadedCount">0</span></div>
+            <div>Total time: <span id="totalTime">0ms</span></div>
+            <div>Average: <span id="avgTime">0ms</span></div>
+            <div class="performance-meter">
+                Status: <span id="loadingStatus">Starting...</span>
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2>🔥 Optimized Fast Loading (New)</h2>
+            <p>Using lazy loading, progressive enhancement, and optimized image delivery:</p>
+            <div class="demo-grid" id="fastGrid">
+                <!-- Fast loading images will be added here -->
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2>🐌 Traditional Loading (Old Method)</h2>
+            <p>Standard image loading without optimization:</p>
+            <div class="demo-grid" id="slowGrid">
+                <!-- Traditional images will be added here -->
+            </div>
+        </div>
+        
+        <div class="demo-section">
+            <h2>📊 Performance Benefits</h2>
+            <ul style="list-style: none; padding: 0;">
+                <li>✅ <strong>Lazy Loading:</strong> Images load only when visible</li>
+                <li>✅ <strong>Progressive Enhancement:</strong> Thumbnails first, then full resolution</li>
+                <li>✅ <strong>Smart Caching:</strong> Avoid duplicate downloads</li>
+                <li>✅ <strong>Optimized Sizes:</strong> Right size for each use case</li>
+                <li>✅ <strong>Background Loading:</strong> Non-blocking image delivery</li>
+                <li>✅ <strong>Error Handling:</strong> Graceful fallbacks for missing images</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="js/fastImageLoader.js"></script>
+    <script>
+        // Performance monitoring
+        let loadedImages = 0;
+        let startTime = Date.now();
+        const loadTimes = [];
+
+        function updateStats() {
+            const elapsed = Date.now() - startTime;
+            const avgTime = loadTimes.length > 0 ? 
+                Math.round(loadTimes.reduce((a, b) => a + b, 0) / loadTimes.length) : 0;
+            
+            document.getElementById('loadedCount').textContent = loadedImages;
+            document.getElementById('totalTime').textContent = elapsed + 'ms';
+            document.getElementById('avgTime').textContent = avgTime + 'ms';
+            
+            const status = document.getElementById('loadingStatus');
+            if (loadedImages < 10) {
+                status.innerHTML = '<span class="slow-indicator">Loading...</span>';
+            } else if (avgTime < 500) {
+                status.innerHTML = '<span class="fast-indicator">⚡ Very Fast!</span>';
+            } else if (avgTime < 1000) {
+                status.innerHTML = '<span class="fast-indicator">✅ Fast</span>';
+            } else {
+                status.innerHTML = '<span class="slow-indicator">⏳ Slow</span>';
+            }
+        }
+
+        // Sample perfume data for demo
+        const samplePerfumes = [
+            { name: '1 Million', brand: 'Paco Rabanne', image: '1 Million.avif' },
+            { name: 'Bleu', brand: 'Chanel', image: 'Bleu.avif' },
+            { name: 'Aventus', brand: 'Creed', image: 'Aventus.avif' },
+            { name: 'Black Orchid', brand: 'Tom Ford', image: 'Black Orchid.avif' },
+            { name: 'Sauvage', brand: 'Dior', image: 'Sauvage.avif' },
+            { name: 'La Vie Est Belle', brand: 'Lancôme', image: 'La Vie Est Belle.avif' },
+            { name: 'Good Girl', brand: 'Carolina Herrera', image: 'good girl.avif' },
+            { name: 'Miss Dior', brand: 'Dior', image: 'Miss Dior.avif' },
+            { name: 'Coco Mademoiselle', brand: 'Chanel', image: 'Coco Mademoiselle.avif' },
+            { name: 'Light Blue', brand: 'Dolce & Gabbana', image: 'Light Blue.avif' },
+            { name: 'Alien', brand: 'Mugler', image: 'Alien.avif' },
+            { name: 'Si', brand: 'Giorgio Armani', image: 'Si.avif' }
+        ];
+
+        // Create fast loading demo
+        function createFastDemo() {
+            const fastGrid = document.getElementById('fastGrid');
+            startTime = Date.now();
+            
+            samplePerfumes.forEach((perfume, index) => {
+                const card = document.createElement('div');
+                card.className = 'demo-card';
+                
+                const imageStart = Date.now();
+                const optimizedImg = window.createOptimizedImage(
+                    perfume.image, 
+                    `${perfume.name} by ${perfume.brand}`, 
+                    'demo-perfume-img', 
+                    'medium'
+                );
+                
+                optimizedImg.onload = () => {
+                    loadTimes.push(Date.now() - imageStart);
+                    loadedImages++;
+                    updateStats();
+                };
+                
+                card.innerHTML = `
+                    <div class="perfume-image-container"></div>
+                    <h4>${perfume.name}</h4>
+                    <p>${perfume.brand}</p>
+                `;
+                
+                card.querySelector('.perfume-image-container').appendChild(optimizedImg);
+                fastGrid.appendChild(card);
+            });
+        }
+
+        // Create traditional loading demo
+        function createSlowDemo() {
+            const slowGrid = document.getElementById('slowGrid');
+            
+            samplePerfumes.forEach((perfume, index) => {
+                const card = document.createElement('div');
+                card.className = 'demo-card';
+                
+                card.innerHTML = `
+                    <img src="photos/Fragrances/${perfume.image}" 
+                         alt="${perfume.name}" 
+                         onerror="this.src='photos/default-perfume.jpg'">
+                    <h4>${perfume.name}</h4>
+                    <p>${perfume.brand}</p>
+                `;
+                
+                slowGrid.appendChild(card);
+            });
+        }
+
+        // Initialize demos
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                createFastDemo();
+                setTimeout(() => createSlowDemo(), 1000);
+            }, 500);
+        });
+
+        // Update stats every 100ms
+        setInterval(updateStats, 100);
+    </script>
+</body>
+</html>

@@ -29,10 +29,10 @@ const getAllPerfumes = async (req, res) => {
             query = query.or(`name.ilike.%${search}%,brand_name.ilike.%${search}%,reference.ilike.%${search}%`);
         }
 
-        // Apply pagination
+        // Apply pagination and sorting
         query = query
             .range(parseInt(offset), parseInt(offset) + parseInt(limit) - 1)
-            .order('created_at', { ascending: false });
+            .order('reference', { ascending: true });
 
         const { data: perfumes, error, count } = await query;
 

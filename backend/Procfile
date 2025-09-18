@@ -1,0 +1,8 @@
+# Heroku deployment configuration
+# Place this file in the backend directory for Heroku deployment
+
+# This tells Heroku to use Node.js buildpack
+web: npm start
+
+# Alternative with explicit node command:
+# web: node server.js

@@ -9,23 +9,44 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Import routes
-const perfumeRoutes = require('./routes/perfumes');
-const brandRoutes = require('./routes/brands');
-const searchRoutes = require('./routes/search');
-const enhancedPerfumeRoutes = require('./routes/enhancedPerfumes');
-
-// Import new Supabase routes
+// Import Supabase routes
 const supabasePerfumeRoutes = require('./routes/supabasePerfumes');
 const supabaseBrandRoutes = require('./routes/supabaseBrands');
 const photoRoutes = require('./routes/photos');
 
 // Middleware
 app.use(helmet());
-app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-    credentials: true
-}));
+
+// CORS configuration for production
+const corsOptions = {
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        
+        // Define allowed origins
+        const allowedOrigins = [
+            'http://localhost:3000',
+            'http://localhost:8080',
+            'http://127.0.0.1:3000',
+            'http://127.0.0.1:8080',
+            process.env.FRONTEND_URL,
+            // Add your Netlify domain
+            'https://your-netlify-domain.netlify.app'
+        ].filter(Boolean); // Remove undefined values
+        
+        if (allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            console.warn(`CORS blocked origin: ${origin}`);
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
 app.use(morgan('combined'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -43,13 +64,7 @@ app.use('/photos', express.static(path.join(__dirname, '../frontend/photos')));
 app.use(express.static(path.join(__dirname, '../frontend')));
 
 // API Routes
-// Legacy routes (old static data)
-app.use('/api/perfumes', perfumeRoutes);
-app.use('/api/brands', brandRoutes);
-app.use('/api/search', searchRoutes);
-app.use('/api/enhanced', enhancedPerfumeRoutes);
-
-// New Supabase routes (recommended)
+// Supabase API v2 (current)
 app.use('/api/v2/perfumes', supabasePerfumeRoutes);
 app.use('/api/v2/brands', supabaseBrandRoutes);
 app.use('/api/v2/photos', photoRoutes);

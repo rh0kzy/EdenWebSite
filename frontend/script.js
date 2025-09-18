@@ -324,12 +324,109 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeCatalog();
 });
 
-function initializeCatalog() {
+// Listen for perfumes loaded event
+window.addEventListener('perfumesLoaded', function(event) {
+    console.log('Perfumes loaded event received:', event.detail);
+    setupCatalogWithData();
+});
+
+async function initializeCatalog() {
+    // Show loading indicator
+    showLoadingIndicator();
+    
+    try {
+        // Check if perfumes database is already loaded
+        if (window.perfumesDatabase && window.perfumesDatabase.length > 0) {
+            setupCatalogWithData();
+        } else {
+            // Load data from API
+            console.log('🔄 Loading perfume data from API...');
+            await loadPerfumeData();
+        }
+    } catch (error) {
+        console.error('Error initializing catalog:', error);
+        showErrorMessage('Failed to load perfume catalog. Please try again later.');
+    }
+}
+
+// Load perfume data from API
+async function loadPerfumeData() {
+    try {
+        // Initialize API client if not already done
+        if (!window.edenAPI) {
+            window.edenAPI = new EdenParfumAPI();
+        }
+
+        // Fetch perfumes data
+        console.log('📡 Requesting perfumes from API...');
+        const response = await window.edenAPI.getPerfumes({ limit: 1000 }); // Get all perfumes
+        
+        console.log('📦 API Response:', response);
+        console.log('📦 Response success:', response.success);
+        console.log('📦 Response data length:', response.data ? response.data.length : 'undefined');
+        console.log('📦 Response total:', response.total);
+        
+        if (response.success && response.data) {
+            // Store in global variable for compatibility with existing code
+            window.perfumesDatabase = response.data;
+            
+            console.log(`✅ Loaded ${response.data.length} perfumes${response.offline ? ' (offline mode)' : ' (online mode)'}`);
+            
+            if (response.offline) {
+                console.warn('⚠️ Running in offline mode - only showing sample data');
+                showErrorMessage(`Running in offline mode - showing ${response.data.length} sample perfumes. Check API connection for full catalog.`, 'warning');
+            }
+            
+            // Dispatch event for other components
+            window.dispatchEvent(new CustomEvent('perfumesLoaded', {
+                detail: { 
+                    perfumes: response.data,
+                    total: response.total,
+                    offline: response.offline
+                }
+            }));
+            
+            // Set up catalog with the loaded data
+            setupCatalogWithData();
+        } else {
+            throw new Error('No data received from API');
+        }
+        
+    } catch (error) {
+        console.error('Failed to load perfume data:', error);
+        
+        // Try fallback to offline data if available
+        if (window.offlinePerfumeData) {
+            console.log('🔄 Using offline fallback data...');
+            window.perfumesDatabase = window.offlinePerfumeData.perfumes;
+            
+            window.dispatchEvent(new CustomEvent('perfumesLoaded', {
+                detail: { 
+                    perfumes: window.offlinePerfumeData.perfumes,
+                    total: window.offlinePerfumeData.perfumes.length,
+                    offline: true
+                }
+            }));
+            
+            setupCatalogWithData();
+        } else {
+            throw error;
+        }
+    }
+}
+
+function setupCatalogWithData() {
+    // Hide loading indicator
+    hideLoadingIndicator();
+    
     // Check if perfumes database is loaded
-    if (typeof perfumesDatabase === 'undefined') {
-        console.error('Perfumes database not loaded');
+    if (!window.perfumesDatabase || window.perfumesDatabase.length === 0) {
+        console.error('Perfumes database not loaded or empty');
+        showErrorMessage('No perfumes found. Please try again later.');
         return;
     }
+    
+    console.log(`Setting up catalog with ${window.perfumesDatabase.length} perfumes`);
     
     // Initialize filters
     populateFilters();
@@ -346,7 +443,7 @@ function initializeCatalog() {
         } else if (genderParam === 'women') {
             genderValue = 'Women';
         } else if (genderParam === 'unisex') {
-            genderValue = 'Mixte';
+            genderValue = 'Unisex';
         }
         
         // Set the gender filter
@@ -360,7 +457,14 @@ function initializeCatalog() {
     }
     
     // Initialize search
-    filteredPerfumes = [...perfumesDatabase];
+    filteredPerfumes = [...window.perfumesDatabase];
+    
+    // Sort by reference number numerically (1105, 1106, etc.)
+    filteredPerfumes.sort((a, b) => {
+        const refA = parseInt(a.reference) || 0;
+        const refB = parseInt(b.reference) || 0;
+        return refA - refB;
+    });
     
     // Apply any URL-based filters
     if (currentGenderFilter) {
@@ -374,9 +478,36 @@ function initializeCatalog() {
     setupSearchEventListeners();
 }
 
+// Get unique brands for filter dropdown
+function getUniqueBrands() {
+    if (!window.perfumesDatabase || window.perfumesDatabase.length === 0) {
+        return [];
+    }
+    const brands = [...new Set(window.perfumesDatabase.map(perfume => perfume.brand).filter(brand => brand && brand.trim() !== ''))];
+    return brands.sort();
+}
+
+// Get unique genders for filter dropdown  
+function getUniqueGenders() {
+    if (!window.perfumesDatabase || window.perfumesDatabase.length === 0) {
+        return [];
+    }
+    const genders = [...new Set(window.perfumesDatabase.map(perfume => perfume.gender).filter(gender => gender))];
+    return genders.sort();
+}
+
 function populateFilters() {
     const brandFilter = document.getElementById('brandFilter');
     const genderFilter = document.getElementById('genderFilter');
+    
+    if (!brandFilter || !genderFilter) {
+        console.warn('Filter elements not found');
+        return;
+    }
+    
+    // Clear existing options except the first "All" option
+    brandFilter.innerHTML = '<option value="">All Brands</option>';
+    genderFilter.innerHTML = '<option value="">All Genders</option>';
     
     // Populate brand filter
     const brands = getUniqueBrands();
@@ -438,7 +569,12 @@ function setupSearchEventListeners() {
 }
 
 function filterPerfumes() {
-    filteredPerfumes = perfumesDatabase.filter(perfume => {
+    if (!window.perfumesDatabase) {
+        console.warn('No perfumes database available for filtering');
+        return;
+    }
+    
+    filteredPerfumes = window.perfumesDatabase.filter(perfume => {
         // Search term filter
         const matchesSearch = !currentSearchTerm || 
             perfume.name.toLowerCase().includes(currentSearchTerm) ||
@@ -452,6 +588,13 @@ function filterPerfumes() {
         const matchesGender = !currentGenderFilter || perfume.gender === currentGenderFilter;
         
         return matchesSearch && matchesBrand && matchesGender;
+    });
+    
+    // Sort by reference number numerically (1105, 1106, etc.)
+    filteredPerfumes.sort((a, b) => {
+        const refA = parseInt(a.reference) || 0;
+        const refB = parseInt(b.reference) || 0;
+        return refA - refB;
     });
     
     displayPerfumes();
@@ -484,26 +627,21 @@ function createPerfumeItem(perfume) {
     item.className = 'perfume-item';
     
     const brandLogo = getBrandLogo(perfume.brand);
-    const fragranceImage = getFragranceImage(perfume);
+    const fragranceImageName = getFragranceImage(perfume);
     
     const brandSection = brandLogo 
         ? `<div class="perfume-brand">
-               <img src="${brandLogo}" alt="${perfume.brand}" class="brand-logo">
+               <img src="${brandLogo}" alt="${perfume.brand}" class="brand-logo" loading="lazy">
                <span>${perfume.brand || 'No Brand'}</span>
            </div>`
         : `<div class="perfume-brand">
                <span>${perfume.brand || 'No Brand'}</span>
            </div>`;
     
-    const imageSection = fragranceImage 
-        ? `<div class="perfume-image">
-               <img src="${fragranceImage}" alt="${perfume.name}" class="fragrance-image">
-           </div>`
-        : '<div class="perfume-image-placeholder"><i class="fas fa-spray-can"></i></div>';
-    
+    // Create the basic structure
     item.innerHTML = `
         ${perfume.multiplier ? `<div class="price-multiplier">${perfume.multiplier}</div>` : ''}
-        ${imageSection}
+        <div class="perfume-image"></div>
         <div class="perfume-header">
             <div class="perfume-name">${perfume.name}</div>
             <div class="perfume-reference">#${perfume.reference}</div>
@@ -514,50 +652,25 @@ function createPerfumeItem(perfume) {
         </div>
     `;
     
-    // Add click event to navigate to detailed perfume page
-    item.addEventListener('click', function(e) {
-        e.preventDefault();
-        
-        // Add loading state
-        const originalContent = this.innerHTML;
-        this.style.opacity = '0.7';
-        this.style.pointerEvents = 'none';
-        
-        // Add loading spinner
-        const loadingDiv = document.createElement('div');
-        loadingDiv.className = 'loading-overlay';
-        loadingDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
-        loadingDiv.style.cssText = `
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(255, 255, 255, 0.9);
-            padding: 1rem;
-            border-radius: 8px;
-            font-size: 14px;
-            color: #333;
-            z-index: 100;
-        `;
-        this.appendChild(loadingDiv);
-        
-        // Navigate to detailed page after brief delay for UX
-        setTimeout(() => {
-            window.location.href = `perfume-detail.html?ref=${perfume.reference}`;
-        }, 300);
-    });
-    
-    // Add hover effect for better UX
-    item.style.cursor = 'pointer';
-    item.addEventListener('mouseenter', function() {
-        this.style.transform = 'translateY(-4px)';
-        this.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.15)';
-    });
-    
-    item.addEventListener('mouseleave', function() {
-        this.style.transform = 'translateY(0)';
-        this.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
-    });
+    // Add optimized image using fast loader
+    const imageContainer = item.querySelector('.perfume-image');
+    if (fragranceImageName && fragranceImageName !== 'default-perfume.jpg') {
+        if (window.createOptimizedImage) {
+            const optimizedImg = window.createOptimizedImage(
+                fragranceImageName, 
+                `${perfume.name} by ${perfume.brand}`, 
+                'fragrance-image', 
+                'medium'
+            );
+            imageContainer.appendChild(optimizedImg);
+        } else {
+            // Fallback for when fast loader isn't available
+            imageContainer.innerHTML = `<img src="photos/${fragranceImageName}" alt="${perfume.name}" class="fragrance-image" loading="lazy">`;
+        }
+    } else {
+        // Default placeholder
+        imageContainer.innerHTML = '<div class="perfume-image-placeholder"><i class="fas fa-spray-can"></i></div>';
+    }
     
     return item;
 }
@@ -570,7 +683,13 @@ function showPerfumeDetails(perfume) {
 
 function updateResultsCount() {
     const countElement = document.getElementById('resultsCount');
-    const total = perfumesDatabase.length;
+    
+    if (!window.perfumesDatabase) {
+        countElement.textContent = 'Loading perfumes...';
+        return;
+    }
+    
+    const total = window.perfumesDatabase.length;
     const showing = filteredPerfumes.length;
     
     if (showing === total) {
@@ -1452,7 +1571,7 @@ function getFragranceImage(perfume) {
         }
     }
     
-    return imageName ? `photos/Fragrances/${imageName}` : null;
+    return imageName ? `Fragrances/${imageName}` : 'default-perfume.jpg';
 }
 
 // Social Media Popup Functionality
@@ -1677,6 +1796,102 @@ function showNotification(message) {
     }, 3000);
 }
 
+// Loading indicator functions
+function showLoadingIndicator() {
+    const grid = document.getElementById('perfumeGrid');
+    if (grid) {
+        grid.innerHTML = `
+            <div class="loading-container" style="
+                display: flex; 
+                justify-content: center; 
+                align-items: center; 
+                min-height: 200px; 
+                grid-column: 1 / -1;
+                font-size: 18px;
+                color: #666;
+            ">
+                <div style="text-align: center;">
+                    <div class="loading-spinner" style="
+                        border: 3px solid #f3f3f3;
+                        border-top: 3px solid #ff6b9d;
+                        border-radius: 50%;
+                        width: 40px;
+                        height: 40px;
+                        animation: spin 1s linear infinite;
+                        margin: 0 auto 15px auto;
+                    "></div>
+                    <p>Loading perfumes...</p>
+                </div>
+            </div>
+        `;
+        
+        // Add spinner animation if not already present
+        if (!document.getElementById('spinner-style')) {
+            const style = document.createElement('style');
+            style.id = 'spinner-style';
+            style.textContent = `
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+}
+
+function hideLoadingIndicator() {
+    const grid = document.getElementById('perfumeGrid');
+    if (grid) {
+        const loadingContainer = grid.querySelector('.loading-container');
+        if (loadingContainer) {
+            loadingContainer.remove();
+        }
+    }
+}
+
+function showErrorMessage(message, type = 'error') {
+    const grid = document.getElementById('perfumeResults') || document.getElementById('perfumeGrid') || document.getElementById('results');
+    if (grid) {
+        const isWarning = type === 'warning';
+        const color = isWarning ? '#f39c12' : '#e74c3c';
+        const icon = isWarning ? 'fa-exclamation-circle' : 'fa-exclamation-triangle';
+        const buttonText = isWarning ? 'Continue Anyway' : 'Reload Page';
+        const buttonAction = isWarning ? 'this.parentElement.parentElement.remove()' : 'location.reload()';
+        
+        grid.innerHTML = `
+            <div class="error-container" style="
+                display: flex; 
+                justify-content: center; 
+                align-items: center; 
+                min-height: 200px; 
+                grid-column: 1 / -1;
+                font-size: 18px;
+                color: ${color};
+                text-align: center;
+                background: ${isWarning ? 'rgba(243, 156, 18, 0.1)' : 'rgba(231, 76, 60, 0.1)'};
+                border-radius: 10px;
+                margin: 1rem 0;
+                padding: 2rem;
+            ">
+                <div>
+                    <i class="fas ${icon}" style="font-size: 48px; margin-bottom: 15px; display: block;"></i>
+                    <p>${message}</p>
+                    <button onclick="${buttonAction}" style="
+                        background: ${isWarning ? '#f39c12' : '#ff6b9d'};
+                        color: white;
+                        border: none;
+                        padding: 10px 20px;
+                        border-radius: 5px;
+                        cursor: pointer;
+                        margin-top: 15px;
+                    ">Try Again</button>
+                </div>
+            </div>
+        `;
+    }
+}
+
 function checkMapLoaded() {
     const iframe = document.querySelector('.google-map');
     if (iframe && iframe.parentNode) {
@@ -1709,3 +1924,60 @@ document.head.appendChild(notificationStyle);
 document.addEventListener('DOMContentLoaded', function() {
     handleMapError();
 });
+
+// Performance optimization for fast image loading
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 EDEN PARFUM - Fast Image Loading Activated!');
+    
+    // Preload critical brand logos for instant display
+    if (window.fastImageLoader) {
+        const criticalBrandLogos = [
+            'chanel.png', 'dior.png', 'gucci-1-logo-black-and-white.png',
+            'louis-vuitton-1-logo-black-and-white.png', 'armani.png', 'hugo boss.png'
+        ];
+        
+        criticalBrandLogos.forEach(logo => {
+            const preloadImg = new Image();
+            preloadImg.src = `photos/${logo}`;
+        });
+        
+        // Preload first few fragrance images when API data loads
+        window.addEventListener('perfumesLoaded', function(event) {
+            if (event.detail && event.detail.perfumes) {
+                const firstSix = event.detail.perfumes.slice(0, 6);
+                const imageNames = firstSix.map(p => getFragranceImage(p)).filter(Boolean);
+                window.fastImageLoader.preloadCriticalImages(imageNames);
+            }
+        });
+    }
+});
+
+// Performance monitoring for catalog loading
+function monitorCatalogPerformance() {
+    const startTime = Date.now();
+    let perfumeCardsLoaded = 0;
+    
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            mutation.addedNodes.forEach(function(node) {
+                if (node.nodeType === 1 && node.classList && node.classList.contains('perfume-item')) {
+                    perfumeCardsLoaded++;
+                    
+                    // Log performance after loading multiple items
+                    if (perfumeCardsLoaded % 20 === 0) {
+                        const elapsed = Date.now() - startTime;
+                        console.log(`📦 ${perfumeCardsLoaded} perfume cards loaded in ${elapsed}ms (${Math.round(elapsed/perfumeCardsLoaded)}ms per card)`);
+                    }
+                }
+            });
+        });
+    });
+    
+    const resultsContainer = document.getElementById('results');
+    if (resultsContainer) {
+        observer.observe(resultsContainer, { childList: true, subtree: true });
+    }
+}
+
+// Start performance monitoring
+setTimeout(monitorCatalogPerformance, 1000);

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test - EDEN PARFUM</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: #f5f5f5;
+        }
+        
+        .test-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+        }
+        
+        .status {
+            padding: 1rem;
+            border-radius: 5px;
+            margin: 1rem 0;
+        }
+        
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        
+        .log {
+            background: #333;
+            color: #fff;
+            padding: 1rem;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        button {
+            background: #ff6b9d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0.5rem;
+        }
+        
+        button:hover {
+            background: #ff5a8a;
+        }
+        
+        .perfume-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .perfume-card {
+            background: #f9f9f9;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .perfume-image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 5px;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 EDEN PARFUM API Test</h1>
+        <p>This page tests the API client and offline fallback functionality.</p>
+        
+        <div id="status" class="status info">
+            Status: Initializing...
+        </div>
+        
+        <div>
+            <button onclick="testAPI()">Test API Connection</button>
+            <button onclick="testOfflineMode()">Test Offline Mode</button>
+            <button onclick="loadPerfumes()">Load Perfumes</button>
+            <button onclick="clearLog()">Clear Log</button>
+        </div>
+        
+        <h3>Console Log:</h3>
+        <div id="log" class="log">Initializing API test...\n</div>
+        
+        <h3>Loaded Perfumes:</h3>
+        <div id="perfumes" class="perfume-grid"></div>
+    </div>
+
+    <script src="js/offlineData.js"></script>
+    <script src="js/fastImageLoader.js"></script>
+    <script src="js/apiClient.js"></script>
+    
+    <script>
+        let api;
+        let logElement = document.getElementById('log');
+        let statusElement = document.getElementById('status');
+        let perfumesElement = document.getElementById('perfumes');
+        
+        function log(message) {
+            console.log(message);
+            logElement.textContent += new Date().toLocaleTimeString() + ': ' + message + '\n';
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        function setStatus(message, type = 'info') {
+            statusElement.textContent = 'Status: ' + message;
+            statusElement.className = 'status ' + type;
+        }
+        
+        function clearLog() {
+            logElement.textContent = '';
+        }
+        
+        async function testAPI() {
+            log('🔧 Testing API connection...');
+            setStatus('Testing API...', 'info');
+            
+            try {
+                if (!api) {
+                    api = new EdenParfumAPI();
+                    log('✅ API client initialized');
+                }
+                
+                const response = await api.getPerfumes({ limit: 5 });
+                
+                if (response.success) {
+                    log(`✅ API test successful! Got ${response.data.length} perfumes`);
+                    if (response.offline) {
+                        setStatus('API test successful (offline mode)', 'success');
+                        log('⚠️ Running in offline mode');
+                    } else {
+                        setStatus('API test successful (online mode)', 'success');
+                        log('🌐 Connected to live API');
+                    }
+                } else {
+                    throw new Error('API returned unsuccessful response');
+                }
+            } catch (error) {
+                log(`❌ API test failed: ${error.message}`);
+                setStatus('API test failed', 'error');
+            }
+        }
+        
+        async function testOfflineMode() {
+            log('🔌 Testing offline mode...');
+            setStatus('Testing offline mode...', 'info');
+            
+            try {
+                if (!api) {
+                    api = new EdenParfumAPI();
+                }
+                
+                // Force offline mode by testing offline data directly
+                const offlineData = api.getOfflineData('/perfumes', { limit: 5 });
+                
+                if (offlineData.success) {
+                    log(`✅ Offline mode test successful! Got ${offlineData.data.length} perfumes`);
+                    setStatus('Offline mode working', 'success');
+                } else {
+                    throw new Error('Offline data not available');
+                }
+            } catch (error) {
+                log(`❌ Offline mode test failed: ${error.message}`);
+                setStatus('Offline mode failed', 'error');
+            }
+        }
+        
+        async function loadPerfumes() {
+            log('📦 Loading perfumes...');
+            setStatus('Loading perfumes...', 'info');
+            
+            try {
+                if (!api) {
+                    api = new EdenParfumAPI();
+                }
+                
+                const response = await api.getPerfumes({ limit: 12 });
+                
+                if (response.success && response.data) {
+                    log(`✅ Loaded ${response.data.length} perfumes`);
+                    displayPerfumes(response.data);
+                    setStatus(`Loaded ${response.data.length} perfumes${response.offline ? ' (offline)' : ''}`, 'success');
+                } else {
+                    throw new Error('No perfume data received');
+                }
+            } catch (error) {
+                log(`❌ Failed to load perfumes: ${error.message}`);
+                setStatus('Failed to load perfumes', 'error');
+            }
+        }
+        
+        function displayPerfumes(perfumes) {
+            perfumesElement.innerHTML = '';
+            
+            perfumes.forEach(perfume => {
+                const card = document.createElement('div');
+                card.className = 'perfume-card';
+                
+                card.innerHTML = `
+                    <div class="perfume-image-placeholder" style="width: 100px; height: 100px; background: #eee; border-radius: 5px; margin: 0 auto 0.5rem auto; display: flex; align-items: center; justify-content: center; color: #999;">
+                        🌸
+                    </div>
+                    <h4>${perfume.name}</h4>
+                    <p><strong>${perfume.brand}</strong></p>
+                    <p>${perfume.gender} • ${perfume.concentration}</p>
+                    <p><small>#${perfume.reference}</small></p>
+                `;
+                
+                perfumesElement.appendChild(card);
+            });
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🚀 API Test page loaded');
+            log('🔍 Checking offline data availability...');
+            
+            if (window.offlinePerfumeData) {
+                log(`✅ Offline data loaded: ${window.offlinePerfumeData.perfumes.length} perfumes, ${window.offlinePerfumeData.brands.length} brands`);
+            } else {
+                log('❌ No offline data available');
+            }
+            
+            setStatus('Ready for testing', 'success');
+        });
+    </script>
+</body>
+</html>

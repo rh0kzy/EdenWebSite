@@ -1,0 +1,34 @@
+# Render deployment configuration
+# Place this file in the backend directory for Render deployment
+
+services:
+  - type: web
+    name: eden-parfum-backend
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SUPABASE_URL
+        sync: false  # Set manually in Render dashboard
+      - key: SUPABASE_ANON_KEY  
+        sync: false  # Set manually in Render dashboard
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false  # Set manually in Render dashboard
+      - key: FRONTEND_URL
+        value: https://your-netlify-domain.netlify.app
+    healthCheckPath: /api/health
+    domains:
+      - eden-parfum-api.onrender.com
+    
+    # Auto-deploy settings
+    autoDeploy: true
+    branch: main
+    
+    # Resource limits (free tier)
+    disk:
+      name: eden-parfum-data
+      size: 1GB
+      mount: /app/data

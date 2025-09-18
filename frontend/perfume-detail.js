@@ -1,406 +1,872 @@
-// Enhanced Perfume Detail Page JavaScript
+// Eden Parfum Detail Page - Updated for Supabase API
 class PerfumeDetailPage {
     constructor() {
-        this.apiBaseUrl = 'http://localhost:3000/api';
-        this.perfumeReference = this.getPerfumeReference();
+        this.apiBaseUrl = this.getApiBaseUrl();
+        this.perfumeId = this.getPerfumeId();
         this.init();
     }
 
-    getPerfumeReference() {
-        // Get reference from URL parameter or default to Marc Jacobs Decadence
+    getApiBaseUrl() {
+        const hostname = window.location.hostname;
+        
+        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+            // Development environment
+            return 'http://localhost:3000/api/v2';
+        } else {
+            // Production environment - API calls will be proxied by Netlify
+            return '/api/v2';
+        }
+    }
+
+    getPerfumeId() {
+        // Get ID from URL parameter - try both 'id' and 'ref' for backward compatibility
         const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get('ref') || '1103';
+        return urlParams.get('id') || urlParams.get('ref') || '1';
     }
 
     async init() {
         try {
+            this.showLoadingState();
             await this.loadPerfumeData();
             this.attachEventListeners();
         } catch (error) {
             console.error('Error initializing perfume detail page:', error);
-            this.showError('Failed to load perfume details');
+            this.showError('Failed to load perfume details. Please try again later.');
+        }
+    }
+
+    showLoadingState() {
+        const container = document.querySelector('.perfume-detail-container') || document.body;
+        container.innerHTML = `
+            <div class="loading-container" style="
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 50vh;
+                flex-direction: column;
+                gap: 20px;
+            ">
+                <div class="loading-spinner" style="
+                    border: 4px solid #f3f3f3;
+                    border-top: 4px solid #ff6b9d;
+                    border-radius: 50%;
+                    width: 50px;
+                    height: 50px;
+                    animation: spin 1s linear infinite;
+                "></div>
+                <p style="color: #666; font-size: 18px;">Loading perfume details...</p>
+            </div>
+        `;
+        
+        // Add spinner animation if not already present
+        if (!document.getElementById('spinner-style')) {
+            const style = document.createElement('style');
+            style.id = 'spinner-style';
+            style.textContent = `
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+            `;
+            document.head.appendChild(style);
         }
     }
 
     async loadPerfumeData() {
         try {
-            const response = await fetch(`${this.apiBaseUrl}/enhanced/enhanced/${this.perfumeReference}`);
-            if (!response.ok) {
-                throw new Error('Failed to fetch perfume data');
+            // Try to find perfume by ID first
+            let perfume = await this.findPerfumeById(this.perfumeId);
+            
+            // If not found by ID, try to find by reference (backward compatibility)
+            if (!perfume) {
+                perfume = await this.findPerfumeByReference(this.perfumeId);
             }
             
-            const result = await response.json();
-            if (result.success) {
-                this.perfumeData = result.data;
-                this.renderPerfumeDetails();
-            } else {
-                throw new Error(result.message || 'Failed to load perfume data');
+            if (!perfume) {
+                throw new Error(`Perfume with ID/reference "${this.perfumeId}" not found`);
             }
+
+            this.perfumeData = perfume;
+            this.renderPerfumeDetails();
+            
         } catch (error) {
             console.error('Error loading perfume data:', error);
-            // Use fallback data for demonstration
-            this.loadFallbackData();
+            
+            // Try to load from the perfumes database as fallback
+            if (window.perfumesDatabase && window.perfumesDatabase.length > 0) {
+                this.loadFromLocalDatabase();
+            } else {
+                throw error;
+            }
         }
     }
 
-    loadFallbackData() {
-        // Fallback data matching our enhanced structure
-        this.perfumeData = {
-            reference: "1103",
-            name: "Decadence",
-            brand: "Marc Jacobs",
-            gender: "Women",
-            fragranceNotes: {
-                top: ["Italian Plum", "Saffron", "Bulgarian Rose"],
-                middle: ["Orris", "Sambac Jasmine", "Rose"],
-                base: ["Liquid Amber", "Vetiver", "Papyrus Wood"]
-            },
-            fragrancePyramid: {
-                longevity: 8,
-                sillage: 7,
-                projection: 6,
-                complexity: 8,
-                seasonality: ["Fall", "Winter", "Evening"],
-                occasion: ["Date Night", "Special Events", "Evening Out"],
-                timeOfDay: "Evening"
-            },
-            releaseInfo: {
-                launchYear: 2015,
-                perfumer: "Annie Buzantian",
-                concentration: "Eau de Parfum",
-                availability: "Available",
-                sizes: ["30ml", "50ml", "100ml"],
-                currentPrice: {
-                    "30ml": "$45",
-                    "50ml": "$65",
-                    "100ml": "$85"
-                }
-            },
-            brandInfo: {
-                brandName: "Marc Jacobs",
-                founded: 1984,
-                founder: "Marc Jacobs",
-                country: "United States",
-                headquarters: "New York City",
-                brandStory: "Marc Jacobs is a world-renowned American fashion designer known for his grunge aesthetic and eclectic designs. His fragrance line reflects his bold, unconventional approach to fashion.",
-                signature: "Modern, edgy, and sophisticated fragrances that capture the essence of contemporary femininity",
-                notableFragrances: ["Daisy", "Perfect", "Decadence", "Dot"],
-                brandValues: ["Creativity", "Individuality", "Modern Luxury"]
-            },
-            similarFragrances: [
-                {
-                    reference: "1104",
-                    name: "Marc Jacobs Perfect",
-                    brand: "Marc Jacobs",
-                    similarity: 85,
-                    reason: "Same brand, similar fruity-floral profile"
-                },
-                {
-                    reference: "1111",
-                    name: "Marc Jacobs Perfect Intense",
-                    brand: "Marc Jacobs",
-                    similarity: 80,
-                    reason: "Intensified version with similar DNA"
-                },
-                {
-                    reference: "1103",
-                    name: "Tom Ford Black Orchid",
-                    brand: "Tom Ford",
-                    similarity: 75,
-                    reason: "Similar dark, luxurious, and seductive character"
-                }
-            ],
-            description: "A captivating and luxurious fragrance that embodies the spirit of feminine decadence. This rich and opulent scent opens with the exotic sweetness of Italian plum and the warmth of saffron, creating an immediately intoxicating experience.",
-            reviews: {
-                averageRating: 4.3,
-                totalReviews: 1247
-            },
-            characteristics: {
-                fragranceFamily: "Oriental Floral",
-                mood: ["Seductive", "Luxurious", "Sophisticated"],
-                intensity: "Strong",
-                uniqueness: "High",
-                versatility: "Medium",
-                ageGroup: "25-45",
-                personality: ["Confident", "Bold", "Glamorous"]
-            },
-            wearabilityGuide: {
-                seasons: {
-                    spring: 3,
-                    summer: 2,
-                    fall: 5,
-                    winter: 5
-                },
-                occasions: {
-                    daily: 2,
-                    office: 3,
-                    evening: 5,
-                    special: 5,
-                    date: 5
+    async findPerfumeById(id) {
+        try {
+            const response = await fetch(`${this.apiBaseUrl}/perfumes/${id}`);
+            
+            if (response.ok) {
+                const result = await response.json();
+                return result.success ? result.data : null;
+            }
+            return null;
+        } catch (error) {
+            console.warn('Failed to fetch perfume by ID:', error);
+            return null;
+        }
+    }
+
+    async findPerfumeByReference(reference) {
+        try {
+            // Search for perfume by reference field
+            const response = await fetch(`${this.apiBaseUrl}/perfumes?search=${reference}&limit=1`);
+            
+            if (response.ok) {
+                const result = await response.json();
+                if (result.success && result.data && result.data.length > 0) {
+                    // Look for exact match in reference field
+                    const exactMatch = result.data.find(p => 
+                        p.id === reference || 
+                        p.reference === reference ||
+                        p.name.toLowerCase().includes(reference.toLowerCase())
+                    );
+                    return exactMatch || result.data[0];
                 }
             }
-        };
-        
-        this.renderPerfumeDetails();
+            return null;
+        } catch (error) {
+            console.warn('Failed to fetch perfume by reference:', error);
+            return null;
+        }
+    }
+
+    loadFromLocalDatabase() {
+        // Fallback to local perfumes database
+        const perfume = window.perfumesDatabase.find(p => 
+            p.reference === this.perfumeId || 
+            p.id === this.perfumeId ||
+            p.name.toLowerCase().includes(this.perfumeId.toLowerCase())
+        );
+
+        if (perfume) {
+            this.perfumeData = perfume;
+            this.renderPerfumeDetails();
+        } else {
+            throw new Error('Perfume not found in local database');
+        }
     }
 
     renderPerfumeDetails() {
-        this.updateBasicInfo();
-        this.updateFragranceNotes();
-        this.updatePyramidMetrics();
-        this.updateBrandInfo();
-        this.updateReleaseInfo();
-        this.updateWearabilityGuide();
-        this.updateSimilarFragrances();
-        this.updatePageTitle();
-    }
-
-    updateBasicInfo() {
-        const nameElement = document.getElementById('perfumeName');
-        const brandElement = document.getElementById('perfumeBrand');
-        const descriptionElement = document.getElementById('perfumeDescription');
-
-        if (nameElement) nameElement.textContent = this.perfumeData.name;
-        if (brandElement) brandElement.textContent = this.perfumeData.brand;
-        if (descriptionElement) descriptionElement.textContent = this.perfumeData.description;
-
-        // Update rating display
-        if (this.perfumeData.reviews) {
-            const ratingText = document.querySelector('.rating-text');
-            if (ratingText) {
-                ratingText.textContent = `${this.perfumeData.reviews.averageRating}/5 (${this.perfumeData.reviews.totalReviews.toLocaleString()} reviews)`;
-            }
-        }
-    }
-
-    updateFragranceNotes() {
-        const noteCategories = ['top', 'middle', 'base'];
+        const container = document.querySelector('.perfume-detail-container') || document.body;
         
-        noteCategories.forEach(category => {
-            const noteList = document.querySelector(`.note-category:nth-child(${noteCategories.indexOf(category) + 1}) .note-list`);
-            if (noteList && this.perfumeData.fragranceNotes[category]) {
-                noteList.innerHTML = '';
-                this.perfumeData.fragranceNotes[category].forEach(note => {
-                    const noteElement = document.createElement('div');
-                    noteElement.className = 'note-item';
-                    noteElement.textContent = note;
-                    noteList.appendChild(noteElement);
-                });
-            }
-        });
-    }
+        const perfume = this.perfumeData;
+        const brandName = perfume.brand_name || perfume.brands?.name || perfume.brand;
+        const perfumeName = perfume.name;
+        const gender = perfume.gender;
+        const concentration = perfume.concentration || 'Eau de Parfum';
+        const size = perfume.size || '50ml';
+        const price = perfume.price ? `$${perfume.price}` : 'Price on request';
+        const category = perfume.category || 'Fragrance';
+        
+        // Generate image URL
+        const imageUrl = this.getPerfumeImageUrl(perfume);
+        const brandLogo = this.getBrandLogoUrl(brandName);
 
-    updatePyramidMetrics() {
-        const metrics = [
-            { name: 'longevity', value: this.perfumeData.fragrancePyramid.longevity },
-            { name: 'sillage', value: this.perfumeData.fragrancePyramid.sillage },
-            { name: 'projection', value: this.perfumeData.fragrancePyramid.projection },
-            { name: 'complexity', value: this.perfumeData.fragrancePyramid.complexity }
-        ];
-
-        metrics.forEach((metric, index) => {
-            const metricElement = document.querySelector(`.metric:nth-child(${index + 1})`);
-            if (metricElement) {
-                const fillElement = metricElement.querySelector('.metric-fill');
-                const valueElement = metricElement.querySelector('span');
-                
-                if (fillElement) fillElement.style.width = `${metric.value * 10}%`;
-                if (valueElement) valueElement.textContent = `${metric.value}/10`;
-            }
-        });
-
-        // Update quick stats
-        const statValues = document.querySelectorAll('.stat-value');
-        if (statValues.length >= 3) {
-            statValues[0].textContent = `${this.perfumeData.fragrancePyramid.longevity}/10`;
-            statValues[1].textContent = `${this.perfumeData.fragrancePyramid.sillage}/10`;
-            statValues[2].textContent = this.perfumeData.releaseInfo.launchYear;
-        }
-    }
-
-    updateBrandInfo() {
-        const brandStory = document.querySelector('.brand-story');
-        if (brandStory && this.perfumeData.brandInfo) {
-            const brandInfo = this.perfumeData.brandInfo;
-            brandStory.innerHTML = `
-                <h3>${brandInfo.brandName}</h3>
-                <p><strong>Founded:</strong> ${brandInfo.founded} | <strong>Founder:</strong> ${brandInfo.founder} | <strong>Country:</strong> ${brandInfo.country}</p>
-                <p>${brandInfo.brandStory}</p>
-                <div class="brand-values">
-                    ${brandInfo.brandValues.map(value => `<span class="value-tag">${value}</span>`).join('')}
+        container.innerHTML = `
+            <div class="perfume-detail-content">
+                <!-- Header Section -->
+                <div class="perfume-header">
+                    <button class="back-button" onclick="history.back()">
+                        <i class="fas fa-arrow-left"></i> Back to Catalog
+                    </button>
+                    <div class="breadcrumb">
+                        <a href="index.html">Home</a> > 
+                        <a href="catalog.html">Catalog</a> > 
+                        <span>${perfumeName}</span>
+                    </div>
                 </div>
-            `;
-        }
-    }
 
-    updateReleaseInfo() {
-        const releaseCards = document.querySelectorAll('.characteristic-card');
-        if (releaseCards.length >= 4 && this.perfumeData.releaseInfo) {
-            const releaseInfo = this.perfumeData.releaseInfo;
-            
-            const infoData = [
-                { icon: 'calendar', title: 'Launch Year', value: releaseInfo.launchYear },
-                { icon: 'user', title: 'Perfumer', value: releaseInfo.perfumer },
-                { icon: 'flask', title: 'Concentration', value: releaseInfo.concentration },
-                { icon: 'check-circle', title: 'Availability', value: releaseInfo.availability }
-            ];
+                <!-- Main Content -->
+                <div class="perfume-main-content">
+                    <!-- Left Side - Image -->
+                    <div class="perfume-image-section">
+                        <div class="perfume-image-container">
+                            <img src="${imageUrl}" alt="${perfumeName}" class="perfume-image" 
+                                 onerror="this.src='/photos/default-perfume.jpg'" />
+                        </div>
+                        <div class="perfume-gallery">
+                            <img src="${imageUrl}" alt="${perfumeName}" class="gallery-thumb active" />
+                        </div>
+                    </div>
 
-            infoData.forEach((info, index) => {
-                if (releaseCards[index]) {
-                    releaseCards[index].innerHTML = `
-                        <h4><i class="fas fa-${info.icon}"></i> ${info.title}</h4>
-                        <p>${info.value}</p>
-                    `;
-                }
-            });
-        }
-    }
+                    <!-- Right Side - Details -->
+                    <div class="perfume-details-section">
+                        <!-- Brand Logo -->
+                        <div class="brand-header">
+                            <img src="${brandLogo}" alt="${brandName}" class="brand-logo" 
+                                 onerror="this.style.display='none'" />
+                            <h1 class="brand-name">${brandName}</h1>
+                        </div>
 
-    updateWearabilityGuide() {
-        // Update seasons chart
-        const seasonsSection = document.querySelector('.chart-section:first-child');
-        if (seasonsSection && this.perfumeData.wearabilityGuide.seasons) {
-            const seasons = this.perfumeData.wearabilityGuide.seasons;
-            const seasonItems = seasonsSection.querySelectorAll('.chart-item');
-            
-            const seasonNames = ['spring', 'summer', 'fall', 'winter'];
-            seasonNames.forEach((season, index) => {
-                if (seasonItems[index]) {
-                    const fill = seasonItems[index].querySelector('.chart-fill');
-                    if (fill) {
-                        fill.style.width = `${(seasons[season] / 5) * 100}%`;
-                    }
-                }
-            });
-        }
+                        <!-- Perfume Name -->
+                        <h2 class="perfume-name">${perfumeName}</h2>
 
-        // Update occasions chart
-        const occasionsSection = document.querySelector('.chart-section:last-child');
-        if (occasionsSection && this.perfumeData.wearabilityGuide.occasions) {
-            const occasions = this.perfumeData.wearabilityGuide.occasions;
-            const occasionItems = occasionsSection.querySelectorAll('.chart-item');
-            
-            const occasionNames = ['daily', 'office', 'evening', 'special'];
-            occasionNames.forEach((occasion, index) => {
-                if (occasionItems[index]) {
-                    const fill = occasionItems[index].querySelector('.chart-fill');
-                    if (fill) {
-                        fill.style.width = `${(occasions[occasion] / 5) * 100}%`;
-                    }
-                }
-            });
-        }
-    }
+                        <!-- Basic Info -->
+                        <div class="perfume-basic-info">
+                            <div class="info-item">
+                                <span class="info-label">Gender:</span>
+                                <span class="info-value ${gender?.toLowerCase()}">${gender}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Concentration:</span>
+                                <span class="info-value">${concentration}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Size:</span>
+                                <span class="info-value">${size}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label">Category:</span>
+                                <span class="info-value">${category}</span>
+                            </div>
+                        </div>
 
-    updateSimilarFragrances() {
-        const similarContainer = document.querySelector('.similar-perfumes');
-        if (similarContainer && this.perfumeData.similarFragrances) {
-            similarContainer.innerHTML = '';
-            
-            this.perfumeData.similarFragrances.forEach(perfume => {
-                const perfumeElement = document.createElement('div');
-                perfumeElement.className = 'similar-item';
-                perfumeElement.innerHTML = `
-                    <div class="similarity-score">${perfume.similarity}% Match</div>
-                    <h4>${perfume.name}</h4>
-                    <p class="brand">${perfume.brand}</p>
-                    <p>${perfume.reason}</p>
-                `;
-                
-                // Add click event to navigate to similar perfume
-                perfumeElement.style.cursor = 'pointer';
-                perfumeElement.addEventListener('click', () => {
-                    window.location.href = `perfume-detail.html?ref=${perfume.reference}`;
-                });
-                
-                similarContainer.appendChild(perfumeElement);
-            });
-        }
-    }
+                        <!-- Price -->
+                        <div class="price-section">
+                            <div class="price">${price}</div>
+                            <div class="price-note">Best price in Morocco</div>
+                        </div>
 
-    updatePageTitle() {
-        document.title = `${this.perfumeData.name} by ${this.perfumeData.brand} - EDEN PARFUM`;
+                        <!-- Action Buttons -->
+                        <div class="action-buttons">
+                            <button class="whatsapp-btn" onclick="this.orderViaWhatsApp('${perfumeName}', '${brandName}')">
+                                <i class="fab fa-whatsapp"></i>
+                                Order via WhatsApp
+                            </button>
+                            <button class="favorite-btn" onclick="this.toggleFavorite('${perfume.id}')">
+                                <i class="far fa-heart"></i>
+                                Add to Favorites
+                            </button>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="perfume-description">
+                            <h3>About This Fragrance</h3>
+                            <p>${this.generateDescription(perfume)}</p>
+                        </div>
+
+                        <!-- Fragrance Notes (placeholder) -->
+                        <div class="fragrance-notes">
+                            <h3>Fragrance Notes</h3>
+                            <div class="notes-container">
+                                <div class="note-category">
+                                    <h4>Top Notes</h4>
+                                    <p>Fresh, sparkling opening notes</p>
+                                </div>
+                                <div class="note-category">
+                                    <h4>Heart Notes</h4>
+                                    <p>Rich, floral middle notes</p>
+                                </div>
+                                <div class="note-category">
+                                    <h4>Base Notes</h4>
+                                    <p>Warm, lasting foundation</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Sections -->
+                <div class="additional-info">
+                    <!-- Brand Story -->
+                    <div class="brand-story">
+                        <h3>About ${brandName}</h3>
+                        <p>${this.getBrandStory(brandName)}</p>
+                    </div>
+
+                    <!-- Similar Perfumes -->
+                    <div class="similar-perfumes">
+                        <h3>You Might Also Like</h3>
+                        <div class="similar-grid" id="similarPerfumes">
+                            <p>Loading similar perfumes...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Optimize images after DOM creation
+        this.optimizeImages(container, imageUrl, perfumeName, brandLogo, brandName);
         
-        // Update breadcrumb
-        const breadcrumbElement = document.getElementById('breadcrumbPerfumeName');
-        if (breadcrumbElement) {
-            breadcrumbElement.textContent = `${this.perfumeData.name} - ${this.perfumeData.brand}`;
-        }
+        // Load similar perfumes
+        this.loadSimilarPerfumes();
+        
+        // Add CSS if not present
+        this.addDetailPageStyles();
     }
 
-    attachEventListeners() {
-        // Add any interactive functionality here
-        this.addAnimationEffects();
-        this.addHoverEffects();
-    }
-
-    addAnimationEffects() {
-        // Animate metric bars on scroll
-        const observerOptions = {
-            threshold: 0.5,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const metricFills = entry.target.querySelectorAll('.metric-fill');
-                    metricFills.forEach((fill, index) => {
-                        setTimeout(() => {
-                            fill.style.transform = 'scaleX(1)';
-                        }, index * 200);
-                    });
-                }
-            });
-        }, observerOptions);
-
-        const pyramidSection = document.querySelector('.fragrance-pyramid');
-        if (pyramidSection) {
-            observer.observe(pyramidSection);
-        }
-    }
-
-    addHoverEffects() {
-        // Add hover effects to note items
-        const noteItems = document.querySelectorAll('.note-item');
-        noteItems.forEach(item => {
-            item.addEventListener('mouseenter', function() {
-                this.style.transform = 'translateY(-2px)';
-                this.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
-            });
+    optimizeImages(container, imageUrl, perfumeName, brandLogo, brandName) {
+        // Optimize main perfume image
+        const mainImageContainer = container.querySelector('.perfume-image-container');
+        const galleryContainer = container.querySelector('.perfume-gallery');
+        
+        if (mainImageContainer && window.createOptimizedImage) {
+            // Replace main image with optimized version
+            const imageName = imageUrl.split('/').pop();
+            const optimizedImg = window.createOptimizedImage(
+                imageName, 
+                perfumeName, 
+                'perfume-image', 
+                'large'
+            );
             
-            item.addEventListener('mouseleave', function() {
-                this.style.transform = 'translateY(0)';
-                this.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
-            });
+            mainImageContainer.innerHTML = '';
+            mainImageContainer.appendChild(optimizedImg);
+            
+            // Also update gallery thumbnail
+            if (galleryContainer) {
+                const galleryImg = window.createOptimizedImage(
+                    imageName, 
+                    perfumeName, 
+                    'gallery-thumb active', 
+                    'thumbnail'
+                );
+                galleryContainer.innerHTML = '';
+                galleryContainer.appendChild(galleryImg);
+            }
+        }
+        
+        // Optimize brand logo with lazy loading
+        const brandLogoImg = container.querySelector('.brand-logo');
+        if (brandLogoImg && brandLogo) {
+            brandLogoImg.loading = 'lazy';
+            brandLogoImg.onerror = function() { 
+                this.style.display = 'none'; 
+            };
+        }
+    }
+
+    getPerfumeImageUrl(perfume) {
+        // Try different image naming conventions
+        const imageName = perfume.name?.replace(/[^a-zA-Z0-9]/g, '_');
+        const brandName = (perfume.brand_name || perfume.brands?.name || perfume.brand)?.replace(/[^a-zA-Z0-9]/g, '_');
+        
+        // Return the photo URL if available, otherwise try to construct it
+        if (perfume.photo_url) {
+            return perfume.photo_url;
+        }
+        
+        // Try different image formats
+        const possibleNames = [
+            `photos/${imageName}.jpg`,
+            `photos/${imageName}.png`,
+            `photos/${brandName}_${imageName}.jpg`,
+            `photos/${perfume.reference}.jpg`,
+            `photos/default-perfume.jpg`
+        ];
+        
+        return possibleNames[0];
+    }
+
+    getBrandLogoUrl(brandName) {
+        if (!brandName) return 'photos/default-brand.png';
+        
+        // Brand logo mapping (simplified version)
+        const brandLogos = {
+            'Chanel': 'photos/chanel.png',
+            'Dior': 'photos/dior.png',
+            'Gucci': 'photos/gucci-1-logo-black-and-white.png',
+            'Louis Vuitton': 'photos/louis-vuitton-1-logo-black-and-white.png',
+            'Marc Jacobs': 'photos/marc-jacobs-fragrances-logo-png_seeklogo-476210.png',
+            'Hugo Boss': 'photos/hugo boss.png',
+            'Calvin Klein': 'photos/calvin klein.svg',
+            'Armani': 'photos/armani.png'
+        };
+        
+        return brandLogos[brandName] || `photos/${brandName.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
+    }
+
+    generateDescription(perfume) {
+        const brand = perfume.brand_name || perfume.brands?.name || perfume.brand;
+        const concentration = perfume.concentration || 'Eau de Parfum';
+        const category = perfume.category || 'fragrance';
+        
+        return `Discover ${perfume.name} by ${brand}, a captivating ${concentration} that embodies elegance and sophistication. This ${category.toLowerCase()} offers a unique olfactory experience that reflects the artistry and craftsmanship of ${brand}. Perfect for those who appreciate quality and distinction in their fragrance collection.`;
+    }
+
+    getBrandStory(brandName) {
+        const brandStories = {
+            'Chanel': 'Chanel is a legendary French luxury brand founded by Gabrielle "Coco" Chanel in 1910. Known for timeless elegance and revolutionary designs, Chanel fragrances like No. 5 have become iconic symbols of sophistication.',
+            'Dior': 'Christian Dior founded his fashion house in 1946, and the fragrance division began in 1947 with Miss Dior. The brand represents French luxury and elegance, creating fragrances that are both classic and contemporary.',
+            'Gucci': 'Founded in Florence in 1921, Gucci has become synonymous with Italian luxury and craftsmanship. Their fragrances reflect the brands bold, contemporary spirit while honoring traditional perfumery techniques.'
+        };
+        
+        return brandStories[brandName] || `${brandName} is a distinguished fragrance house known for creating exceptional perfumes that capture the essence of luxury and elegance. Each fragrance tells a unique story and reflects the brands commitment to quality and artistry.`;
+    }
+
+    async loadSimilarPerfumes() {
+        const container = document.getElementById('similarPerfumes');
+        if (!container) return;
+
+        try {
+            // Get similar perfumes from the same brand or gender
+            const brand = this.perfumeData.brand_name || this.perfumeData.brands?.name || this.perfumeData.brand;
+            const gender = this.perfumeData.gender;
+            
+            const response = await fetch(`${this.apiBaseUrl}/perfumes?brand=${encodeURIComponent(brand)}&limit=4`);
+            
+            if (response.ok) {
+                const result = await response.json();
+                if (result.success && result.data && result.data.length > 0) {
+                    // Filter out current perfume
+                    const similarPerfumes = result.data.filter(p => p.id !== this.perfumeData.id).slice(0, 3);
+                    this.renderSimilarPerfumes(similarPerfumes);
+                } else {
+                    container.innerHTML = '<p>No similar perfumes found.</p>';
+                }
+            } else {
+                container.innerHTML = '<p>Unable to load similar perfumes.</p>';
+            }
+        } catch (error) {
+            console.error('Error loading similar perfumes:', error);
+            container.innerHTML = '<p>Unable to load similar perfumes.</p>';
+        }
+    }
+
+    renderSimilarPerfumes(perfumes) {
+        const container = document.getElementById('similarPerfumes');
+        if (!container) return;
+
+        // Create cards with placeholder images first
+        container.innerHTML = perfumes.map(perfume => `
+            <div class="similar-perfume-card" onclick="window.location.href='perfume-detail.html?id=${perfume.id}'">
+                <div class="similar-perfume-image"></div>
+                <h4>${perfume.name}</h4>
+                <p>${perfume.brand_name || perfume.brands?.name || perfume.brand}</p>
+                <span class="price">${perfume.price ? `$${perfume.price}` : 'Price on request'}</span>
+            </div>
+        `).join('');
+
+        // Add optimized images
+        const cards = container.querySelectorAll('.similar-perfume-card');
+        cards.forEach((card, index) => {
+            const perfume = perfumes[index];
+            const imageContainer = card.querySelector('.similar-perfume-image');
+            const imageUrl = this.getPerfumeImageUrl(perfume);
+            
+            if (imageContainer && imageUrl && window.createOptimizedImage) {
+                const imageName = imageUrl.split('/').pop();
+                const optimizedImg = window.createOptimizedImage(
+                    imageName, 
+                    perfume.name, 
+                    'similar-perfume-img', 
+                    'small'
+                );
+                imageContainer.appendChild(optimizedImg);
+            } else if (imageContainer) {
+                // Fallback
+                imageContainer.innerHTML = `<img src="${imageUrl}" alt="${perfume.name}" loading="lazy" onerror="this.src='photos/default-perfume.jpg'" />`;
+            }
         });
     }
 
-    showError(message) {
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'error-message';
-        errorDiv.style.cssText = `
+    orderViaWhatsApp(perfumeName, brandName) {
+        const message = `Hello! I'm interested in ordering ${perfumeName} by ${brandName}. Could you please provide me with more details about availability and pricing?`;
+        const whatsappNumber = '212636262660'; // Your WhatsApp number
+        const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+        window.open(whatsappUrl, '_blank');
+    }
+
+    toggleFavorite(perfumeId) {
+        // Simple favorite functionality using localStorage
+        const favorites = JSON.parse(localStorage.getItem('eden_favorites') || '[]');
+        const index = favorites.indexOf(perfumeId);
+        
+        if (index > -1) {
+            favorites.splice(index, 1);
+            this.showNotification('Removed from favorites');
+        } else {
+            favorites.push(perfumeId);
+            this.showNotification('Added to favorites');
+        }
+        
+        localStorage.setItem('eden_favorites', JSON.stringify(favorites));
+        this.updateFavoriteButton(index === -1);
+    }
+
+    updateFavoriteButton(isFavorited) {
+        const favoriteBtn = document.querySelector('.favorite-btn i');
+        if (favoriteBtn) {
+            favoriteBtn.className = isFavorited ? 'fas fa-heart' : 'far fa-heart';
+        }
+    }
+
+    showNotification(message) {
+        const notification = document.createElement('div');
+        notification.className = 'notification';
+        notification.textContent = message;
+        notification.style.cssText = `
             position: fixed;
             top: 20px;
             right: 20px;
-            background: #ff6b6b;
+            background: #ff6b9d;
             color: white;
-            padding: 1rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 15px 20px;
+            border-radius: 5px;
             z-index: 1000;
+            animation: slideIn 0.3s ease;
         `;
-        errorDiv.textContent = message;
         
-        document.body.appendChild(errorDiv);
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 3000);
+    }
+
+    addDetailPageStyles() {
+        if (document.getElementById('detail-page-styles')) return;
+
+        const styles = document.createElement('style');
+        styles.id = 'detail-page-styles';
+        styles.textContent = `
+            .perfume-detail-content {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 20px;
+                font-family: Arial, sans-serif;
+            }
+            
+            .perfume-header {
+                margin-bottom: 30px;
+            }
+            
+            .back-button {
+                background: #ff6b9d;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 5px;
+                cursor: pointer;
+                margin-bottom: 10px;
+            }
+            
+            .breadcrumb {
+                color: #666;
+                font-size: 14px;
+            }
+            
+            .breadcrumb a {
+                color: #ff6b9d;
+                text-decoration: none;
+            }
+            
+            .perfume-main-content {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 40px;
+                margin-bottom: 40px;
+            }
+            
+            .perfume-image-container {
+                text-align: center;
+            }
+            
+            .perfume-image {
+                max-width: 100%;
+                height: auto;
+                max-height: 400px;
+                border-radius: 10px;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            }
+            
+            .brand-header {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                margin-bottom: 20px;
+            }
+            
+            .brand-logo {
+                height: 50px;
+                width: auto;
+            }
+            
+            .brand-name {
+                font-size: 24px;
+                color: #333;
+                margin: 0;
+            }
+            
+            .perfume-name {
+                font-size: 32px;
+                color: #ff6b9d;
+                margin: 0 0 20px 0;
+            }
+            
+            .perfume-basic-info {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                margin-bottom: 30px;
+            }
+            
+            .info-item {
+                display: flex;
+                justify-content: space-between;
+                padding: 10px;
+                background: #f8f9fa;
+                border-radius: 5px;
+            }
+            
+            .info-label {
+                font-weight: bold;
+                color: #555;
+            }
+            
+            .info-value {
+                color: #333;
+            }
+            
+            .info-value.men {
+                color: #2563eb;
+            }
+            
+            .info-value.women {
+                color: #dc2626;
+            }
+            
+            .info-value.mixte {
+                color: #7c3aed;
+            }
+            
+            .price-section {
+                text-align: center;
+                margin: 30px 0;
+            }
+            
+            .price {
+                font-size: 36px;
+                font-weight: bold;
+                color: #ff6b9d;
+            }
+            
+            .price-note {
+                color: #666;
+                font-size: 14px;
+                margin-top: 5px;
+            }
+            
+            .action-buttons {
+                display: flex;
+                gap: 15px;
+                margin-bottom: 30px;
+            }
+            
+            .whatsapp-btn, .favorite-btn {
+                flex: 1;
+                padding: 15px;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 16px;
+                transition: all 0.3s ease;
+            }
+            
+            .whatsapp-btn {
+                background: #25d366;
+                color: white;
+            }
+            
+            .whatsapp-btn:hover {
+                background: #128c7e;
+            }
+            
+            .favorite-btn {
+                background: #f8f9fa;
+                color: #333;
+                border: 2px solid #ddd;
+            }
+            
+            .favorite-btn:hover {
+                background: #ff6b9d;
+                color: white;
+            }
+            
+            .perfume-description, .fragrance-notes, .brand-story {
+                margin-bottom: 30px;
+            }
+            
+            .perfume-description h3, .fragrance-notes h3, .brand-story h3 {
+                color: #333;
+                border-bottom: 2px solid #ff6b9d;
+                padding-bottom: 10px;
+                margin-bottom: 15px;
+            }
+            
+            .notes-container {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
+            }
+            
+            .note-category {
+                background: #f8f9fa;
+                padding: 20px;
+                border-radius: 8px;
+                text-align: center;
+            }
+            
+            .note-category h4 {
+                color: #ff6b9d;
+                margin-bottom: 10px;
+            }
+            
+            .similar-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 20px;
+                margin-top: 20px;
+            }
+            
+            .similar-perfume-card {
+                background: white;
+                border-radius: 10px;
+                padding: 15px;
+                text-align: center;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                cursor: pointer;
+                transition: transform 0.3s ease;
+            }
+            
+            .similar-perfume-card:hover {
+                transform: translateY(-5px);
+            }
+            
+            .similar-perfume-card img,
+            .similar-perfume-image img {
+                width: 100%;
+                max-width: 120px;
+                height: auto;
+                margin-bottom: 10px;
+                border-radius: 8px;
+                transition: transform 0.2s ease;
+            }
+            
+            .similar-perfume-image {
+                width: 120px;
+                height: 120px;
+                margin: 0 auto 10px auto;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
+                border-radius: 8px;
+                background: #f9f9f9;
+            }
+            
+            .similar-perfume-card h4 {
+                margin: 10px 0 5px 0;
+                color: #333;
+            }
+            
+            .similar-perfume-card p {
+                color: #666;
+                margin: 5px 0;
+                font-size: 14px;
+            }
+            
+            .similar-perfume-card .price {
+                color: #ff6b9d;
+                font-weight: bold;
+                font-size: 16px;
+            }
+            
+            @media (max-width: 768px) {
+                .perfume-main-content {
+                    grid-template-columns: 1fr;
+                    gap: 20px;
+                }
+                
+                .notes-container {
+                    grid-template-columns: 1fr;
+                }
+                
+                .action-buttons {
+                    flex-direction: column;
+                }
+                
+                .perfume-basic-info {
+                    grid-template-columns: 1fr;
+                }
+            }
+        `;
         
-        setTimeout(() => {
-            errorDiv.remove();
-        }, 5000);
+        document.head.appendChild(styles);
+    }
+
+    showError(message) {
+        const container = document.querySelector('.perfume-detail-container') || document.body;
+        container.innerHTML = `
+            <div class="error-container" style="
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 50vh;
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            ">
+                <i class="fas fa-exclamation-triangle" style="font-size: 64px; color: #e74c3c;"></i>
+                <h2 style="color: #333; margin: 0;">${message}</h2>
+                <button onclick="history.back()" style="
+                    background: #ff6b9d;
+                    color: white;
+                    border: none;
+                    padding: 15px 30px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-size: 16px;
+                ">Go Back</button>
+            </div>
+        `;
+    }
+
+    attachEventListeners() {
+        // Add any additional event listeners here
+        const favoriteBtn = document.querySelector('.favorite-btn');
+        if (favoriteBtn) {
+            const favorites = JSON.parse(localStorage.getItem('eden_favorites') || '[]');
+            const isFavorited = favorites.includes(this.perfumeData.id);
+            this.updateFavoriteButton(isFavorited);
+        }
     }
 }
 
 // Initialize the perfume detail page when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
     new PerfumeDetailPage();
 });
+
+// Global functions for onclick handlers
+window.orderViaWhatsApp = function(perfumeName, brandName) {
+    const message = `Hello! I'm interested in ordering ${perfumeName} by ${brandName}. Could you please provide me with more details about availability and pricing?`;
+    const whatsappNumber = '212636262660';
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+};
+
+window.toggleFavorite = function(perfumeId) {
+    const favorites = JSON.parse(localStorage.getItem('eden_favorites') || '[]');
+    const index = favorites.indexOf(perfumeId);
+    
+    if (index > -1) {
+        favorites.splice(index, 1);
+    } else {
+        favorites.push(perfumeId);
+    }
+    
+    localStorage.setItem('eden_favorites', JSON.stringify(favorites));
+    
+    const favoriteBtn = document.querySelector('.favorite-btn i');
+    if (favoriteBtn) {
+        favoriteBtn.className = index === -1 ? 'fas fa-heart' : 'far fa-heart';
+    }
+};
