@@ -225,4 +225,4 @@ const offlinePerfumeData = {
 // Make data available globally
 window.offlinePerfumeData = offlinePerfumeData;
 
-console.log('📦 Offline perfume data loaded:', offlinePerfumeData.perfumes.length, 'perfumes');
+// Production: Remove debug logging

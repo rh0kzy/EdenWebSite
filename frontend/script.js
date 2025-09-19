@@ -281,35 +281,35 @@ window.addEventListener('load', function() {
 // Search Functionality (for future implementation)
 function searchPerfumes(query) {
     // This function can be expanded to implement search functionality
-    console.log('Searching for:', query);
+    // Production: Remove debug logging
     // Future implementation could filter perfumes or redirect to search results
 }
 
 // Newsletter Subscription (for future implementation)
 function subscribeNewsletter(email) {
     // This function can be expanded to handle newsletter subscriptions
-    console.log('Newsletter subscription for:', email);
+    // Production: Remove debug logging
     showNotification('Thank you for subscribing to our newsletter!', 'success');
 }
 
 // Product Filter (for future implementation)
 function filterProducts(category) {
     // This function can be expanded to filter products by category
-    console.log('Filtering products by:', category);
+    // Production: Remove debug logging
     // Future implementation could show/hide products based on category
 }
 
 // Wishlist Functionality (for future implementation)
 function addToWishlist(productId) {
     // This function can be expanded to handle wishlist functionality
-    console.log('Added to wishlist:', productId);
+    // Production: Remove debug logging
     showNotification('Added to wishlist!', 'success');
 }
 
 // Language Toggle (for future implementation)
 function toggleLanguage(lang) {
     // This function can be expanded to handle multiple languages
-    console.log('Switching to language:', lang);
+    // Production: Remove debug logging
     // Future implementation could switch between Arabic and French
 }
 
@@ -326,7 +326,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Listen for perfumes loaded event
 window.addEventListener('perfumesLoaded', function(event) {
-    console.log('Perfumes loaded event received:', event.detail);
+    // Production: Remove debug logging
     setupCatalogWithData();
 });
 
@@ -340,7 +340,7 @@ async function initializeCatalog() {
             setupCatalogWithData();
         } else {
             // Load data from API
-            console.log('🔄 Loading perfume data from API...');
+            // Production: Remove debug logging
             await loadPerfumeData();
         }
     } catch (error) {
@@ -358,22 +358,18 @@ async function loadPerfumeData() {
         }
 
         // Fetch perfumes data
-        console.log('📡 Requesting perfumes from API...');
+        // Production: Remove debug logging
         const response = await window.edenAPI.getPerfumes({ limit: 1000 }); // Get all perfumes
         
-        console.log('📦 API Response:', response);
-        console.log('📦 Response success:', response.success);
-        console.log('📦 Response data length:', response.data ? response.data.length : 'undefined');
-        console.log('📦 Response total:', response.total);
+        // Production: Remove debug logging
         
         if (response.success && response.data) {
             // Store in global variable for compatibility with existing code
             window.perfumesDatabase = response.data;
             
-            console.log(`✅ Loaded ${response.data.length} perfumes${response.offline ? ' (offline mode)' : ' (online mode)'}`);
-            
+            // Production: Only log important info for production monitoring
             if (response.offline) {
-                console.warn('⚠️ Running in offline mode - only showing sample data');
+                console.warn('Running in offline mode - showing sample data');
                 showErrorMessage(`Running in offline mode - showing ${response.data.length} sample perfumes. Check API connection for full catalog.`, 'warning');
             }
             
@@ -397,7 +393,7 @@ async function loadPerfumeData() {
         
         // Try fallback to offline data if available
         if (window.offlinePerfumeData) {
-            console.log('🔄 Using offline fallback data...');
+            // Production: Remove debug logging
             window.perfumesDatabase = window.offlinePerfumeData.perfumes;
             
             window.dispatchEvent(new CustomEvent('perfumesLoaded', {
@@ -426,7 +422,7 @@ function setupCatalogWithData() {
         return;
     }
     
-    console.log(`Setting up catalog with ${window.perfumesDatabase.length} perfumes`);
+    // Production: Remove debug logging
     
     // Initialize filters
     populateFilters();
@@ -1655,7 +1651,7 @@ function initializeSocialPopup() {
 
     function trackSocialClick(platform) {
         // Optional: Add analytics tracking here
-        console.log(`User clicked ${platform} button`);
+        // Production: Remove debug logging
         
         // You can integrate with Google Analytics or other tracking services
         if (typeof gtag !== 'undefined') {
@@ -1927,7 +1923,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Performance optimization for fast image loading
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 EDEN PARFUM - Fast Image Loading Activated!');
+    // Production: Remove debug logging
     
     // Preload critical brand logos for instant display
     if (window.fastImageLoader) {
@@ -1963,11 +1959,8 @@ function monitorCatalogPerformance() {
                 if (node.nodeType === 1 && node.classList && node.classList.contains('perfume-item')) {
                     perfumeCardsLoaded++;
                     
-                    // Log performance after loading multiple items
-                    if (perfumeCardsLoaded % 20 === 0) {
-                        const elapsed = Date.now() - startTime;
-                        console.log(`📦 ${perfumeCardsLoaded} perfume cards loaded in ${elapsed}ms (${Math.round(elapsed/perfumeCardsLoaded)}ms per card)`);
-                    }
+                    // Production: Remove debug logging for performance
+                    // Simplified performance monitoring for production
                 }
             });
         });

@@ -283,4 +283,4 @@ window.createOptimizedImage = function(imageName, alt, className = '', size = 'm
     return window.fastImageLoader.createLazyImage(imageName, alt, className, size);
 };
 
-console.log('🚀 Fast Image Loader initialized - Images will now load much faster!');
+// Production: Remove debug logging

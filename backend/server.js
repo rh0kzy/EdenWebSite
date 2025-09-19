@@ -105,6 +105,7 @@ app.use('/api/*', (req, res) => {
 function startServer() {
     // Start the server
     app.listen(PORT, () => {
+        // Keep essential production logs for monitoring
         console.log(`🌸 Eden Parfum Backend Server running on port ${PORT}`);
         console.log(`🚀 API Base URL: http://localhost:${PORT}/api`);
         console.log(`📱 Frontend URL: http://localhost:${PORT}`);

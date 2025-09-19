@@ -64,7 +64,7 @@ class EdenParfumAPI {
         });
 
         try {
-            console.log(`🌐 Fetching: ${url.toString()}`);
+            // Production: Remove debug logging
             const response = await fetch(url);
             
             if (!response.ok) {
@@ -72,7 +72,7 @@ class EdenParfumAPI {
             }
             
             const data = await response.json();
-            console.log(`✅ API Success: Got ${data.data ? data.data.length : 'unknown'} items from ${endpoint}`);
+            // Production: Remove debug logging
             
             // Transform API response to expected format
             const transformedData = {
@@ -87,8 +87,9 @@ class EdenParfumAPI {
             this.setCache(cacheKey, transformedData);
             return transformedData;
         } catch (error) {
-            console.warn(`❌ API Error (${endpoint}):`, error.message);
-            console.log(`🔄 Falling back to offline data for ${endpoint}...`);
+            // Production: Still show errors but cleaner format
+            console.warn(`API Error (${endpoint}):`, error.message);
+            // Production: Remove debug logging
             
             // Try to use offline data as fallback
             return this.getOfflineData(endpoint, params);
@@ -276,12 +277,12 @@ window.edenAPI = new EdenParfumAPI();
 window.perfumesDatabase = null;
 window.loadPerfumesDatabase = async function() {
     try {
-        console.log('Loading perfumes from new API...');
+        // Production: Remove debug logging
         const response = await window.edenAPI.getPerfumes({ limit: 1000 });
         
         if (response.success && response.data) {
             window.perfumesDatabase = window.edenAPI.convertToLegacyFormat(response.data);
-            console.log(`Loaded ${window.perfumesDatabase.length} perfumes from API`);
+            // Production: Remove debug logging
             
             // Trigger a custom event to notify that data is loaded
             window.dispatchEvent(new CustomEvent('perfumesLoaded', {
@@ -311,4 +312,4 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-console.log('Eden Parfum API client loaded successfully');
+// Production: Remove debug logging
