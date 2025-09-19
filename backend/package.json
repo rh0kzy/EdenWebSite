@@ -8,7 +8,12 @@
     "dev": "nodemon server.js",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "cache-bust": "node cache-busting-build.js build",
+    "cache-bust:watch": "node cache-busting-build.js watch",
+    "cache-bust:manifest": "node cache-busting-build.js manifest",
+    "build": "npm run cache-bust",
+    "build:watch": "npm run cache-bust:watch"
   },
   "keywords": [
     "perfume",
@@ -25,7 +30,10 @@
     "express": "^4.18.2",
     "express-rate-limit": "^6.10.0",
     "helmet": "^7.0.0",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "nodemailer": "^7.0.6",
+    "winston": "^3.17.0",
+    "winston-daily-rotate-file": "^5.0.0"
   },
   "devDependencies": {
     "jest": "^30.1.3",

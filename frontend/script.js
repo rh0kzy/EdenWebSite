@@ -1,5 +1,11 @@
 // Mobile Navigation Toggle
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize error monitoring if available
+    if (window.ErrorMonitor) {
+        console.log('Error monitoring system active');
+    } else {
+        console.warn('Error monitoring system not loaded');
+    }
     // Social Media Popup Functionality
     initializeSocialPopup();
 

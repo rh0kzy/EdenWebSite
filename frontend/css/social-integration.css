@@ -1,0 +1,1030 @@
+/* ====================================================================
+   EDEN PARFUM - ADVANCED SOCIAL MEDIA INTEGRATION STYLES
+   Modern, engaging social media components with premium animations
+   ==================================================================== */
+
+/* Base Variables */
+:root {
+    --eden-primary: #a58b4c;
+    --eden-secondary: #8b7355;
+    --eden-gradient: linear-gradient(135deg, #a58b4c 0%, #8b7355 100%);
+    --eden-shadow: 0 8px 32px rgba(165, 139, 76, 0.2);
+    --eden-shadow-hover: 0 12px 48px rgba(165, 139, 76, 0.3);
+    --social-facebook: #1877f2;
+    --social-instagram: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    --social-tiktok: #25f4ee;
+    --social-twitter: #1da1f2;
+    --social-whatsapp: #25d366;
+    --social-youtube: #ff0000;
+    --social-linkedin: #0077b5;
+}
+
+/* Floating Social Media Bar */
+.eden-floating-social {
+    position: fixed;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1000;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.floating-social-toggle {
+    background: var(--eden-gradient);
+    color: white;
+    padding: 16px 12px;
+    border-radius: 25px 0 0 25px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    box-shadow: var(--eden-shadow);
+    transition: all 0.3s ease;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    min-height: 120px;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.floating-social-toggle::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.6s ease;
+}
+
+.floating-social-toggle:hover::before {
+    left: 100%;
+}
+
+.floating-social-toggle:hover {
+    background: linear-gradient(135deg, #8b7355, #a58b4c);
+    transform: translateX(-8px);
+    box-shadow: var(--eden-shadow-hover);
+}
+
+.floating-social-toggle i {
+    font-size: 1.3em;
+    animation: pulse 2s infinite;
+}
+
+.floating-social-toggle span {
+    font-size: 0.9em;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+.floating-social-menu {
+    position: absolute;
+    right: 100%;
+    top: 0;
+    background: white;
+    border-radius: 20px;
+    padding: 0;
+    min-width: 280px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(30px) scale(0.9);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(165, 139, 76, 0.2);
+    overflow: hidden;
+}
+
+.eden-floating-social.expanded .floating-social-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0) scale(1);
+}
+
+.social-menu-header {
+    background: var(--eden-gradient);
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+.social-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-bottom: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.social-menu-header h4 {
+    margin: 0 0 8px 0;
+    font-size: 1.1em;
+    font-weight: 600;
+}
+
+.social-menu-header p {
+    margin: 0;
+    font-size: 0.85em;
+    opacity: 0.9;
+}
+
+.social-links-grid {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.social-link {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    text-decoration: none;
+    color: #333;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid transparent;
+}
+
+.social-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    transition: left 0.3s ease;
+    z-index: -1;
+}
+
+.social-link.facebook::before { background: var(--social-facebook); }
+.social-link.instagram::before { background: var(--social-instagram); }
+.social-link.tiktok::before { background: var(--social-tiktok); }
+.social-link.twitter::before { background: var(--social-twitter); }
+.social-link.whatsapp::before { background: var(--social-whatsapp); }
+.social-link.youtube::before { background: var(--social-youtube); }
+
+.social-link:hover::before {
+    left: 0;
+}
+
+.social-link:hover {
+    color: white;
+    transform: translateX(8px);
+    border-color: rgba(165, 139, 76, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.social-link i {
+    font-size: 1.4em;
+    margin-right: 16px;
+    width: 24px;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.social-link:hover i {
+    transform: scale(1.1);
+}
+
+.social-info {
+    flex: 1;
+}
+
+.social-name {
+    display: block;
+    font-weight: 600;
+    font-size: 0.95em;
+    margin-bottom: 2px;
+}
+
+.follower-count {
+    font-size: 0.8em;
+    opacity: 0.7;
+    font-weight: 500;
+}
+
+.social-menu-footer {
+    padding: 16px 20px 20px;
+    border-top: 1px solid rgba(165, 139, 76, 0.1);
+}
+
+.share-page-btn {
+    width: 100%;
+    background: var(--eden-gradient);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.share-page-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(165, 139, 76, 0.4);
+}
+
+/* Social Share Buttons */
+.eden-social-share {
+    background: linear-gradient(135deg, rgba(165, 139, 76, 0.05) 0%, rgba(139, 115, 85, 0.05) 100%);
+    border-radius: 20px;
+    padding: 30px;
+    margin: 30px 0;
+    border: 1px solid rgba(165, 139, 76, 0.15);
+    backdrop-filter: blur(10px);
+}
+
+.social-share-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.share-icon {
+    background: var(--eden-gradient);
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 20px;
+    font-size: 1.2em;
+}
+
+.share-content h3 {
+    margin: 0 0 5px 0;
+    color: var(--eden-primary);
+    font-size: 1.4em;
+    font-weight: 700;
+}
+
+.share-content p {
+    margin: 0;
+    color: #666;
+    font-size: 0.95em;
+}
+
+.social-share-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
+}
+
+.share-btn {
+    display: flex;
+    align-items: center;
+    padding: 16px 20px;
+    border: none;
+    border-radius: 15px;
+    background: white;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9em;
+    font-weight: 500;
+    position: relative;
+    overflow: hidden;
+    border: 2px solid transparent;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.share-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    transition: left 0.3s ease;
+    z-index: 0;
+}
+
+.share-btn.facebook::before { background: var(--social-facebook); }
+.share-btn.instagram::before { background: var(--social-instagram); }
+.share-btn.tiktok::before { background: var(--social-tiktok); }
+.share-btn.twitter::before { background: var(--social-twitter); }
+.share-btn.whatsapp::before { background: var(--social-whatsapp); }
+.share-btn.copy::before { background: #6c757d; }
+
+.share-btn:hover::before {
+    left: 0;
+}
+
+.share-btn:hover {
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.share-btn.tiktok:hover {
+    color: #000;
+}
+
+.btn-icon {
+    background: rgba(165, 139, 76, 0.1);
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 16px;
+    font-size: 1.3em;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.share-btn:hover .btn-icon {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+.btn-content {
+    flex: 1;
+    text-align: left;
+    position: relative;
+    z-index: 1;
+}
+
+.btn-name {
+    display: block;
+    font-weight: 600;
+    font-size: 1em;
+    margin-bottom: 3px;
+}
+
+.btn-desc {
+    display: block;
+    font-size: 0.8em;
+    opacity: 0.7;
+}
+
+.share-count {
+    background: rgba(165, 139, 76, 0.1);
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-size: 0.8em;
+    font-weight: 600;
+    min-width: 35px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    display: none;
+}
+
+.share-btn:hover .share-count {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Social Guide Modals */
+.social-guide-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    backdrop-filter: blur(8px);
+    animation: modalFadeIn 0.3s ease;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 25px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 85vh;
+    overflow: hidden;
+    position: relative;
+    animation: modalSlideIn 0.4s ease;
+}
+
+.modal-header {
+    background: var(--eden-gradient);
+    color: white;
+    padding: 25px 30px;
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.modal-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 20px;
+    font-size: 1.4em;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.modal-icon.instagram {
+    background: var(--social-instagram);
+}
+
+.modal-icon.tiktok {
+    background: var(--social-tiktok);
+    color: #000;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 1.4em;
+    font-weight: 700;
+    flex: 1;
+}
+
+.close-modal {
+    position: absolute;
+    top: 20px;
+    right: 25px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    font-size: 1.5em;
+    cursor: pointer;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.close-modal:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+.modal-body {
+    padding: 30px;
+    overflow-y: auto;
+    max-height: calc(85vh - 100px);
+}
+
+/* Instagram Modal Specific */
+.guide-steps {
+    margin-bottom: 30px;
+}
+
+.step {
+    display: none;
+    padding: 25px;
+    background: #f8f9fa;
+    border-radius: 20px;
+    border-left: 5px solid var(--eden-primary);
+    margin-bottom: 20px;
+}
+
+.step.active {
+    display: block;
+    animation: stepFadeIn 0.4s ease;
+}
+
+.step-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.step-number {
+    background: var(--eden-primary);
+    color: white;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: 15px;
+    font-size: 1.1em;
+}
+
+.step h4 {
+    margin: 0;
+    color: var(--eden-primary);
+    font-size: 1.2em;
+    font-weight: 600;
+}
+
+.image-preview {
+    position: relative;
+    border-radius: 15px;
+    overflow: hidden;
+    margin: 15px 0;
+    background: #f0f0f0;
+}
+
+.share-preview {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    display: block;
+}
+
+.image-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.image-preview:hover .image-overlay {
+    opacity: 1;
+}
+
+.caption-box {
+    position: relative;
+    margin: 15px 0;
+}
+
+.caption-text {
+    width: 100%;
+    min-height: 150px;
+    padding: 20px;
+    border: 2px solid #e9ecef;
+    border-radius: 15px;
+    font-size: 0.9em;
+    line-height: 1.6;
+    resize: vertical;
+    font-family: inherit;
+    background: white;
+    transition: border-color 0.3s ease;
+}
+
+.caption-text:focus {
+    outline: none;
+    border-color: var(--eden-primary);
+}
+
+.download-btn, .copy-caption-btn, .action-btn {
+    background: var(--eden-gradient);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    margin: 8px 8px 8px 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    font-size: 0.9em;
+}
+
+.download-btn:hover, .copy-caption-btn:hover, .action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(165, 139, 76, 0.4);
+}
+
+.action-btn.secondary {
+    background: #6c757d;
+}
+
+.action-btn.instagram {
+    background: var(--social-instagram);
+}
+
+.action-btn.tiktok {
+    background: var(--social-tiktok);
+    color: #000;
+}
+
+/* TikTok Modal Specific */
+.tiktok-ideas {
+    margin-bottom: 30px;
+}
+
+.tiktok-ideas h4 {
+    color: var(--eden-primary);
+    margin-bottom: 20px;
+    font-size: 1.2em;
+}
+
+.ideas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 25px;
+}
+
+.idea-card {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    text-align: center;
+    border: 2px solid #f0f0f0;
+    transition: all 0.3s ease;
+}
+
+.idea-card:hover {
+    border-color: var(--eden-primary);
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(165, 139, 76, 0.2);
+}
+
+.idea-icon {
+    font-size: 2em;
+    margin-bottom: 12px;
+}
+
+.idea-card h5 {
+    margin: 0 0 8px 0;
+    color: var(--eden-primary);
+    font-weight: 600;
+}
+
+.idea-card p {
+    margin: 0;
+    font-size: 0.85em;
+    color: #666;
+    line-height: 1.4;
+}
+
+.caption-suggestion, .tiktok-tips {
+    background: #f8f9fa;
+    padding: 25px;
+    border-radius: 15px;
+    margin-bottom: 25px;
+    border-left: 5px solid var(--eden-primary);
+}
+
+.caption-suggestion h4, .tiktok-tips h4 {
+    margin: 0 0 15px 0;
+    color: var(--eden-primary);
+    font-size: 1.1em;
+}
+
+.tiktok-tips ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.tiktok-tips li {
+    margin-bottom: 8px;
+    color: #555;
+    line-height: 1.5;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* Step Navigation */
+.step-navigation {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 0;
+    border-top: 1px solid #e9ecef;
+    margin-top: 30px;
+}
+
+.nav-btn {
+    background: var(--eden-gradient);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.nav-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(165, 139, 76, 0.4);
+}
+
+.nav-btn:first-child {
+    display: none;
+}
+
+.step-dots {
+    display: flex;
+    gap: 8px;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #ddd;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.dot.active {
+    background: var(--eden-primary);
+    transform: scale(1.2);
+}
+
+/* Notifications */
+.eden-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    color: #333;
+    padding: 16px 20px;
+    border-radius: 15px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 10001;
+    transform: translateX(400px);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-left: 5px solid var(--eden-primary);
+    min-width: 300px;
+    max-width: 400px;
+}
+
+.eden-notification.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.eden-notification.success {
+    border-left-color: #28a745;
+}
+
+.notification-icon {
+    background: rgba(165, 139, 76, 0.1);
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--eden-primary);
+    font-size: 1.1em;
+}
+
+.eden-notification.success .notification-icon {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+}
+
+.notification-text {
+    flex: 1;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.notification-close {
+    background: none;
+    border: none;
+    color: #999;
+    cursor: pointer;
+    font-size: 1.1em;
+    padding: 4px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.notification-close:hover {
+    background: rgba(0, 0, 0, 0.1);
+    color: #666;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .eden-floating-social {
+        right: 15px;
+    }
+    
+    .floating-social-menu {
+        min-width: 260px;
+    }
+    
+    .social-share-buttons {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .eden-floating-social {
+        right: 10px;
+    }
+    
+    .floating-social-toggle {
+        padding: 14px 10px;
+        min-height: 100px;
+    }
+    
+    .floating-social-menu {
+        min-width: 240px;
+        padding: 0;
+    }
+    
+    .social-menu-header {
+        padding: 16px;
+    }
+    
+    .social-links-grid {
+        padding: 16px;
+    }
+    
+    .social-share-buttons {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .share-btn {
+        padding: 14px 16px;
+    }
+    
+    .modal-content {
+        margin: 20px;
+        max-height: 90vh;
+    }
+    
+    .modal-body {
+        padding: 20px;
+    }
+    
+    .ideas-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .action-btn {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .floating-social-toggle span {
+        display: none;
+    }
+    
+    .floating-social-menu {
+        min-width: 220px;
+    }
+    
+    .share-btn .btn-desc {
+        display: none;
+    }
+    
+    .social-share-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+    
+    .share-icon {
+        margin: 0;
+    }
+    
+    .eden-notification {
+        min-width: 280px;
+        margin: 0 10px;
+    }
+    
+    .step-navigation {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .nav-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Animation Keyframes */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes stepFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Instagram gradient animation */
+@keyframes instagram-gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.social-link.instagram:hover::before {
+    background: linear-gradient(-45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+    background-size: 400% 400%;
+    animation: instagram-gradient 3s ease infinite;
+}
+
+/* Hover effects for share buttons */
+.share-btn.facebook:hover .btn-icon { color: var(--social-facebook); }
+.share-btn.instagram:hover .btn-icon { 
+    background: var(--social-instagram);
+    color: white;
+}
+.share-btn.tiktok:hover .btn-icon { color: var(--social-tiktok); }
+.share-btn.twitter:hover .btn-icon { color: var(--social-twitter); }
+.share-btn.whatsapp:hover .btn-icon { color: var(--social-whatsapp); }
+.share-btn.copy:hover .btn-icon { color: #6c757d; }
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Focus styles for accessibility */
+.share-btn:focus,
+.social-link:focus,
+.nav-btn:focus,
+.action-btn:focus {
+    outline: 2px solid var(--eden-primary);
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .share-btn {
+        border: 2px solid #000;
+    }
+    
+    .social-link {
+        border: 1px solid #000;
+    }
+    
+    .modal-content {
+        border: 2px solid #000;
+    }
+}

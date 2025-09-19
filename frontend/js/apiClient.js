@@ -63,16 +63,46 @@ class EdenParfumAPI {
             }
         });
 
+        const startTime = performance.now();
+
         try {
-            // Production: Remove debug logging
             const response = await fetch(url);
+            const endTime = performance.now();
+            const duration = endTime - startTime;
             
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
+                const error = new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
+                
+                // Log API error to monitoring system
+                if (window.ErrorMonitor) {
+                    window.ErrorMonitor.logError({
+                        type: 'api_error',
+                        message: `API request failed: ${response.status} ${response.statusText}`,
+                        endpoint: endpoint,
+                        url: url.toString(),
+                        status: response.status,
+                        statusText: response.statusText,
+                        duration: duration,
+                        params: params,
+                        timestamp: new Date().toISOString()
+                    });
+                }
+
+                throw error;
             }
             
             const data = await response.json();
-            // Production: Remove debug logging
+            
+            // Log slow API calls
+            if (duration > 2000 && window.ErrorMonitor) {
+                window.ErrorMonitor.logError({
+                    type: 'slow_api_call',
+                    message: `Slow API response: ${duration.toFixed(2)}ms`,
+                    endpoint: endpoint,
+                    duration: duration,
+                    timestamp: new Date().toISOString()
+                });
+            }
             
             // Transform API response to expected format
             const transformedData = {
@@ -87,9 +117,29 @@ class EdenParfumAPI {
             this.setCache(cacheKey, transformedData);
             return transformedData;
         } catch (error) {
-            // Production: Still show errors but cleaner format
-            console.warn(`API Error (${endpoint}):`, error.message);
-            // Production: Remove debug logging
+            const endTime = performance.now();
+            const duration = endTime - startTime;
+
+            // Log network error to monitoring system
+            if (window.ErrorMonitor) {
+                window.ErrorMonitor.logError({
+                    type: 'network_error',
+                    message: `Network request failed: ${error.message}`,
+                    endpoint: endpoint,
+                    url: url.toString(),
+                    error: error.toString(),
+                    duration: duration,
+                    params: params,
+                    timestamp: new Date().toISOString()
+                });
+            }
+
+            // Show user-friendly error message
+            if (window.UserErrorHandler) {
+                window.UserErrorHandler.handleApiError(error, `Loading ${endpoint}`);
+            } else {
+                console.warn(`API Error (${endpoint}):`, error.message);
+            }
             
             // Try to use offline data as fallback
             return this.getOfflineData(endpoint, params);

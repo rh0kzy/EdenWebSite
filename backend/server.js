@@ -6,16 +6,76 @@ const rateLimit = require('express-rate-limit');
 const path = require('path');
 require('dotenv').config();
 
+// Environment Validation - MUST be done before other imports
+const EnvironmentValidator = require('./config/environmentValidator');
+const envValidator = new EnvironmentValidator();
+
+// Validate environment variables before starting server
+console.log('🔧 Validating environment configuration...\n');
+const validationResults = envValidator.validate();
+
+if (!validationResults.valid) {
+    console.error('\n❌ Environment validation failed! Server cannot start with invalid configuration.');
+    console.error('📝 Please check your .env file and fix the issues above.\n');
+    
+    // In production, we should exit immediately
+    if (process.env.NODE_ENV === 'production') {
+        console.error('🚨 Production environment detected - exiting immediately for security.');
+        process.exit(1);
+    } else {
+        console.warn('⚠️  Development environment detected - continuing with warnings.');
+        console.warn('   Please fix these issues before deploying to production.\n');
+    }
+} else {
+    console.log('✅ Environment validation passed - starting server...\n');
+}
+
+// Import logger and error handling middleware
+const logger = require('./config/logger');
+const { 
+    errorHandler, 
+    notFoundHandler, 
+    asyncHandler, 
+    requestLogger, 
+    healthCheck, 
+    performanceMonitor 
+} = require('./middleware/errorHandler');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Log application startup with environment summary
+const envSummary = envValidator.getEnvironmentSummary();
+logger.info('Eden Parfum Backend Starting', {
+    port: PORT,
+    environment: process.env.NODE_ENV || 'development',
+    nodeVersion: process.version,
+    timestamp: new Date().toISOString(),
+    environmentValidation: {
+        passed: validationResults.valid,
+        databaseConfigured: envSummary.databaseConfigured,
+        loggingConfigured: envSummary.loggingConfigured,
+        monitoringConfigured: envSummary.monitoringConfigured,
+        notificationsConfigured: envSummary.notificationsConfigured
+    }
+});
 
 // Import Supabase routes
 const supabasePerfumeRoutes = require('./routes/supabasePerfumes');
 const supabaseBrandRoutes = require('./routes/supabaseBrands');
 const photoRoutes = require('./routes/photos');
+const healthRoutes = require('./routes/health');
+const monitoringRoutes = require('./routes/monitoring');
+const socialRoutes = require('./routes/social');
 
 // Middleware
 app.use(helmet());
+
+// Performance monitoring
+app.use(performanceMonitor);
+
+// Request logging
+app.use(requestLogger);
 
 // CORS configuration for production
 const corsOptions = {
@@ -38,7 +98,11 @@ const corsOptions = {
         if (allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
-            console.warn(`CORS blocked origin: ${origin}`);
+            logger.logSecurityEvent('CORS Violation', {
+                origin,
+                ip: 'unknown',
+                timestamp: new Date().toISOString()
+            });
             callback(new Error('Not allowed by CORS'));
         }
     },
@@ -52,64 +116,177 @@ app.use(morgan('combined'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Rate limiting
+// Rate limiting with enhanced error logging
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 100, // limit each IP to 100 requests per windowMs
-    message: 'Too many requests from this IP, please try again later.'
+    message: 'Too many requests from this IP, please try again later.',
+    handler: (req, res) => {
+        logger.logSecurityEvent('Rate Limit Exceeded', {
+            ip: req.ip,
+            userAgent: req.get('User-Agent'),
+            url: req.url,
+            timestamp: new Date().toISOString()
+        });
+        res.status(429).json({
+            success: false,
+            error: {
+                message: 'Too many requests from this IP, please try again later.',
+                statusCode: 429
+            },
+            timestamp: new Date().toISOString()
+        });
+    }
 });
 app.use('/api/', limiter);
 
-// Static files - serve frontend assets
-app.use('/photos', express.static(path.join(__dirname, '../frontend/photos')));
-app.use(express.static(path.join(__dirname, '../frontend')));
+// Cache Busting Middleware
+const CacheBustingMiddleware = require('./middleware/cacheBusting');
+const cacheBustingMiddleware = new CacheBustingMiddleware({
+    mode: 'timestamp', // Use timestamp for development, 'hash' for production
+    baseDir: path.join(__dirname, '../frontend')
+});
+
+// Add cache busting helpers to all responses
+app.use(cacheBustingMiddleware.middleware());
+
+// Enhanced static file serving with cache busting
+app.use('/photos', cacheBustingMiddleware.staticFileMiddleware(
+    path.join(__dirname, '../frontend/photos'),
+    { maxAge: '1y' } // Long cache for photos since they rarely change
+));
+
+app.use(cacheBustingMiddleware.staticFileMiddleware(
+    path.join(__dirname, '../frontend'),
+    { maxAge: '5m' } // Default cache for other static files
+));
+
+// HTML cache busting injection (for dynamically served HTML)
+app.use(cacheBustingMiddleware.htmlCacheBustingMiddleware());
 
 // API Routes
+// Health monitoring routes (before rate limiting for external monitoring)
+app.use('/api/health', healthRoutes);
+app.use('/api/monitoring', monitoringRoutes);
+
+// Cache busting API endpoints
+app.get('/api/cache-manifest', cacheBustingMiddleware.getManifestEndpoint());
+app.get('/api/versioned-url', cacheBustingMiddleware.getVersionedUrlEndpoint());
+app.post('/api/clear-cache', cacheBustingMiddleware.getClearCacheEndpoint());
+
+// Apply rate limiting to other API routes
+app.use('/api/', limiter);
+
 // Supabase API v2 (current)
 app.use('/api/v2/perfumes', supabasePerfumeRoutes);
 app.use('/api/v2/brands', supabaseBrandRoutes);
 app.use('/api/v2/photos', photoRoutes);
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-    res.status(200).json({
-        status: 'OK',
-        message: 'Eden Parfum API is running',
-        timestamp: new Date().toISOString(),
-        version: '1.0.0'
-    });
-});
+// Social Media Integration API
+app.use('/api/social', socialRoutes);
 
 // Serve frontend for any non-API routes
 app.get('*', (req, res) => {
     if (req.path.startsWith('/api/')) {
-        return res.status(404).json({ error: 'API endpoint not found' });
+        logger.warn('API Route Not Found', {
+            path: req.path,
+            method: req.method,
+            ip: req.ip,
+            timestamp: new Date().toISOString()
+        });
+        return res.status(404).json({ 
+            success: false,
+            error: {
+                message: 'API endpoint not found',
+                statusCode: 404
+            },
+            timestamp: new Date().toISOString()
+        });
     }
+    
+    logger.debug('Serving Frontend', {
+        path: req.path,
+        ip: req.ip,
+        timestamp: new Date().toISOString()
+    });
+    
     res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({
-        error: 'Something went wrong!',
-        message: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error'
-    });
-});
+// 404 handler for undefined routes
+app.use(notFoundHandler);
 
-app.use('/api/*', (req, res) => {
-    res.status(404).json({ error: 'API endpoint not found' });
-});
+// Global error handler (must be last)
+app.use(errorHandler);
 
-// Initialize and start server
+// Initialize and start server with comprehensive error handling
 function startServer() {
-    // Start the server
-    app.listen(PORT, () => {
-        // Keep essential production logs for monitoring
-        console.log(`🌸 Eden Parfum Backend Server running on port ${PORT}`);
-        console.log(`🚀 API Base URL: http://localhost:${PORT}/api`);
-        console.log(`📱 Frontend URL: http://localhost:${PORT}`);
-    });
+    try {
+        // Start the server
+        const server = app.listen(PORT, () => {
+            // Log successful startup
+            logger.info('Server Started Successfully', {
+                port: PORT,
+                environment: process.env.NODE_ENV || 'development',
+                pid: process.pid,
+                timestamp: new Date().toISOString()
+            });
+            
+            // Keep essential production logs for monitoring
+            console.log(`🌸 Eden Parfum Backend Server running on port ${PORT}`);
+            console.log(`🚀 API Base URL: http://localhost:${PORT}/api`);
+            console.log(`📱 Frontend URL: http://localhost:${PORT}`);
+            console.log(`📊 Health Check: http://localhost:${PORT}/api/health`);
+            console.log(`📈 System Status: http://localhost:${PORT}/api/status`);
+        });
+
+        // Handle server errors
+        server.on('error', (error) => {
+            logger.error('Server Error', {
+                error: error.message,
+                stack: error.stack,
+                port: PORT,
+                timestamp: new Date().toISOString()
+            });
+            
+            if (error.code === 'EADDRINUSE') {
+                logger.error(`Port ${PORT} is already in use`);
+                process.exit(1);
+            }
+        });
+
+        // Graceful shutdown handling
+        const gracefulShutdown = (signal) => {
+            logger.info('Graceful Shutdown Initiated', {
+                signal,
+                uptime: process.uptime(),
+                timestamp: new Date().toISOString()
+            });
+            
+            server.close(() => {
+                logger.info('Server Closed Successfully');
+                process.exit(0);
+            });
+
+            // Force close after 10 seconds
+            setTimeout(() => {
+                logger.error('Forced Shutdown - Server did not close gracefully');
+                process.exit(1);
+            }, 10000);
+        };
+
+        process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+        process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+        
+        return server;
+    } catch (error) {
+        logger.error('Server Startup Failed', {
+            error: error.message,
+            stack: error.stack,
+            timestamp: new Date().toISOString()
+        });
+        process.exit(1);
+    }
 }
 
 // Start the server

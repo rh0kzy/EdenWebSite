@@ -12,6 +12,9 @@ A Node.js/Express REST API for the Eden Parfum perfume catalog website.
 - **Rate Limiting**: Protection against abuse
 - **CORS Support**: Cross-origin requests enabled
 - **Error Handling**: Comprehensive error handling and validation
+- **Environment Validation**: Automated validation of required environment variables
+- **Cache Busting**: Automated asset versioning for optimal browser caching
+- **Monitoring**: Health checks and performance monitoring
 
 ## API Endpoints
 
@@ -35,6 +38,12 @@ A Node.js/Express REST API for the Eden Parfum perfume catalog website.
 
 ### Health Check
 - `GET /api/health` - API health status
+
+### Monitoring
+- `GET /api/monitoring/health` - Comprehensive system health check
+- `GET /api/monitoring/environment` - Environment validation status
+- `GET /api/monitoring/environment/details` - Detailed environment validation
+- `GET /api/monitoring/environment/example` - Download .env.example template
 
 ## Query Parameters
 
@@ -72,7 +81,25 @@ A Node.js/Express REST API for the Eden Parfum perfume catalog website.
    # Edit .env with your configurations
    ```
 
-4. **Start the server**
+   **Required Environment Variables:**
+   - `NODE_ENV` - Environment mode (development, production, staging, test)
+   - `SUPABASE_URL` - Your Supabase project URL
+   - `SUPABASE_ANON_KEY` - Your Supabase anonymous key
+
+   **Optional Configuration:**
+   - `PORT` - Server port (default: 3000)
+   - `LOG_LEVEL` - Logging level (error, warn, info, debug)
+   - `ENABLE_MONITORING` - Enable performance monitoring
+   - See `.env.example` for complete configuration options
+
+4. **Validate environment setup**
+   ```bash
+   # The server will automatically validate environment variables on startup
+   # Check the console output for any configuration issues
+   npm run dev
+   ```
+
+5. **Start the server**
    ```bash
    # Development
    npm run dev
@@ -81,14 +108,85 @@ A Node.js/Express REST API for the Eden Parfum perfume catalog website.
    npm start
    ```
 
+## Environment Configuration
+
+The backend includes comprehensive environment validation to ensure all required configuration is present and valid before starting the server.
+
+### Environment Validation Features
+
+- **Startup Validation**: Automatic validation when the server starts
+- **Type Checking**: Validates data types for numeric and boolean values
+- **Dependency Validation**: Ensures related configurations are consistent
+- **Security Scoring**: Calculates configuration security score
+- **Missing Variable Detection**: Identifies required but missing variables
+- **API Endpoints**: Runtime access to validation status via monitoring endpoints
+
+### Environment Categories
+
+1. **Server Configuration**: Basic server settings (PORT, NODE_ENV)
+2. **Database**: Supabase connection settings
+3. **Logging**: Log levels, file paths, and rotation settings
+4. **Monitoring**: Performance metrics and health check settings
+5. **Notifications**: Error notification settings (email, webhooks)
+6. **Security**: Authentication, CORS, and rate limiting settings
+
+### Validation API Endpoints
+
+- `GET /api/monitoring/environment` - Environment validation summary with security score
+- `GET /api/monitoring/environment/details` - Detailed validation results
+- `GET /api/monitoring/environment/example` - Download updated .env.example template
+
+### Production Safety
+
+In production environments, the server will **not start** if critical environment variables are missing or invalid. This prevents misconfigured deployments and ensures system reliability.
+
 ## Environment Variables
 
+The backend uses environment variables for configuration. A comprehensive `.env.example` template is provided with detailed documentation for all available settings.
+
+### Core Configuration
+
 ```env
+# Server
 PORT=3000
 NODE_ENV=development
-FRONTEND_URL=http://localhost:3000
-RATE_LIMIT_WINDOW_MS=900000
-RATE_LIMIT_MAX_REQUESTS=100
+
+# Database (Supabase)
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your-anon-key-here
+
+# Logging
+LOG_LEVEL=info
+LOG_FILE=./logs/app.log
+
+# Monitoring
+ENABLE_MONITORING=false
+HEALTH_CHECK_TIMEOUT=5000
+```
+
+### Complete Configuration
+
+For a complete list of all available environment variables with descriptions and default values, see the `.env.example` file. The configuration includes:
+
+- **Server Settings**: Port, environment mode, timeouts
+- **Database**: Supabase connection and authentication
+- **Logging**: Log levels, file rotation, formats
+- **Security**: JWT secrets, CORS, rate limiting
+- **Monitoring**: Performance metrics, health checks
+- **Notifications**: Error alerts via email or webhooks
+- **Caching**: Redis configuration, TTL settings
+- **File Uploads**: Size limits, allowed types, storage paths
+
+### Environment Validation
+
+The server automatically validates all environment variables on startup using the built-in EnvironmentValidator. This ensures:
+
+- Required variables are present
+- Values have correct data types
+- Dependencies between variables are satisfied
+- Security best practices are followed
+
+Access validation status via the monitoring API at `/api/monitoring/environment`.
 ```
 
 ## Project Structure

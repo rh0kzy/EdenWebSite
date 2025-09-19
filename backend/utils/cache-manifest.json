@@ -1,0 +1,41 @@
+{
+  "cache_styles.css": {
+    "value": "d1335fb0",
+    "lastModified": 1758226402391,
+    "generated": 1758292759609
+  },
+  "cache_js/errorMonitor.js": {
+    "value": "ae86bcde",
+    "lastModified": 1758292518915,
+    "generated": 1758292759611
+  },
+  "cache_perfumes-data.js": {
+    "value": "1758292759619",
+    "generated": 1758292759620
+  },
+  "cache_script.js": {
+    "value": "60baabaa",
+    "lastModified": 1758292518915,
+    "generated": 1758292759615
+  },
+  "cache_js/offlineData.js": {
+    "value": "6292a9d7",
+    "lastModified": 1758288556985,
+    "generated": 1758292759634
+  },
+  "cache_js/fastImageLoader.js": {
+    "value": "618bed8d",
+    "lastModified": 1758288556985,
+    "generated": 1758292759636
+  },
+  "cache_js/apiClient.js": {
+    "value": "f44ebf93",
+    "lastModified": 1758292518915,
+    "generated": 1758292759639
+  },
+  "cache_perfume-detail.js": {
+    "value": "985ac410",
+    "lastModified": 1758222866328,
+    "generated": 1758292759653
+  }
+}
