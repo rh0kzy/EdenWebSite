@@ -24,7 +24,6 @@ class EdenSocialIntegration {
                 tiktok: 'https://tiktok.com/@edenparfum',
                 twitter: 'https://twitter.com/edenparfum',
                 whatsapp: 'https://wa.me/213123456789',
-                youtube: 'https://youtube.com/@edenparfum',
                 linkedin: 'https://linkedin.com/company/edenparfum'
             },
             analytics: {
@@ -35,7 +34,6 @@ class EdenSocialIntegration {
                 instagram: '15.2K',
                 facebook: '8.7K',
                 tiktok: '32.5K',
-                youtube: '4.1K',
                 twitter: '2.8K'
             }
         };
@@ -95,16 +93,22 @@ class EdenSocialIntegration {
                             <span class="social-name">TikTok</span>
                         </div>
                     </a>
-                    <a href="${this.config.socialAccounts.youtube}" target="_blank" class="social-link youtube" data-platform="youtube">
-                        <i class="fab fa-youtube"></i>
-                        <div class="social-info">
-                            <span class="social-name">YouTube</span>
-                        </div>
-                    </a>
                     <a href="${this.config.socialAccounts.whatsapp}" target="_blank" class="social-link whatsapp" data-platform="whatsapp">
                         <i class="fab fa-whatsapp"></i>
                         <div class="social-info">
                             <span class="social-name">WhatsApp</span>
+                        </div>
+                    </a>
+                    <a href="${this.config.socialAccounts.twitter}" target="_blank" class="social-link twitter" data-platform="twitter">
+                        <i class="fab fa-twitter"></i>
+                        <div class="social-info">
+                            <span class="social-name">Twitter</span>
+                        </div>
+                    </a>
+                    <a href="${this.config.socialAccounts.linkedin}" target="_blank" class="social-link linkedin" data-platform="linkedin">
+                        <i class="fab fa-linkedin-in"></i>
+                        <div class="social-info">
+                            <span class="social-name">LinkedIn</span>
                         </div>
                     </a>
                 </div>

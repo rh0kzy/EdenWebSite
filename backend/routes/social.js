@@ -25,7 +25,6 @@ let socialCounts = {
         facebook: 8765,
         tiktok: 32567,
         twitter: 5439,
-        youtube: 12890,
         whatsapp: 0 // WhatsApp doesn't have public follower counts
     },
     lastUpdated: new Date().toISOString()
