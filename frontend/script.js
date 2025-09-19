@@ -327,16 +327,27 @@ let currentGenderFilter = '';
 
 // Initialize catalog when page loads
 document.addEventListener('DOMContentLoaded', function() {
-    initializeCatalog();
+    // Only initialize catalog if we're on a page with catalog elements
+    if (document.getElementById('brandFilter') && document.getElementById('genderFilter')) {
+        initializeCatalog();
+    }
 });
 
 // Listen for perfumes loaded event
 window.addEventListener('perfumesLoaded', function(event) {
-    // Production: Remove debug logging
-    setupCatalogWithData();
+    // Only setup catalog if we're on the catalog page
+    if (document.getElementById('brandFilter') && document.getElementById('genderFilter')) {
+        setupCatalogWithData();
+    }
 });
 
 async function initializeCatalog() {
+    // Check if we're on the catalog page
+    if (!document.getElementById('brandFilter') || !document.getElementById('genderFilter')) {
+        console.warn('Not on catalog page - skipping catalog initialization');
+        return;
+    }
+
     // Show loading indicator
     showLoadingIndicator();
     
@@ -418,6 +429,12 @@ async function loadPerfumeData() {
 }
 
 function setupCatalogWithData() {
+    // Check if we're on the catalog page first
+    if (!document.getElementById('brandFilter') || !document.getElementById('genderFilter')) {
+        console.warn('Not on catalog page - skipping catalog setup');
+        return;
+    }
+
     // Hide loading indicator
     hideLoadingIndicator();
     
@@ -503,31 +520,35 @@ function populateFilters() {
     const genderFilter = document.getElementById('genderFilter');
     
     if (!brandFilter || !genderFilter) {
-        console.warn('Filter elements not found');
+        console.warn('Filter elements not found - not on catalog page');
         return;
     }
-    
+
     // Clear existing options except the first "All" option
     brandFilter.innerHTML = '<option value="">All Brands</option>';
     genderFilter.innerHTML = '<option value="">All Genders</option>';
-    
+
     // Populate brand filter
     const brands = getUniqueBrands();
-    brands.forEach(brand => {
-        const option = document.createElement('option');
-        option.value = brand;
-        option.textContent = brand;
-        brandFilter.appendChild(option);
-    });
-    
+    if (brands && Array.isArray(brands)) {
+        brands.forEach(brand => {
+            const option = document.createElement('option');
+            option.value = brand;
+            option.textContent = brand;
+            brandFilter.appendChild(option);
+        });
+    }
+
     // Populate gender filter
     const genders = getUniqueGenders();
-    genders.forEach(gender => {
-        const option = document.createElement('option');
-        option.value = gender;
-        option.textContent = gender;
-        genderFilter.appendChild(option);
-    });
+    if (genders && Array.isArray(genders)) {
+        genders.forEach(gender => {
+            const option = document.createElement('option');
+            option.value = gender;
+            option.textContent = gender;
+            genderFilter.appendChild(option);
+        });
+    }
 }
 
 function setupSearchEventListeners() {

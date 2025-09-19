@@ -10,12 +10,9 @@
     --eden-gradient: linear-gradient(135deg, #a58b4c 0%, #8b7355 100%);
     --eden-shadow: 0 8px 32px rgba(165, 139, 76, 0.2);
     --eden-shadow-hover: 0 12px 48px rgba(165, 139, 76, 0.3);
-    --social-facebook: #1877f2;
     --social-instagram: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
     --social-tiktok: #25f4ee;
-    --social-twitter: #1da1f2;
     --social-whatsapp: #25d366;
-    --social-linkedin: #0077b5;
 }
 
 /* Floating Social Media Bar */
@@ -144,7 +141,7 @@
     overflow-y: auto;
     overflow-x: hidden;
     flex: 1;
-    max-height: 180px;
+    max-height: 120px;
     scroll-behavior: smooth;
 }
 
@@ -199,12 +196,9 @@
     z-index: -1;
 }
 
-.social-link.facebook::before { background: var(--social-facebook); }
 .social-link.instagram::before { background: var(--social-instagram); }
 .social-link.tiktok::before { background: var(--social-tiktok); }
-.social-link.twitter::before { background: var(--social-twitter); }
 .social-link.whatsapp::before { background: var(--social-whatsapp); }
-.social-link.linkedin::before { background: var(--social-linkedin); }
 
 .social-link:hover::before {
     left: 0;
@@ -905,7 +899,7 @@
     
     .social-links-grid {
         padding: 20px;
-        max-height: 160px;
+        max-height: 100px;
     }
     
     .social-share-buttons {
@@ -950,7 +944,7 @@
     }
     
     .social-links-grid {
-        max-height: 140px;
+        max-height: 80px;
     }
     
     .share-btn .btn-desc {

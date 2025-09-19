@@ -19,12 +19,9 @@ class EdenSocialIntegration {
             siteUrl: window.location.origin,
             defaultImage: '/photos/eden parfum logo.png',
             socialAccounts: {
-                facebook: 'https://facebook.com/edenparfum',
                 instagram: 'https://instagram.com/edenparfum',
                 tiktok: 'https://tiktok.com/@edenparfum',
-                twitter: 'https://twitter.com/edenparfum',
-                whatsapp: 'https://wa.me/213123456789',
-                linkedin: 'https://linkedin.com/company/edenparfum'
+                whatsapp: 'https://wa.me/213123456789'
             },
             analytics: {
                 trackEvents: true,
@@ -32,9 +29,7 @@ class EdenSocialIntegration {
             },
             followerCounts: {
                 instagram: '15.2K',
-                facebook: '8.7K',
-                tiktok: '32.5K',
-                twitter: '2.8K'
+                tiktok: '32.5K'
             }
         };
         
@@ -81,12 +76,6 @@ class EdenSocialIntegration {
                             <span class="social-name">Instagram</span>
                         </div>
                     </a>
-                    <a href="${this.config.socialAccounts.facebook}" target="_blank" class="social-link facebook" data-platform="facebook">
-                        <i class="fab fa-facebook-f"></i>
-                        <div class="social-info">
-                            <span class="social-name">Facebook</span>
-                        </div>
-                    </a>
                     <a href="${this.config.socialAccounts.tiktok}" target="_blank" class="social-link tiktok" data-platform="tiktok">
                         <i class="fab fa-tiktok"></i>
                         <div class="social-info">
@@ -97,18 +86,6 @@ class EdenSocialIntegration {
                         <i class="fab fa-whatsapp"></i>
                         <div class="social-info">
                             <span class="social-name">WhatsApp</span>
-                        </div>
-                    </a>
-                    <a href="${this.config.socialAccounts.twitter}" target="_blank" class="social-link twitter" data-platform="twitter">
-                        <i class="fab fa-twitter"></i>
-                        <div class="social-info">
-                            <span class="social-name">Twitter</span>
-                        </div>
-                    </a>
-                    <a href="${this.config.socialAccounts.linkedin}" target="_blank" class="social-link linkedin" data-platform="linkedin">
-                        <i class="fab fa-linkedin-in"></i>
-                        <div class="social-info">
-                            <span class="social-name">LinkedIn</span>
                         </div>
                     </a>
                 </div>
