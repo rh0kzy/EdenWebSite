@@ -41,7 +41,7 @@ class EdenSocialIntegration {
         this.createFloatingSocial();
         this.setupGlobalSocialFeatures();
         this.initializeSocialAnalytics();
-        console.log('🌸 Eden Social Integration initialized');
+        // Eden Social Integration initialized
     }
 
     loadCSS() {
@@ -723,7 +723,7 @@ What's your signature scent? Drop it below! 👇
                 body: JSON.stringify(data)
             });
         } catch (error) {
-            console.warn('Social analytics error:', error);
+            // Social analytics error
         }
     }
 
@@ -744,7 +744,7 @@ What's your signature scent? Drop it below! 👇
                 });
             }
         } catch (error) {
-            console.warn('Failed to load share counts:', error);
+            // Failed to load share counts
         }
     }
 
@@ -765,7 +765,9 @@ What's your signature scent? Drop it below! 👇
                 platform,
                 url: window.location.href
             })
-        }).catch(console.warn);
+        }).catch(() => {
+            // Error ignored for share count update
+        });
     }
 
     formatCount(count) {

@@ -309,7 +309,7 @@ describe('Eden Parfum Frontend Core Tests', () => {
                 try {
                     return await apiFunction();
                 } catch (error) {
-                    console.warn('API call failed, using fallback data:', error.message);
+                    // API call failed, using fallback data
                     return fallbackData;
                 }
             };

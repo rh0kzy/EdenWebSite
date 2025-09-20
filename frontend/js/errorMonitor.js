@@ -178,11 +178,8 @@ class ErrorMonitor {
             this.errors.shift(); // Remove oldest error
         }
 
-        // Log to console in development
-        if (this.isDevelopment()) {
-            console.error('Error logged:', enrichedError);
-        }
-
+        // Error logged (console removed for production)
+        
         // Send to backend (with rate limiting)
         this.sendErrorToBackend(enrichedError);
     }
@@ -213,11 +210,11 @@ class ErrorMonitor {
             });
 
             if (!response.ok) {
-                console.warn('Failed to send error to backend:', response.status);
+                // Failed to send error to backend
             }
         } catch (error) {
             // Silently fail - don't create recursive error logging
-            console.warn('Error reporting failed:', error.message);
+            // Error reporting failed
         }
     }
 
@@ -362,19 +359,37 @@ class UserErrorHandler {
     showError(message, type = 'error', duration = 5000) {
         const notification = document.createElement('div');
         notification.className = `error-notification error-${type}`;
-        notification.style.cssText = `
-            background: ${type === 'error' ? '#f8d7da' : '#d1ecf1'};
-            color: ${type === 'error' ? '#721c24' : '#0c5460'};
-            border: 1px solid ${type === 'error' ? '#f5c6cb' : '#bee5eb'};
-            border-radius: 8px;
-            padding: 12px 16px;
-            margin-bottom: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            animation: slideIn 0.3s ease-out;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            font-size: 14px;
-            line-height: 1.4;
-        `;
+        
+        // Use CSS classes instead of inline styles
+        if (type === 'error') {
+            notification.style.cssText = `
+                background: var(--alert-error-bg);
+                color: var(--alert-error-text);
+                border: 1px solid var(--alert-error-border);
+                border-radius: 8px;
+                padding: 12px 16px;
+                margin-bottom: 10px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                animation: slideIn 0.3s ease-out;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                font-size: 14px;
+                line-height: 1.4;
+            `;
+        } else {
+            notification.style.cssText = `
+                background: var(--alert-info-bg);
+                color: var(--alert-info-text);
+                border: 1px solid var(--alert-info-border);
+                border-radius: 8px;
+                padding: 12px 16px;
+                margin-bottom: 10px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                animation: slideIn 0.3s ease-out;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                font-size: 14px;
+                line-height: 1.4;
+            `;
+        }
 
         notification.innerHTML = `
             <div style="display: flex; align-items: center; justify-content: space-between;">
@@ -462,9 +477,9 @@ class UserErrorHandler {
     showSuccess(message, duration = 3000) {
         const notification = document.createElement('div');
         notification.style.cssText = `
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+            background: var(--alert-success-bg);
+            color: var(--alert-success-text);
+            border: 1px solid var(--alert-success-border);
             border-radius: 8px;
             padding: 12px 16px;
             margin-bottom: 10px;

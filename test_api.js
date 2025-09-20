@@ -40,7 +40,7 @@ function testEndpoint(path) {
 }
 
 async function runTests() {
-    console.log('🧪 Testing Eden Parfum API endpoints...\n');
+    // Testing Eden Parfum API endpoints
 
     const endpoints = [
         '/api/health',
@@ -49,23 +49,36 @@ async function runTests() {
         '/api/v2/photos/stats'
     ];
 
+    const results = [];
     for (const endpoint of endpoints) {
         try {
-            console.log(`Testing ${endpoint}...`);
+            // Testing endpoint
             const result = await testEndpoint(endpoint);
-            console.log(`✅ Status: ${result.status}`);
-            if (typeof result.data === 'object') {
-                console.log(`📊 Response:`, JSON.stringify(result.data, null, 2));
-            } else {
-                console.log(`📊 Response:`, result.data.substring(0, 200) + '...');
-            }
-            console.log('');
+            results.push({
+                endpoint,
+                status: result.status,
+                success: true,
+                data: result.data
+            });
         } catch (error) {
-            console.log(`❌ Error: ${error.message}\n`);
+            results.push({
+                endpoint,
+                success: false,
+                error: error.message
+            });
         }
     }
 
-    console.log('🏁 Test completed!');
+    // Test completed
+    return results;
 }
 
-runTests();
+// Only run test if this file is executed directly
+if (require.main === module) {
+    runTests().then(results => {
+        const failures = results.filter(r => !r.success);
+        process.exit(failures.length > 0 ? 1 : 0);
+    });
+}
+
+module.exports = runTests;

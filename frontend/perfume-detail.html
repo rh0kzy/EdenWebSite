@@ -413,10 +413,10 @@
         </nav>
     </header>
 
-    <main style="padding-top: 100px; min-height: 100vh; background: linear-gradient(135deg, #f8f6f3 0%, #ede8e2 100%);">
+    <main class="main-content">
         <div class="container">
             <!-- Breadcrumb Navigation -->
-            <nav class="breadcrumb" style="margin-bottom: 1rem;">
+            <nav class="breadcrumb breadcrumb-spacing">
                 <a href="index.html">Home</a>
                 <span>/</span>
                 <a href="catalog.html">Catalog</a>
@@ -425,7 +425,7 @@
             </nav>
             
             <!-- Back Button -->
-            <div style="margin-bottom: 2rem;">
+            <div class="back-button-container">
                 <button onclick="history.back()" class="back-button">
                     <i class="fas fa-arrow-left"></i> Back to Catalog
                 </button>
@@ -506,28 +506,28 @@
                             <div class="metric">
                                 <h5>Longevity</h5>
                                 <div class="metric-bar">
-                                    <div class="metric-fill" style="width: 80%"></div>
+                                    <div class="metric-fill metric-fill-80"></div>
                                 </div>
                                 <span>8/10</span>
                             </div>
                             <div class="metric">
                                 <h5>Sillage</h5>
                                 <div class="metric-bar">
-                                    <div class="metric-fill" style="width: 70%"></div>
+                                    <div class="metric-fill metric-fill-70"></div>
                                 </div>
                                 <span>7/10</span>
                             </div>
                             <div class="metric">
                                 <h5>Projection</h5>
                                 <div class="metric-bar">
-                                    <div class="metric-fill" style="width: 60%"></div>
+                                    <div class="metric-fill metric-fill-60"></div>
                                 </div>
                                 <span>6/10</span>
                             </div>
                             <div class="metric">
                                 <h5>Complexity</h5>
                                 <div class="metric-bar">
-                                    <div class="metric-fill" style="width: 80%"></div>
+                                    <div class="metric-fill metric-fill-80"></div>
                                 </div>
                                 <span>8/10</span>
                             </div>
@@ -604,25 +604,25 @@
                             <div class="chart-item">
                                 <span>Spring</span>
                                 <div class="chart-bar">
-                                    <div class="chart-fill" style="width: 30%"></div>
+                                    <div class="chart-fill chart-fill-30"></div>
                                 </div>
                             </div>
                             <div class="chart-item">
                                 <span>Summer</span>
                                 <div class="chart-bar">
-                                    <div class="chart-fill" style="width: 20%"></div>
+                                    <div class="chart-fill chart-fill-20"></div>
                                 </div>
                             </div>
                             <div class="chart-item">
                                 <span>Fall</span>
                                 <div class="chart-bar">
-                                    <div class="chart-fill" style="width: 100%"></div>
+                                    <div class="chart-fill chart-fill-100"></div>
                                 </div>
                             </div>
                             <div class="chart-item">
                                 <span>Winter</span>
                                 <div class="chart-bar">
-                                    <div class="chart-fill" style="width: 100%"></div>
+                                    <div class="chart-fill chart-fill-100"></div>
                                 </div>
                             </div>
                         </div>
@@ -631,25 +631,25 @@
                             <div class="chart-item">
                                 <span>Daily</span>
                                 <div class="chart-bar">
-                                    <div class="chart-fill" style="width: 20%"></div>
+                                    <div class="chart-fill chart-fill-20"></div>
                                 </div>
                             </div>
                             <div class="chart-item">
                                 <span>Office</span>
                                 <div class="chart-bar">
-                                    <div class="chart-fill" style="width: 30%"></div>
+                                    <div class="chart-fill chart-fill-30"></div>
                                 </div>
                             </div>
                             <div class="chart-item">
                                 <span>Evening</span>
                                 <div class="chart-bar">
-                                    <div class="chart-fill" style="width: 100%"></div>
+                                    <div class="chart-fill chart-fill-100"></div>
                                 </div>
                             </div>
                             <div class="chart-item">
                                 <span>Special Events</span>
                                 <div class="chart-bar">
-                                    <div class="chart-fill" style="width: 100%"></div>
+                                    <div class="chart-fill chart-fill-100"></div>
                                 </div>
                             </div>
                         </div>
@@ -722,7 +722,13 @@
     </footer>
 
     <script src="js/fastImageLoader.js?v=618bed8d"></script>
-    <script src="script.js?v=60baabaa"></script>
+    
+    <!-- Modern Modular JavaScript (ES6 Modules) -->
+    <script type="module" src="js/main.js?v=modular"></script>
+    
+    <!-- Fallback for older browsers - keep original script for compatibility -->
+    <script nomodule src="script.js?v=60baabaa"></script>
+    
     <script src="perfume-detail.js?v=985ac410"></script>
     
     <!-- Social Media Integration -->

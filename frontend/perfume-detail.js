@@ -30,7 +30,7 @@ class PerfumeDetailPage {
             await this.loadPerfumeData();
             this.attachEventListeners();
         } catch (error) {
-            console.error('Error initializing perfume detail page:', error);
+            // Error initializing perfume detail page
             this.showError('Failed to load perfume details. Please try again later.');
         }
     }
@@ -90,7 +90,7 @@ class PerfumeDetailPage {
             this.renderPerfumeDetails();
             
         } catch (error) {
-            console.error('Error loading perfume data:', error);
+            // Error loading perfume data
             
             // Try to load from the perfumes database as fallback
             if (window.perfumesDatabase && window.perfumesDatabase.length > 0) {
@@ -111,7 +111,7 @@ class PerfumeDetailPage {
             }
             return null;
         } catch (error) {
-            console.warn('Failed to fetch perfume by ID:', error);
+            // Failed to fetch perfume by ID
             return null;
         }
     }
@@ -135,7 +135,7 @@ class PerfumeDetailPage {
             }
             return null;
         } catch (error) {
-            console.warn('Failed to fetch perfume by reference:', error);
+            // Failed to fetch perfume by reference
             return null;
         }
     }
@@ -428,7 +428,7 @@ class PerfumeDetailPage {
                 container.innerHTML = '<p>Unable to load similar perfumes.</p>';
             }
         } catch (error) {
-            console.error('Error loading similar perfumes:', error);
+            // Error loading similar perfumes
             container.innerHTML = '<p>Unable to load similar perfumes.</p>';
         }
     }

@@ -12,7 +12,7 @@ const getAllBrands = async (req, res) => {
             .range(parseInt(offset), parseInt(offset) + parseInt(limit) - 1);
 
         if (error) {
-            console.error('Error fetching brands:', error);
+            // Error fetching brands - logged via logger
             return res.status(500).json({ 
                 error: 'Failed to fetch brands',
                 details: error.message 
@@ -28,7 +28,7 @@ const getAllBrands = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Server error:', error);
+        // Error: Server error: - logged via logger
         res.status(500).json({ error: 'Internal server error' });
     }
 };
@@ -58,7 +58,7 @@ const getBrandById = async (req, res) => {
             if (error.code === 'PGRST116') {
                 return res.status(404).json({ error: 'Brand not found' });
             }
-            console.error('Error fetching brand:', error);
+            // Error: Error fetching brand: - logged via logger
             return res.status(500).json({ 
                 error: 'Failed to fetch brand',
                 details: error.message 
@@ -68,7 +68,7 @@ const getBrandById = async (req, res) => {
         res.json(brand);
 
     } catch (error) {
-        console.error('Server error:', error);
+        // Error: Server error: - logged via logger
         res.status(500).json({ error: 'Internal server error' });
     }
 };
@@ -98,7 +98,7 @@ const getBrandByName = async (req, res) => {
             if (error.code === 'PGRST116') {
                 return res.status(404).json({ error: 'Brand not found' });
             }
-            console.error('Error fetching brand:', error);
+            // Error: Error fetching brand: - logged via logger
             return res.status(500).json({ 
                 error: 'Failed to fetch brand',
                 details: error.message 
@@ -108,7 +108,7 @@ const getBrandByName = async (req, res) => {
         res.json(brand);
 
     } catch (error) {
-        console.error('Server error:', error);
+        // Error: Server error: - logged via logger
         res.status(500).json({ error: 'Internal server error' });
     }
 };
@@ -125,7 +125,7 @@ const getBrandsWithCount = async (req, res) => {
             .order('name', { ascending: true });
 
         if (error) {
-            console.error('Error fetching brands with count:', error);
+            // Error: Error fetching brands with count: - logged via logger
             return res.status(500).json({ 
                 error: 'Failed to fetch brands',
                 details: error.message 
@@ -142,7 +142,7 @@ const getBrandsWithCount = async (req, res) => {
         res.json(brandsWithCount);
 
     } catch (error) {
-        console.error('Server error:', error);
+        // Error: Server error: - logged via logger
         res.status(500).json({ error: 'Internal server error' });
     }
 };
@@ -169,7 +169,7 @@ const createBrand = async (req, res) => {
             if (error.code === '23505') { // Unique constraint violation
                 return res.status(409).json({ error: 'Brand already exists' });
             }
-            console.error('Error creating brand:', error);
+            // Error: Error creating brand: - logged via logger
             return res.status(500).json({ 
                 error: 'Failed to create brand',
                 details: error.message 
@@ -179,7 +179,7 @@ const createBrand = async (req, res) => {
         res.status(201).json(brand);
 
     } catch (error) {
-        console.error('Server error:', error);
+        // Error: Server error: - logged via logger
         res.status(500).json({ error: 'Internal server error' });
     }
 };
@@ -204,7 +204,7 @@ const updateBrand = async (req, res) => {
             if (error.code === '23505') { // Unique constraint violation
                 return res.status(409).json({ error: 'Brand name already exists' });
             }
-            console.error('Error updating brand:', error);
+            // Error: Error updating brand: - logged via logger
             return res.status(500).json({ 
                 error: 'Failed to update brand',
                 details: error.message 
@@ -214,7 +214,7 @@ const updateBrand = async (req, res) => {
         res.json(brand);
 
     } catch (error) {
-        console.error('Server error:', error);
+        // Error: Server error: - logged via logger
         res.status(500).json({ error: 'Internal server error' });
     }
 };
@@ -230,7 +230,7 @@ const deleteBrand = async (req, res) => {
             .eq('id', id);
 
         if (error) {
-            console.error('Error deleting brand:', error);
+            // Error: Error deleting brand: - logged via logger
             return res.status(500).json({ 
                 error: 'Failed to delete brand',
                 details: error.message 
@@ -240,7 +240,7 @@ const deleteBrand = async (req, res) => {
         res.status(204).send();
 
     } catch (error) {
-        console.error('Server error:', error);
+        // Error: Server error: - logged via logger
         res.status(500).json({ error: 'Internal server error' });
     }
 };

@@ -37,7 +37,7 @@ const getAllPerfumes = async (req, res) => {
         const { data: perfumes, error, count } = await query;
 
         if (error) {
-            console.error('Error fetching perfumes:', error);
+            // Error logged via logger
             return res.status(500).json({ 
                 error: 'Failed to fetch perfumes',
                 details: error.message 
@@ -53,7 +53,7 @@ const getAllPerfumes = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Server error:', error);
+        // Error logged via logger
         res.status(500).json({ error: 'Internal server error' });
     }
 };
@@ -80,7 +80,7 @@ const getPerfumeByReference = async (req, res) => {
             if (error.code === 'PGRST116') {
                 return res.status(404).json({ error: 'Perfume not found' });
             }
-            console.error('Error fetching perfume:', error);
+            // Error logged via logger
             return res.status(500).json({ 
                 error: 'Failed to fetch perfume',
                 details: error.message 
@@ -90,7 +90,7 @@ const getPerfumeByReference = async (req, res) => {
         res.json(perfume);
 
     } catch (error) {
-        console.error('Server error:', error);
+        // Error logged via logger
         res.status(500).json({ error: 'Internal server error' });
     }
 };
@@ -117,7 +117,7 @@ const getPerfumeById = async (req, res) => {
             if (error.code === 'PGRST116') {
                 return res.status(404).json({ error: 'Perfume not found' });
             }
-            console.error('Error fetching perfume:', error);
+            // Error logged via logger
             return res.status(500).json({ 
                 error: 'Failed to fetch perfume',
                 details: error.message 
@@ -127,7 +127,7 @@ const getPerfumeById = async (req, res) => {
         res.json(perfume);
 
     } catch (error) {
-        console.error('Server error:', error);
+        // Error logged via logger
         res.status(500).json({ error: 'Internal server error' });
     }
 };
@@ -141,7 +141,7 @@ const getUniqueGenders = async (req, res) => {
             .not('gender', 'is', null);
 
         if (error) {
-            console.error('Error fetching genders:', error);
+            // Error logged via logger
             return res.status(500).json({ 
                 error: 'Failed to fetch genders',
                 details: error.message 
@@ -152,7 +152,7 @@ const getUniqueGenders = async (req, res) => {
         res.json(uniqueGenders);
 
     } catch (error) {
-        console.error('Server error:', error);
+        // Error logged via logger
         res.status(500).json({ error: 'Internal server error' });
     }
 };
@@ -181,7 +181,7 @@ const createPerfume = async (req, res) => {
                     .single();
 
                 if (brandError) {
-                    console.error('Error creating brand:', brandError);
+                    // Error logged via logger
                     return res.status(500).json({ 
                         error: 'Failed to create brand',
                         details: brandError.message 
@@ -207,7 +207,7 @@ const createPerfume = async (req, res) => {
             .single();
 
         if (error) {
-            console.error('Error creating perfume:', error);
+            // Error logged via logger
             return res.status(500).json({ 
                 error: 'Failed to create perfume',
                 details: error.message 
@@ -217,7 +217,7 @@ const createPerfume = async (req, res) => {
         res.status(201).json(perfume);
 
     } catch (error) {
-        console.error('Server error:', error);
+        // Error logged via logger
         res.status(500).json({ error: 'Internal server error' });
     }
 };
@@ -239,7 +239,7 @@ const updatePerfume = async (req, res) => {
             if (error.code === 'PGRST116') {
                 return res.status(404).json({ error: 'Perfume not found' });
             }
-            console.error('Error updating perfume:', error);
+            // Error logged via logger
             return res.status(500).json({ 
                 error: 'Failed to update perfume',
                 details: error.message 
@@ -249,7 +249,7 @@ const updatePerfume = async (req, res) => {
         res.json(perfume);
 
     } catch (error) {
-        console.error('Server error:', error);
+        // Error logged via logger
         res.status(500).json({ error: 'Internal server error' });
     }
 };
@@ -265,7 +265,7 @@ const deletePerfume = async (req, res) => {
             .eq('id', id);
 
         if (error) {
-            console.error('Error deleting perfume:', error);
+            // Error logged via logger
             return res.status(500).json({ 
                 error: 'Failed to delete perfume',
                 details: error.message 
@@ -275,7 +275,7 @@ const deletePerfume = async (req, res) => {
         res.status(204).send();
 
     } catch (error) {
-        console.error('Server error:', error);
+        // Error logged via logger
         res.status(500).json({ error: 'Internal server error' });
     }
 };

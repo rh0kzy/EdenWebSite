@@ -113,7 +113,7 @@
         let perfumesElement = document.getElementById('perfumes');
         
         function log(message) {
-            console.log(message);
+            // Console logging removed for production
             logElement.textContent += new Date().toLocaleTimeString() + ': ' + message + '\n';
             logElement.scrollTop = logElement.scrollHeight;
         }
@@ -213,7 +213,7 @@
                 card.className = 'perfume-card';
                 
                 card.innerHTML = `
-                    <div class="perfume-image-placeholder" style="width: 100px; height: 100px; background: #eee; border-radius: 5px; margin: 0 auto 0.5rem auto; display: flex; align-items: center; justify-content: center; color: #999;">
+                    <div class="perfume-image-placeholder perfume-placeholder">
                         🌸
                     </div>
                     <h4>${perfume.name}</h4>

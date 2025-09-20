@@ -117,7 +117,7 @@
 </head>
 <body>
     <div class="test-container">
-        <h1 style="text-align: center; color: #a58b4c; margin-bottom: 40px;">
+        <h1 class="social-test-heading">
             <i class="fas fa-flask"></i> EDEN PARFUM Social Media Integration Test Suite
         </h1>
 
@@ -284,8 +284,10 @@
         function logTest(message, type = 'info') {
             const log = document.getElementById('testLog');
             const timestamp = new Date().toLocaleTimeString();
-            const logClass = type === 'error' ? 'color: #ff6b6b;' : type === 'success' ? 'color: #51cf66;' : 'color: #74c0fc;';
-            log.innerHTML += `<div style="${logClass}">[${timestamp}] ${message}</div>`;
+            const logElement = document.createElement('div');
+            logElement.className = `log-${type}`;
+            logElement.textContent = `[${timestamp}] ${message}`;
+            log.appendChild(logElement);
             log.scrollTop = log.scrollHeight;
         }
 

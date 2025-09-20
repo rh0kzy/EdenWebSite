@@ -11,7 +11,7 @@ const EnvironmentValidator = require('./config/environmentValidator');
 const envValidator = new EnvironmentValidator();
 
 // Validate environment variables before starting server
-console.log('🔧 Validating environment configuration...\n');
+// Validating environment configuration
 const validationResults = envValidator.validate();
 
 if (!validationResults.valid) {
@@ -27,7 +27,7 @@ if (!validationResults.valid) {
         console.warn('   Please fix these issues before deploying to production.\n');
     }
 } else {
-    console.log('✅ Environment validation passed - starting server...\n');
+    // Environment validation passed - starting server
 }
 
 // Import logger and error handling middleware
@@ -232,12 +232,8 @@ function startServer() {
                 timestamp: new Date().toISOString()
             });
             
-            // Keep essential production logs for monitoring
-            console.log(`🌸 Eden Parfum Backend Server running on port ${PORT}`);
-            console.log(`🚀 API Base URL: http://localhost:${PORT}/api`);
-            console.log(`📱 Frontend URL: http://localhost:${PORT}`);
-            console.log(`📊 Health Check: http://localhost:${PORT}/api/health`);
-            console.log(`📈 System Status: http://localhost:${PORT}/api/status`);
+            // Server is running (production logs removed for security)
+            logger.info(`Eden Parfum Backend Server running on port ${PORT}`);
         });
 
         // Handle server errors

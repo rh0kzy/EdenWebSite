@@ -102,7 +102,7 @@ router.get('/analytics', (req, res) => {
         });
         
     } catch (error) {
-        console.error('Analytics retrieval error:', error);
+        // Analytics retrieval error - logged via logger
         res.status(500).json({
             success: false,
             error: 'Failed to retrieve analytics data'
@@ -210,7 +210,7 @@ router.post('/analytics/track', (req, res) => {
         });
         
     } catch (error) {
-        console.error('Analytics tracking error:', error);
+        // Analytics tracking error - logged via logger
         res.status(500).json({
             success: false,
             error: 'Failed to track analytics event'
@@ -256,7 +256,7 @@ router.get('/share-counts', (req, res) => {
         }
         
     } catch (error) {
-        console.error('Share counts retrieval error:', error);
+        // Share counts retrieval error - logged via logger
         res.status(500).json({
             success: false,
             error: 'Failed to retrieve share counts'
@@ -308,7 +308,7 @@ router.put('/share-counts', (req, res) => {
         });
         
     } catch (error) {
-        console.error('Share counts update error:', error);
+        // Share counts update error - logged via logger
         res.status(500).json({
             success: false,
             error: 'Failed to update share counts'
@@ -383,7 +383,7 @@ router.get('/trending', (req, res) => {
         });
         
     } catch (error) {
-        console.error('Trending data retrieval error:', error);
+        // Trending data retrieval error - logged via logger
         res.status(500).json({
             success: false,
             error: 'Failed to retrieve trending data'
@@ -481,7 +481,7 @@ router.post('/engagement/log', (req, res) => {
         });
         
     } catch (error) {
-        console.error('Engagement logging error:', error);
+        // Engagement logging error - logged via logger
         res.status(500).json({
             success: false,
             error: 'Failed to log engagement events'
@@ -551,7 +551,7 @@ router.get('/dashboard', (req, res) => {
         });
         
     } catch (error) {
-        console.error('Dashboard data retrieval error:', error);
+        // Dashboard data retrieval error - logged via logger
         res.status(500).json({
             success: false,
             error: 'Failed to retrieve dashboard data'

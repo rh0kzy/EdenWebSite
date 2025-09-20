@@ -138,7 +138,7 @@ class EdenParfumAPI {
             if (window.UserErrorHandler) {
                 window.UserErrorHandler.handleApiError(error, `Loading ${endpoint}`);
             } else {
-                console.warn(`API Error (${endpoint}):`, error.message);
+                // API Error handled silently in production
             }
             
             // Try to use offline data as fallback
@@ -291,7 +291,7 @@ class EdenParfumAPI {
             const response = await fetch(`${window.location.origin}/api/health`);
             return await response.json();
         } catch (error) {
-            console.error('Health check failed:', error);
+            // Health check failed
             return { status: 'error', message: 'API unavailable' };
         }
     }
@@ -344,7 +344,7 @@ window.loadPerfumesDatabase = async function() {
             throw new Error('Failed to load perfumes from API');
         }
     } catch (error) {
-        console.error('Error loading perfumes database:', error);
+        // Error loading perfumes database
         
         // Fallback: create empty array to prevent errors
         window.perfumesDatabase = [];

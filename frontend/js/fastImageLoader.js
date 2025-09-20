@@ -53,7 +53,7 @@ class FastImageLoader {
         img.className = `lazy-image ${className}`;
         
         // Add loading placeholder
-        img.style.backgroundColor = '#f0f0f0';
+        img.style.backgroundColor = 'var(--bg-lighter)';
         img.style.backgroundImage = 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23ccc\'%3E%3Cpath d=\'M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z\'/%3E%3C/svg%3E")';
         img.style.backgroundSize = '50px 50px';
         img.style.backgroundRepeat = 'no-repeat';
@@ -104,7 +104,7 @@ class FastImageLoader {
             preloadImg.src = src;
 
         } catch (error) {
-            console.warn('Error loading image:', src, error);
+            // Error loading image
             this.handleImageError(imgElement);
         }
     }
@@ -198,7 +198,7 @@ class FastImageLoader {
 const fastImageStyles = `
     .lazy-image {
         transition: all 0.3s ease;
-        background-color: #f5f5f5;
+        background-color: var(--bg-lightest);
     }
 
     .lazy-image.loading {
@@ -233,8 +233,8 @@ const fastImageStyles = `
         align-items: center;
         justify-content: center;
         min-height: 200px;
-        background: #f8f8f8;
-        color: #999;
+        background: var(--bg-lightest);
+        color: var(--text-light);
         font-size: 14px;
     }
 

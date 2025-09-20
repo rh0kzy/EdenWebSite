@@ -454,13 +454,13 @@
                         src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d3197.1!2d3.0554277!3d36.7585922!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x128fb30018c34e03%3A0x69b304bc5ec91959!2sEden%20parfum!5e0!3m2!1sen!2sdz!4v1735173600000!5m2!1sen!2sdz"
                         width="100%" 
                         height="400" 
-                        style="border:0; border-radius: 20px;" 
+                        class="iframe-maps" 
                         allowfullscreen="" 
                         loading="lazy" 
                         referrerpolicy="no-referrer-when-downgrade"
                         class="google-map"
                         title="Eden Parfum Location"
-                        onload="console.log('Map loaded successfully')"
+                        onload="mapLoaded()"
                         onerror="showMapFallback()">
                     </iframe>
                     <div class="map-overlay">
@@ -566,7 +566,12 @@
     <!-- Load error monitoring before other scripts -->
     <script src="js/errorMonitor.js?v=ae86bcde"></script>
     <script src="perfumes-data.js?v=1758292759619"></script>
-    <script src="script.js?v=60baabaa"></script>
+    
+    <!-- Modern Modular JavaScript (ES6 Modules) -->
+    <script type="module" src="js/main.js?v=modular"></script>
+    
+    <!-- Fallback for older browsers - keep original script for compatibility -->
+    <script nomodule src="script.js?v=60baabaa"></script>
     
     <!-- Social Media Integration -->
     <script src="js/socialIntegration.js"></script>

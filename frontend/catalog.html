@@ -129,7 +129,7 @@
             </div>
             
             <!-- No Results Message -->
-            <div id="noResults" class="no-results" style="display: none;">
+            <div id="noResults" class="no-results no-results-hidden">
                 <i class="fas fa-search"></i>
                 <h3>No perfumes found</h3>
                 <p>Try adjusting your search criteria or contact us directly</p>
@@ -206,7 +206,12 @@
     <script src="js/offlineData.js?v=6292a9d7"></script>
     <script src="js/fastImageLoader.js?v=618bed8d"></script>
     <script src="js/apiClient.js?v=f44ebf93"></script>
-    <script src="script.js?v=60baabaa"></script>
+    
+    <!-- Modern Modular JavaScript (ES6 Modules) -->
+    <script type="module" src="js/main.js?v=modular"></script>
+    
+    <!-- Fallback for older browsers - keep original script for compatibility -->
+    <script nomodule src="script.js?v=60baabaa"></script>
     
     <!-- Social Media Integration -->
     <script src="js/socialIntegration.js"></script>

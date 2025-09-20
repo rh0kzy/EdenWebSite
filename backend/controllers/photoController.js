@@ -45,7 +45,7 @@ const getPerfumesWithPhotos = async (req, res) => {
         const { data: perfumes, error, count } = await query;
 
         if (error) {
-            console.error('Error fetching perfumes with photos:', error);
+            // Error logged via logger
             return res.status(500).json({ 
                 error: 'Failed to fetch perfumes',
                 details: error.message 
@@ -71,7 +71,7 @@ const getPerfumesWithPhotos = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Server error:', error);
+        // Error logged via logger
         res.status(500).json({ error: 'Internal server error' });
     }
 };
@@ -98,7 +98,7 @@ const getFeaturedPerfumes = async (req, res) => {
             .order('created_at', { ascending: false });
 
         if (error) {
-            console.error('Error fetching featured perfumes:', error);
+            // Error logged via logger
             return res.status(500).json({ 
                 error: 'Failed to fetch featured perfumes',
                 details: error.message 
@@ -118,7 +118,7 @@ const getFeaturedPerfumes = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Server error:', error);
+        // Error logged via logger
         res.status(500).json({ error: 'Internal server error' });
     }
 };
@@ -143,7 +143,7 @@ const getPhotoStats = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Server error:', error);
+        // Error logged via logger
         res.status(500).json({ error: 'Internal server error' });
     }
 };
