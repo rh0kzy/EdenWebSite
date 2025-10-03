@@ -59,10 +59,15 @@ export class NavigationModule {
                     return; // Invalid selector, let browser handle it
                 }
 
-                const targetSection = document.querySelector(targetId);
+                try {
+                    const targetSection = document.querySelector(targetId);
 
-                if (targetSection) {
-                    this.scrollToSection(targetSection);
+                    if (targetSection) {
+                        this.scrollToSection(targetSection);
+                    }
+                } catch (error) {
+                    // Invalid selector, let browser handle navigation normally
+                    return;
                 }
             });
         });

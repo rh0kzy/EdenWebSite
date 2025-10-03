@@ -45,14 +45,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 return; // Invalid selector, let browser handle it
             }
 
-            const targetSection = document.querySelector(targetId);
+            try {
+                const targetSection = document.querySelector(targetId);
 
-            if (targetSection) {
-                const offsetTop = targetSection.offsetTop - 80;
-                window.scrollTo({
-                    top: offsetTop,
-                    behavior: 'smooth'
-                });
+                if (targetSection) {
+                    const offsetTop = targetSection.offsetTop - 80;
+                    window.scrollTo({
+                        top: offsetTop,
+                        behavior: 'smooth'
+                    });
+                }
+            } catch (error) {
+                // Invalid selector, let browser handle navigation normally
+                return;
             }
         });
     });
