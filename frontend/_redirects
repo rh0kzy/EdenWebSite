@@ -1,5 +1,5 @@
-# Netlify redirects file
-/*    /index.html   200
+# Netlify redirects file - simplified to avoid conflicts with netlify.toml
+# Only handle specific redirects, not catch-all
 
 # Optional: Redirect old URLs to new ones
 /home /index.html 301

@@ -15,6 +15,19 @@
   to = "https://edenwebsite.onrender.com/api/:splat"
   status = 200
 
+# Specific page redirects (exclude from catch-all)
+[[redirects]]
+  from = "/catalog.html"
+  to = "/catalog.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/perfume-detail.html"
+  to = "/perfume-detail.html"
+  status = 200
+  force = true
+
 [[redirects]]
   # Handle SPA routing - redirect all other requests to index.html
   from = "/*"
