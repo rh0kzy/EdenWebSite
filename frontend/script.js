@@ -31,16 +31,22 @@ document.addEventListener('DOMContentLoaded', function() {
     navLinks.forEach(link => {
         link.addEventListener('click', function(e) {
             const href = this.getAttribute('href');
-            
-            // Don't prevent default for external links (like catalog.html)
-            if (href.includes('.html')) {
+
+            // Don't prevent default for external links (like catalog.html) or absolute URLs
+            if (href.includes('.html') || href.startsWith('http') || href.startsWith('/')) {
                 return; // Let the browser handle the navigation
             }
-            
+
             e.preventDefault();
             const targetId = href;
+
+            // Validate that targetId is a valid CSS selector (should start with # for anchor links)
+            if (!targetId || !targetId.startsWith('#')) {
+                return; // Invalid selector, let browser handle it
+            }
+
             const targetSection = document.querySelector(targetId);
-            
+
             if (targetSection) {
                 const offsetTop = targetSection.offsetTop - 80;
                 window.scrollTo({
