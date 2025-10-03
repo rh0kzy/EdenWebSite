@@ -518,7 +518,7 @@ function getUniqueGenders() {
 function populateFilters() {
     const brandFilter = document.getElementById('brandFilter');
     const genderFilter = document.getElementById('genderFilter');
-    
+
     if (!brandFilter || !genderFilter) {
         // Filter elements not found - not on catalog page
         return;
@@ -530,23 +530,27 @@ function populateFilters() {
 
     // Populate brand filter
     const brands = getUniqueBrands();
-    if (brands && Array.isArray(brands)) {
+    if (brands && Array.isArray(brands) && brandFilter) {
         brands.forEach(brand => {
-            const option = document.createElement('option');
-            option.value = brand;
-            option.textContent = brand;
-            brandFilter.appendChild(option);
+            if (brandFilter) { // Double-check element still exists
+                const option = document.createElement('option');
+                option.value = brand;
+                option.textContent = brand;
+                brandFilter.appendChild(option);
+            }
         });
     }
 
     // Populate gender filter
     const genders = getUniqueGenders();
-    if (genders && Array.isArray(genders)) {
+    if (genders && Array.isArray(genders) && genderFilter) {
         genders.forEach(gender => {
-            const option = document.createElement('option');
-            option.value = gender;
-            option.textContent = gender;
-            genderFilter.appendChild(option);
+            if (genderFilter) { // Double-check element still exists
+                const option = document.createElement('option');
+                option.value = gender;
+                option.textContent = gender;
+                genderFilter.appendChild(option);
+            }
         });
     }
 }
@@ -556,7 +560,13 @@ function setupSearchEventListeners() {
     const brandFilter = document.getElementById('brandFilter');
     const genderFilter = document.getElementById('genderFilter');
     const clearButton = document.getElementById('clearFilters');
-    
+
+    // Check if all required elements exist
+    if (!searchInput || !brandFilter || !genderFilter || !clearButton) {
+        // Not all catalog elements found - not on catalog page
+        return;
+    }
+
     // Search input with debounce
     let searchTimeout;
     searchInput.addEventListener('input', function() {
@@ -566,24 +576,26 @@ function setupSearchEventListeners() {
             filterPerfumes();
         }, 300);
     });
-    
+
     // Brand filter
     brandFilter.addEventListener('change', function() {
         currentBrandFilter = this.value;
         filterPerfumes();
     });
-    
+
     // Gender filter
     genderFilter.addEventListener('change', function() {
         currentGenderFilter = this.value;
         filterPerfumes();
     });
-    
+
     // Clear filters
     clearButton.addEventListener('click', function() {
-        searchInput.value = '';
-        brandFilter.value = '';
-        genderFilter.value = '';
+        if (searchInput && brandFilter && genderFilter) {
+            searchInput.value = '';
+            brandFilter.value = '';
+            genderFilter.value = '';
+        }
         currentSearchTerm = '';
         currentBrandFilter = '';
         currentGenderFilter = '';
@@ -627,21 +639,29 @@ function filterPerfumes() {
 function displayPerfumes() {
     const resultsContainer = document.getElementById('perfumeResults');
     const noResultsDiv = document.getElementById('noResults');
-    
+
+    // Check if required elements exist
+    if (!resultsContainer || !noResultsDiv) {
+        // Not on catalog page - skipping display
+        return;
+    }
+
     if (filteredPerfumes.length === 0) {
         resultsContainer.style.display = 'none';
         noResultsDiv.style.display = 'block';
         return;
     }
-    
+
     resultsContainer.style.display = 'grid';
     noResultsDiv.style.display = 'none';
-    
+
     resultsContainer.innerHTML = '';
-    
+
     filteredPerfumes.forEach(perfume => {
         const perfumeItem = createPerfumeItem(perfume);
-        resultsContainer.appendChild(perfumeItem);
+        if (resultsContainer) { // Double-check container still exists
+            resultsContainer.appendChild(perfumeItem);
+        }
     });
 }
 
@@ -706,15 +726,21 @@ function showPerfumeDetails(perfume) {
 
 function updateResultsCount() {
     const countElement = document.getElementById('resultsCount');
-    
+
+    // Check if element exists
+    if (!countElement) {
+        // Not on catalog page - skipping count update
+        return;
+    }
+
     if (!window.perfumesDatabase) {
         countElement.textContent = 'Loading perfumes...';
         return;
     }
-    
+
     const total = window.perfumesDatabase.length;
     const showing = filteredPerfumes.length;
-    
+
     if (showing === total) {
         countElement.textContent = `Showing all ${total} perfumes`;
     } else {
