@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "concurrently \"npm run backend:dev\" \"npm run frontend:dev\"",
     "start": "npm run backend:start",
+    "simple-api": "node simple-server.js",
     "backend:dev": "cd backend && npm run dev",
     "backend:start": "cd backend && npm start",
     "frontend:dev": "cd frontend && npm run dev",
@@ -34,6 +35,10 @@
     "backend"
   ],
   "dependencies": {
+    "@supabase/supabase-js": "^2.57.4",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
     "glob": "^11.0.3"
   }
 }
