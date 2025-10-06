@@ -1,5 +1,17 @@
+// FORCE CLEAR CACHED DATA IMMEDIATELY
+console.log('🧹 SCRIPT.JS: Force clearing cached data...');
+window.offlinePerfumeData = null;
+window.perfumesDatabase = null;
+delete window.offlinePerfumeData;
+delete window.perfumesDatabase;
+
 // Mobile Navigation Toggle
 document.addEventListener('DOMContentLoaded', function() {
+    // FORCE CLEAR AGAIN ON DOM READY
+    console.log('🧹 DOM READY: Force clearing cached data again...');
+    window.offlinePerfumeData = null;
+    window.perfumesDatabase = null;
+    
     // Initialize error monitoring if available
     if (window.ErrorMonitor) {
         // Error monitoring system is active
