@@ -7,6 +7,7 @@ class EdenParfumAPI {
         this.baseUrl = this.getApiBaseUrl();
         this.cache = new Map();
         this.cacheExpiry = 5 * 60 * 1000; // 5 minutes
+        console.log('🔧 EdenParfumAPI initialized with base URL:', this.baseUrl);
     }
 
     getApiBaseUrl() {
@@ -42,6 +43,12 @@ class EdenParfumAPI {
             data,
             timestamp: Date.now()
         });
+    }
+
+    // Clear all cache - useful for debugging
+    clearCache() {
+        console.log('🗑️ Clearing API cache');
+        this.cache.clear();
     }
 
     // Fetch wrapper with error handling and offline fallback

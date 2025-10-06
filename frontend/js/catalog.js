@@ -63,13 +63,18 @@ export class CatalogModule {
                 window.edenAPI = new EdenParfumAPI();
             }
 
+            // Clear cache to ensure fresh data
+            window.edenAPI.clearCache();
+
             console.log('🔄 Loading perfumes from API...');
+            console.log('🌐 API Base URL:', window.edenAPI.baseUrl);
 
             // First, get total count by fetching page 1 with limit 1
             const countResponse = await window.edenAPI.getPerfumes({ page: 1, limit: 1 });
             const totalPerfumes = countResponse.total || 506;
             
             console.log(`📊 Total perfumes available: ${totalPerfumes}`);
+            console.log('🔍 Count response details:', countResponse);
             
             // Now fetch all perfumes with a high limit to get everything
             const response = await window.edenAPI.getPerfumes({ 
@@ -77,7 +82,9 @@ export class CatalogModule {
                 limit: Math.max(totalPerfumes, 1000) // Ensure we get all perfumes
             });
             
-            console.log('🔍 API Response:', response);
+            console.log('🔍 Full API Response:', response);
+            console.log('📊 Response data length:', response.data ? response.data.length : 'NO DATA');
+            console.log('🏷️ Response offline flag:', response.offline);
             
             if (response.success && response.data) {
                 // Store in global variable for compatibility with existing code
