@@ -18,7 +18,7 @@ class EdenParfumAPI {
             return 'http://localhost:3000/api/v2';
         } else {
             // Production environment - use Netlify Functions
-            return '/api/v2';
+            return '/.netlify/functions';
         }
     }
 
