@@ -638,7 +638,7 @@ export class FragranceDataModule {
             return null; // Return null instead of placeholder.avif to avoid 404 errors
         }
         
-        return `photos/${imageName}`;
+        return `Fragrances/${imageName}`;
     }
 
     getBrandLogo(brand) {
