@@ -58,68 +58,30 @@ export class CatalogModule {
 
     async loadPerfumeData() {
         try {
-            // Wait for EdenParfumAPI to be available
-            if (typeof EdenParfumAPI === 'undefined') {
-                console.log('⏳ Waiting for EdenParfumAPI to load...');
-                await new Promise(resolve => {
-                    const checkAPI = () => {
-                        if (typeof EdenParfumAPI !== 'undefined') {
-                            resolve();
-                        } else {
-                            setTimeout(checkAPI, 100);
-                        }
-                    };
-                    checkAPI();
-                });
+            console.log('🔄 Starting direct API call...');
+            
+            // Direct fetch to the API endpoint
+            const response = await fetch('/.netlify/functions/perfumes?limit=1000');
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
-
-            // Initialize API client if not already done
-            if (!window.edenAPI) {
-                window.edenAPI = new EdenParfumAPI();
-            }
-
-            // Clear cache to ensure fresh data
-            window.edenAPI.clearCache();
-
-            console.log('🔄 Loading perfumes from API...');
-            console.log('🌐 API Base URL:', window.edenAPI.baseUrl);
-
-            // First, get total count by fetching page 1 with limit 1
-            const countResponse = await window.edenAPI.getPerfumes({ page: 1, limit: 1 });
-            const totalPerfumes = countResponse.total || 506;
             
-            console.log(`📊 Total perfumes available: ${totalPerfumes}`);
-            console.log('🔍 Count response details:', countResponse);
+            const apiData = await response.json();
+            console.log('✅ Direct API call successful:', apiData);
             
-            // Now fetch all perfumes with a high limit to get everything
-            const response = await window.edenAPI.getPerfumes({ 
-                page: 1, 
-                limit: Math.max(totalPerfumes, 1000) // Ensure we get all perfumes
-            });
-            
-            console.log('🔍 Full API Response:', response);
-            console.log('📊 Response data length:', response.data ? response.data.length : 'NO DATA');
-            console.log('🏷️ Response offline flag:', response.offline);
-            
-            if (response.success && response.data) {
+            if (apiData.success && apiData.data && apiData.data.length > 0) {
                 // Store in global variable for compatibility with existing code
-                window.perfumesDatabase = response.data;
+                window.perfumesDatabase = apiData.data;
                 
-                console.log(`✅ Loaded ${response.data.length} perfumes from API (total: ${response.total})`);
-                
-                // Handle offline mode
-                if (response.offline) {
-                    showErrorMessage(`Running in offline mode - showing ${response.data.length} sample perfumes. Check API connection for full catalog.`, 'warning');
-                } else if (response.data.length < totalPerfumes) {
-                    console.warn(`⚠️ Only loaded ${response.data.length} of ${totalPerfumes} perfumes. API may have pagination limits.`);
-                }
+                console.log(`✅ Loaded ${apiData.data.length} perfumes directly from API (total: ${apiData.total})`);
                 
                 // Dispatch event for other components
                 window.dispatchEvent(new CustomEvent('perfumesLoaded', {
                     detail: { 
-                        perfumes: response.data,
-                        total: response.total,
-                        offline: response.offline
+                        perfumes: apiData.data,
+                        total: apiData.total,
+                        offline: false
                     }
                 }));
                 
@@ -130,7 +92,7 @@ export class CatalogModule {
             }
             
         } catch (error) {
-            console.error('❌ API Error:', error);
+            console.error('❌ Direct API call failed:', error);
             console.log('🔄 Falling back to offline data...');
             
             // Try fallback to offline data if available
