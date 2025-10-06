@@ -5,7 +5,6 @@
 window.CACHE_MANIFEST = {
   "styles.css": "d1335fb0",
   "js/errorMonitor.js": "ae86bcde",
-  "perfumes-data.js": "1758292759619",
   "script.js": "60baabaa",
   "js/offlineData.js": "6292a9d7",
   "js/fastImageLoader.js": "618bed8d",

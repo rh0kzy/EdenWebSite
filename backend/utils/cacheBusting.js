@@ -189,7 +189,6 @@ class CacheBustingManager {
         const staticAssets = [
             'styles.css',
             'script.js',
-            'perfumes-data.js',
             'perfume-detail.js',
             'js/apiClient.js',
             'js/fastImageLoader.js',
