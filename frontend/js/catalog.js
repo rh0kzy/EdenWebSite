@@ -12,15 +12,26 @@ export class CatalogModule {
     }
 
     init() {
-        if (this.isInitialized) return;
+        console.log('🎯 CatalogModule.init() called');
+        if (this.isInitialized) {
+            console.log('⚠️ CatalogModule already initialized, skipping');
+            return;
+        }
         
         // Only initialize catalog if we're on a page with catalog elements
-        if (this.isCatalogPage()) {
+        const isCatalogPage = this.isCatalogPage();
+        console.log(`📄 Is catalog page: ${isCatalogPage}`);
+        
+        if (isCatalogPage) {
+            console.log('🚀 Starting catalog initialization...');
             this.initializeCatalog();
+        } else {
+            console.log('⏭️ Not a catalog page, skipping catalog initialization');
         }
 
         this.setupEventListeners();
         this.isInitialized = true;
+        console.log('✅ CatalogModule initialization complete');
     }
 
     isCatalogPage() {

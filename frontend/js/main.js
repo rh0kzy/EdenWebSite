@@ -7,6 +7,7 @@ import { CatalogModule } from './catalog.js';
 
 class EdenWebsiteController {
     constructor() {
+        console.log('🚀 EdenWebsiteController constructor called');
         this.modules = {
             navigation: new NavigationModule(),
             animations: new AnimationsModule(),
@@ -15,12 +16,15 @@ class EdenWebsiteController {
             catalog: new CatalogModule()
         };
         this.isInitialized = false;
+        console.log('📦 All modules created:', Object.keys(this.modules));
     }
 
     async init() {
         if (this.isInitialized) return;
 
         try {
+            console.log('🔄 EdenWebsiteController.init() starting...');
+            
             // Initialize error monitoring if available
             this.initializeErrorMonitoring();
             
@@ -37,6 +41,7 @@ class EdenWebsiteController {
             this.initializePageSpecificFeatures();
             
             this.isInitialized = true;
+            console.log('✅ EdenWebsiteController initialization complete');
             
             // Dispatch initialization complete event
             window.dispatchEvent(new CustomEvent('edenWebsiteInitialized', {
@@ -44,7 +49,7 @@ class EdenWebsiteController {
             }));
             
         } catch (error) {
-            console.error('Failed to initialize Eden Website:', error);
+            console.error('❌ Failed to initialize Eden Website:', error);
             this.showInitializationError();
         }
     }
@@ -77,7 +82,9 @@ class EdenWebsiteController {
         this.modules.animations.init();
         
         // Initialize catalog (will only run on catalog pages)
+        console.log('🎯 Initializing catalog module...');
         this.modules.catalog.init();
+        console.log('📋 Catalog module init completed');
         
         // Setup global utilities for backwards compatibility
         this.setupGlobalUtilities();
@@ -266,8 +273,12 @@ class EdenWebsiteController {
 // Create global instance
 const edenWebsite = new EdenWebsiteController();
 
+// Make it globally accessible for debugging
+window.edenWebsiteController = edenWebsite;
+
 // Auto-initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('🌟 DOM Content Loaded - Initializing Eden Website...');
     edenWebsite.init();
 });
 
