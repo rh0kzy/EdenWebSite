@@ -94,7 +94,7 @@ export class CatalogModule {
                 ? apiData.data
                 : (Array.isArray(apiData) ? apiData : null);
 
-            if (perfumes && perfumes.length > 0 && apiData?.success !== false) {
+            if (perfumes && perfumes.length > 0) {
                 // Store in global variable for compatibility with existing code
                 window.perfumesDatabase = perfumes;
 
