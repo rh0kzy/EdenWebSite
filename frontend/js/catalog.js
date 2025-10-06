@@ -63,34 +63,24 @@ export class CatalogModule {
             // Small delay to ensure other scripts don't interfere
             await new Promise(resolve => setTimeout(resolve, 100));
             
-            // Store original fetch if it exists
-            const originalFetch = window.fetch.original || window.fetch;
-            
-            // Direct fetch to the API endpoint using XMLHttpRequest as fallback if fetch fails
-            let response;
-            try {
-                response = await originalFetch.call(window, '/api/v2/perfumes?limit=506');
-            } catch (fetchError) {
-                console.log('🔄 Fetch failed, trying XMLHttpRequest...');
-                // Fallback to XMLHttpRequest
-                response = await new Promise((resolve, reject) => {
-                    const xhr = new XMLHttpRequest();
-                    xhr.open('GET', '/api/v2/perfumes?limit=506');
-                    xhr.onload = () => {
-                        if (xhr.status >= 200 && xhr.status < 300) {
-                            resolve({
-                                ok: true,
-                                status: xhr.status,
-                                json: () => Promise.resolve(JSON.parse(xhr.responseText))
-                            });
-                        } else {
-                            reject(new Error(`HTTP ${xhr.status}: ${xhr.statusText}`));
-                        }
-                    };
-                    xhr.onerror = () => reject(new Error('Network error'));
-                    xhr.send();
-                });
-            }
+            // Use XMLHttpRequest directly to avoid fetch interception issues
+            response = await new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', '/api/v2/perfumes?limit=506');
+                xhr.onload = () => {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        resolve({
+                            ok: true,
+                            status: xhr.status,
+                            json: () => Promise.resolve(JSON.parse(xhr.responseText))
+                        });
+                    } else {
+                        reject(new Error(`HTTP ${xhr.status}: ${xhr.statusText}`));
+                    }
+                };
+                xhr.onerror = () => reject(new Error('Network error'));
+                xhr.send();
+            });
             
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
