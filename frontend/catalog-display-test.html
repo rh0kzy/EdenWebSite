@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catalog Display Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .results { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        .test-item { margin: 10px 0; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .warning { background: #fff3cd; color: #856404; }
+        button { background: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin: 5px; }
+        pre { background: #f1f1f1; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Catalog Display Analysis</h1>
+    <p>This will check what's actually being displayed on the catalog page.</p>
+    
+    <button onclick="checkCatalogPage()">Check Catalog Page</button>
+    <button onclick="simulateCatalogLoad()">Simulate Catalog Load</button>
+    <button onclick="clearResults()">Clear Results</button>
+    
+    <div id="results"></div>
+    
+    <script>
+        function addResult(content, type = 'test-item') {
+            const div = document.createElement('div');
+            div.className = type;
+            div.innerHTML = content;
+            document.getElementById('results').appendChild(div);
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+        
+        async function checkCatalogPage() {
+            clearResults();
+            addResult('<h3>🔍 Analyzing Catalog Page Content</h3>');
+            
+            try {
+                // Fetch the catalog page
+                const response = await fetch('/catalog.html');
+                const html = await response.text();
+                
+                // Check what scripts are actually loaded
+                const scriptMatches = html.match(/<script[^>]*src="[^"]*"[^>]*>/g) || [];
+                addResult(`<strong>📜 Scripts Found:</strong><br>${scriptMatches.map(s => `• ${s}`).join('<br>')}`, 'test-item');
+                
+                // Check for offline data references
+                const hasOfflineData = html.includes('offlineData.js');
+                addResult(`<strong>💾 Offline Data Script:</strong> ${hasOfflineData ? '❌ FOUND (Problem!)' : '✅ Not found'}`, hasOfflineData ? 'error' : 'success');
+                
+                // Check for perfumes-data.js references
+                const hasPerfumesData = html.includes('perfumes-data.js');
+                addResult(`<strong>📊 Perfumes Data Script:</strong> ${hasPerfumesData ? '❌ FOUND (Problem!)' : '✅ Not found'}`, hasPerfumesData ? 'error' : 'success');
+                
+                // Check DOM structure
+                const hasCatalogElements = html.includes('id="perfumeResults"') && html.includes('id="brandFilter"');
+                addResult(`<strong>🏗️ Catalog DOM Elements:</strong> ${hasCatalogElements ? '✅ Found' : '❌ Missing'}`, hasCatalogElements ? 'success' : 'error');
+                
+            } catch (error) {
+                addResult(`<strong>❌ Error analyzing catalog page:</strong> ${error.message}`, 'error');
+            }
+        }
+        
+        async function simulateCatalogLoad() {
+            addResult('<h3>🧪 Simulating Catalog Data Load</h3>');
+            
+            try {
+                // Step 1: Clear any existing data
+                window.perfumesDatabase = null;
+                window.offlinePerfumeData = null;
+                addResult('🧹 Cleared existing global data', 'success');
+                
+                // Step 2: Test API call
+                const apiResponse = await fetch('/api/v2/perfumes?limit=506');
+                const apiData = await apiResponse.json();
+                
+                if (apiData.success && apiData.data) {
+                    addResult(`✅ API Call: Success - ${apiData.data.length} perfumes received`, 'success');
+                    
+                    // Step 3: Set global data
+                    window.perfumesDatabase = apiData.data;
+                    addResult(`📋 Set window.perfumesDatabase to ${apiData.data.length} perfumes`, 'success');
+                    
+                    // Step 4: Show sample data
+                    const sample = apiData.data.slice(0, 5).map(p => `${p.name} by ${p.brand}`);
+                    addResult(`<strong>🎯 Sample Perfumes:</strong><br>${sample.join('<br>')}`, 'test-item');
+                    
+                    // Step 5: Check if this would display correctly
+                    const totalCount = apiData.data.length;
+                    if (totalCount >= 500) {
+                        addResult(`🎉 RESULT: Should display ${totalCount} perfumes - THIS IS CORRECT!`, 'success');
+                    } else if (totalCount === 40) {
+                        addResult(`⚠️ RESULT: Would display ${totalCount} perfumes - THIS IS THE PROBLEM!`, 'error');
+                    } else {
+                        addResult(`❓ RESULT: Would display ${totalCount} perfumes - UNEXPECTED COUNT`, 'warning');
+                    }
+                    
+                } else {
+                    addResult('❌ API Call: Failed or returned invalid data', 'error');
+                }
+                
+            } catch (error) {
+                addResult(`❌ Simulation Error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Auto-run initial check
+        window.addEventListener('load', () => {
+            setTimeout(checkCatalogPage, 1000);
+        });
+    </script>
+</body>
+</html>
