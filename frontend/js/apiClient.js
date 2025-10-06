@@ -16,9 +16,9 @@ class EdenParfumAPI {
         
         if (hostname === 'localhost' || hostname === '127.0.0.1') {
             // Development environment - use local server
-            return 'http://localhost:3000/api/v2';
+            return 'http://localhost:3001/api/v2';
         } else {
-            // Production environment - use Netlify Functions
+            // Production environment - use direct Netlify Functions path
             return '/.netlify/functions';
         }
     }
@@ -68,7 +68,17 @@ class EdenParfumAPI {
             return cached;
         }
 
-        const url = new URL(`${baseUrl}${endpoint}`);
+        // Construct URL properly handling relative and absolute base URLs
+        let fullUrl;
+        if (baseUrl.startsWith('http')) {
+            // Absolute URL (development)
+            fullUrl = `${baseUrl}${endpoint}`;
+        } else {
+            // Relative URL (production) - need to make it absolute
+            fullUrl = `${window.location.origin}${baseUrl}${endpoint}`;
+        }
+        
+        const url = new URL(fullUrl);
         Object.keys(params).forEach(key => {
             if (params[key] !== undefined && params[key] !== '') {
                 url.searchParams.append(key, params[key]);
