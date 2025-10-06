@@ -9,7 +9,7 @@ class ErrorMonitor {
         this.errors = [];
         this.maxErrors = 100; // Keep last 100 errors
         this.apiEndpoint = '/api/v2/errors'; // Backend endpoint for error reporting
-        this.enabled = true;
+        this.enabled = false; // Disabled to prevent 404 errors on Netlify
         this.userId = this.generateUserId();
         this.sessionId = this.generateSessionId();
         

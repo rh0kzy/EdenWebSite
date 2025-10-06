@@ -34,6 +34,16 @@
   to = "/.netlify/functions/photos"
   status = 200
 
+[[redirects]]
+  from = "/api/v2/errors"
+  to = "/.netlify/functions/errors"
+  status = 200
+
+[[redirects]]
+  from = "/api/social/analytics"
+  to = "/.netlify/functions/social-analytics"
+  status = 200
+
 # Specific page redirects (exclude from catch-all)
 [[redirects]]
   from = "/catalog.html"

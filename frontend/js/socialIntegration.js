@@ -24,7 +24,7 @@ class EdenSocialIntegration {
                 whatsapp: 'https://wa.me/213123456789'
             },
             analytics: {
-                trackEvents: true,
+                trackEvents: false,  // Disabled to prevent 404 errors
                 endpoint: '/api/social/analytics'
             },
             followerCounts: {
