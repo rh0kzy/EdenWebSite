@@ -58,6 +58,21 @@ export class CatalogModule {
 
     async loadPerfumeData() {
         try {
+            // Wait for EdenParfumAPI to be available
+            if (typeof EdenParfumAPI === 'undefined') {
+                console.log('⏳ Waiting for EdenParfumAPI to load...');
+                await new Promise(resolve => {
+                    const checkAPI = () => {
+                        if (typeof EdenParfumAPI !== 'undefined') {
+                            resolve();
+                        } else {
+                            setTimeout(checkAPI, 100);
+                        }
+                    };
+                    checkAPI();
+                });
+            }
+
             // Initialize API client if not already done
             if (!window.edenAPI) {
                 window.edenAPI = new EdenParfumAPI();
