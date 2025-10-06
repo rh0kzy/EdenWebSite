@@ -18,7 +18,7 @@ exports.handler = async (event, context) => {
     // Enable CORS
     const headers = {
         'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
         'Content-Type': 'application/json'
     };
@@ -42,6 +42,13 @@ exports.handler = async (event, context) => {
 
     // Check if Supabase is initialized
     if (!supabase) {
+        console.error('Supabase not initialized:', {
+            hasUrl: !!supabaseUrl,
+            hasKey: !!supabaseKey,
+            urlLength: supabaseUrl?.length,
+            keyLength: supabaseKey?.length
+        });
+        
         return {
             statusCode: 500,
             headers,
@@ -50,14 +57,18 @@ exports.handler = async (event, context) => {
                 error: 'Database connection not available',
                 debug: {
                     hasUrl: !!supabaseUrl,
-                    hasKey: !!supabaseKey
+                    hasKey: !!supabaseKey,
+                    nodeEnv: process.env.NODE_ENV
                 }
             })
         };
     }
 
     try {
-        const { search, brand, gender, category, page = 1, limit = 50 } = event.queryStringParameters || {};
+        const queryParams = event.queryStringParameters || {};
+        const { search, brand, gender, category, page = 1, limit = 50 } = queryParams;
+
+        console.log('Query params:', queryParams);
 
         let query = supabase
             .from('perfumes')
