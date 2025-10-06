@@ -18,9 +18,7 @@ class EdenParfumAPI {
             return 'http://localhost:3000/api/v2';
         } else {
             // Production environment - use Netlify Functions
-            // Temporarily fallback to offline mode due to function issues
-            console.warn('🔄 API functions not yet ready, using offline data');
-            return null; // This will trigger offline fallback
+            return '/api/v2';
         }
     }
 
