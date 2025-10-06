@@ -2009,7 +2009,9 @@ document.addEventListener('DOMContentLoaded', function() {
         window.addEventListener('perfumesLoaded', function(event) {
             if (event.detail && event.detail.perfumes) {
                 const firstSix = event.detail.perfumes.slice(0, 6);
-                const imageNames = firstSix.map(p => getFragranceImage(p)).filter(Boolean);
+                const imageNames = firstSix
+                    .map(p => getFragranceImage(p))
+                    .filter(imageName => imageName && imageName !== null);
                 window.fastImageLoader.preloadCriticalImages(imageNames);
             }
         });

@@ -197,7 +197,9 @@ class EdenWebsiteController {
             window.addEventListener('perfumesLoaded', (event) => {
                 if (event.detail && event.detail.perfumes) {
                     const firstSix = event.detail.perfumes.slice(0, 6);
-                    const imageNames = firstSix.map(p => this.modules.fragranceData.getFragranceImage(p)).filter(Boolean);
+                    const imageNames = firstSix
+                        .map(p => this.modules.fragranceData.getFragranceImage(p))
+                        .filter(imageName => imageName && imageName !== null);
                     window.fastImageLoader.preloadCriticalImages(imageNames);
                 }
             });

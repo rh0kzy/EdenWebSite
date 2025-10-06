@@ -357,7 +357,7 @@ export class CatalogModule {
         
         // Add optimized image using fast loader
         const imageContainer = item.querySelector('.perfume-image');
-        if (fragranceImageName && fragranceImageName !== 'photos/placeholder.avif') {
+        if (fragranceImageName && fragranceImageName !== null) {
             if (window.createOptimizedImage) {
                 const optimizedImg = window.createOptimizedImage(
                     fragranceImageName, 

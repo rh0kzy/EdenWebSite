@@ -635,7 +635,7 @@ export class FragranceDataModule {
         }
         
         if (!imageName) {
-            return 'placeholder.avif';
+            return null; // Return null instead of placeholder.avif to avoid 404 errors
         }
         
         return `photos/${imageName}`;
