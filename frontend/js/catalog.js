@@ -60,6 +60,9 @@ export class CatalogModule {
         try {
             console.log('🔄 Starting direct API call...');
             
+            // Small delay to ensure other scripts don't interfere
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
             // Direct fetch to the API endpoint
             const response = await fetch('/.netlify/functions/perfumes?limit=1000');
             

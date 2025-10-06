@@ -13,8 +13,8 @@ class PerfumeDetailPage {
             // Development environment
             return 'http://localhost:3000/api/v2';
         } else {
-            // Production environment - API calls will be proxied by Netlify
-            return '/api/v2';
+            // Production environment - Use Netlify Functions
+            return '/.netlify/functions';
         }
     }
 

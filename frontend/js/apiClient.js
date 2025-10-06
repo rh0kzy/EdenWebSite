@@ -364,14 +364,14 @@ window.loadPerfumesDatabase = async function() {
     }
 };
 
-// Auto-load on DOM ready
-document.addEventListener('DOMContentLoaded', function() {
-    // Only load if we're on a page that needs the perfumes database
-    if (document.getElementById('perfumeGrid') || 
-        document.querySelector('.perfume-grid') ||
-        window.location.pathname.includes('catalog.html')) {
-        window.loadPerfumesDatabase();
-    }
-});
+// Auto-load on DOM ready - DISABLED to prevent conflicts with module system
+// document.addEventListener('DOMContentLoaded', function() {
+//     // Only load if we're on a page that needs the perfumes database
+//     if (document.getElementById('perfumeGrid') || 
+//         document.querySelector('.perfume-grid') ||
+//         window.location.pathname.includes('catalog.html')) {
+//         window.loadPerfumesDatabase();
+//     }
+// });
 
 // Production: Remove debug logging
