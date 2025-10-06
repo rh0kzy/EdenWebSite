@@ -8,6 +8,9 @@
   # Environment settings
   NETLIFY_SKIP_YARN_INTEGRITY_CHECK = "1"
   NODE_VERSION = "18"
+
+# Environment variables for Netlify Functions
+[context.production.environment]
   SUPABASE_URL = "https://ztofzphjvcsuqsjglluk.supabase.co"
   SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp0b2Z6cGhqdmNzdXFzamdsbHVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgyMTY5MTMsImV4cCI6MjA3Mzc5MjkxM30.hMLOsqNXn9s5n2Mj_32jLxCdVv_BYqzTmXgub05_Wu8"
 

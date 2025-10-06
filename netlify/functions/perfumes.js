@@ -4,11 +4,15 @@ const { createClient } = require('@supabase/supabase-js');
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseKey) {
-    console.error('Supabase credentials missing');
+let supabase;
+try {
+    if (!supabaseUrl || !supabaseKey) {
+        throw new Error('Supabase credentials missing');
+    }
+    supabase = createClient(supabaseUrl, supabaseKey);
+} catch (error) {
+    console.error('Supabase initialization error:', error);
 }
-
-const supabase = createClient(supabaseUrl, supabaseKey);
 
 exports.handler = async (event, context) => {
     // Enable CORS
@@ -33,6 +37,22 @@ exports.handler = async (event, context) => {
             statusCode: 405,
             headers,
             body: JSON.stringify({ error: 'Method not allowed' })
+        };
+    }
+
+    // Check if Supabase is initialized
+    if (!supabase) {
+        return {
+            statusCode: 500,
+            headers,
+            body: JSON.stringify({
+                success: false,
+                error: 'Database connection not available',
+                debug: {
+                    hasUrl: !!supabaseUrl,
+                    hasKey: !!supabaseKey
+                }
+            })
         };
     }
 

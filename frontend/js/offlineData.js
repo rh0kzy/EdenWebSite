@@ -202,6 +202,207 @@ const offlinePerfumeData = {
             size: "100ml",
             category: "Aromatic",
             reference: "YSL002"
+        },
+        // Additional perfumes to show more variety
+        {
+            id: 21,
+            name: "J'adore",
+            brand: "Dior",
+            gender: "Femme",
+            concentration: "Eau de Parfum",
+            size: "100ml",
+            category: "Floral",
+            reference: "D003"
+        },
+        {
+            id: 22,
+            name: "Angel",
+            brand: "Mugler",
+            gender: "Femme",
+            concentration: "Eau de Parfum",
+            size: "50ml",
+            category: "Oriental",
+            reference: "M002"
+        },
+        {
+            id: 23,
+            name: "Invictus",
+            brand: "Paco Rabanne",
+            gender: "Homme",
+            concentration: "Eau de Toilette",
+            size: "100ml",
+            category: "Aromatic",
+            reference: "PR003"
+        },
+        {
+            id: 24,
+            name: "Very Irresistible",
+            brand: "Givenchy",
+            gender: "Femme",
+            concentration: "Eau de Toilette",
+            size: "75ml",
+            category: "Floral",
+            reference: "GIV001"
+        },
+        {
+            id: 25,
+            name: "Allure Homme",
+            brand: "Chanel",
+            gender: "Homme",
+            concentration: "Eau de Toilette",
+            size: "100ml",
+            category: "Woody",
+            reference: "C003"
+        },
+        {
+            id: 26,
+            name: "Pure Poison",
+            brand: "Dior",
+            gender: "Femme",
+            concentration: "Eau de Parfum",
+            size: "100ml",
+            category: "Floral",
+            reference: "D004"
+        },
+        {
+            id: 27,
+            name: "Eros",
+            brand: "Versace",
+            gender: "Homme",
+            concentration: "Eau de Toilette",
+            size: "100ml",
+            category: "Fresh",
+            reference: "V001"
+        },
+        {
+            id: 28,
+            name: "Bright Crystal",
+            brand: "Versace",
+            gender: "Femme",
+            concentration: "Eau de Toilette",
+            size: "90ml",
+            category: "Floral",
+            reference: "V002"
+        },
+        {
+            id: 29,
+            name: "Acqua Di Gio",
+            brand: "Giorgio Armani",
+            gender: "Homme",
+            concentration: "Eau de Toilette",
+            size: "100ml",
+            category: "Fresh",
+            reference: "GA003"
+        },
+        {
+            id: 30,
+            name: "Hypnotic Poison",
+            brand: "Dior",
+            gender: "Femme",
+            concentration: "Eau de Toilette",
+            size: "100ml",
+            category: "Oriental",
+            reference: "D005"
+        },
+        {
+            id: 31,
+            name: "212 VIP",
+            brand: "Carolina Herrera",
+            gender: "Homme",
+            concentration: "Eau de Toilette",
+            size: "100ml",
+            category: "Aromatic",
+            reference: "CH002"
+        },
+        {
+            id: 32,
+            name: "Good Girl Supreme",
+            brand: "Carolina Herrera",
+            gender: "Femme",
+            concentration: "Eau de Parfum",
+            size: "80ml",
+            category: "Oriental",
+            reference: "CH003"
+        },
+        {
+            id: 33,
+            name: "Code",
+            brand: "Giorgio Armani",
+            gender: "Homme",
+            concentration: "Eau de Toilette",
+            size: "125ml",
+            category: "Oriental",
+            reference: "GA004"
+        },
+        {
+            id: 34,
+            name: "Olympea",
+            brand: "Paco Rabanne",
+            gender: "Femme",
+            concentration: "Eau de Parfum",
+            size: "80ml",
+            category: "Floral",
+            reference: "PR004"
+        },
+        {
+            id: 35,
+            name: "Spicebomb",
+            brand: "Viktor & Rolf",
+            gender: "Homme",
+            concentration: "Eau de Toilette",
+            size: "90ml",
+            category: "Spicy",
+            reference: "VR001"
+        },
+        {
+            id: 36,
+            name: "Flowerbomb",
+            brand: "Viktor & Rolf",
+            gender: "Femme",
+            concentration: "Eau de Parfum",
+            size: "100ml",
+            category: "Floral",
+            reference: "VR002"
+        },
+        {
+            id: 37,
+            name: "Scandal",
+            brand: "Jean Paul Gaultier",
+            gender: "Femme",
+            concentration: "Eau de Parfum",
+            size: "80ml",
+            category: "Floral",
+            reference: "JPG001"
+        },
+        {
+            id: 38,
+            name: "Le Male",
+            brand: "Jean Paul Gaultier",
+            gender: "Homme",
+            concentration: "Eau de Toilette",
+            size: "125ml",
+            category: "Oriental",
+            reference: "JPG002"
+        },
+        {
+            id: 39,
+            name: "Modern Muse",
+            brand: "Estée Lauder",
+            gender: "Femme",
+            concentration: "Eau de Parfum",
+            size: "100ml",
+            category: "Floral",
+            reference: "EL001"
+        },
+        {
+            id: 40,
+            name: "White Tea",
+            brand: "Elizabeth Arden",
+            gender: "Femme",
+            concentration: "Eau de Toilette",
+            size: "100ml",
+            category: "Fresh",
+            reference: "EA001"
         }
     ],
     brands: [
@@ -218,7 +419,13 @@ const offlinePerfumeData = {
         { id: 11, name: "Gucci" },
         { id: 12, name: "Hugo Boss" },
         { id: 13, name: "Kenzo" },
-        { id: 14, name: "Yves Saint Laurent" }
+        { id: 14, name: "Yves Saint Laurent" },
+        { id: 15, name: "Givenchy" },
+        { id: 16, name: "Versace" },
+        { id: 17, name: "Viktor & Rolf" },
+        { id: 18, name: "Jean Paul Gaultier" },
+        { id: 19, name: "Estée Lauder" },
+        { id: 20, name: "Elizabeth Arden" }
     ]
 };
 

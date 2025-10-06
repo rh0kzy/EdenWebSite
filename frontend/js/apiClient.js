@@ -18,7 +18,9 @@ class EdenParfumAPI {
             return 'http://localhost:3000/api/v2';
         } else {
             // Production environment - use Netlify Functions
-            return '/api/v2';
+            // Temporarily fallback to offline mode due to function issues
+            console.warn('🔄 API functions not yet ready, using offline data');
+            return null; // This will trigger offline fallback
         }
     }
 
@@ -46,6 +48,14 @@ class EdenParfumAPI {
 
     // Fetch wrapper with error handling and offline fallback
     async fetchAPI(endpoint, params = {}) {
+        const baseUrl = this.baseUrl;
+        
+        // If baseUrl is null, immediately use offline data
+        if (!baseUrl) {
+            console.log('🔄 Using offline data (API not available)');
+            return this.getOfflineData(endpoint, params);
+        }
+        
         const cacheKey = this.getCacheKey(endpoint, params);
         const cached = this.getFromCache(cacheKey);
         
@@ -53,7 +63,7 @@ class EdenParfumAPI {
             return cached;
         }
 
-        const url = new URL(`${this.baseUrl}${endpoint}`);
+        const url = new URL(`${baseUrl}${endpoint}`);
         Object.keys(params).forEach(key => {
             if (params[key] !== undefined && params[key] !== '') {
                 url.searchParams.append(key, params[key]);
