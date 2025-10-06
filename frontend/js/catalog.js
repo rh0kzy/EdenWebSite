@@ -44,13 +44,9 @@ export class CatalogModule {
         showLoadingIndicator();
         
         try {
-            // Check if perfumes database is already loaded
-            if (window.perfumesDatabase && window.perfumesDatabase.length > 0) {
-                this.setupCatalogWithData();
-            } else {
-                // Load data from API
-                await this.loadPerfumeData();
-            }
+            // Always try to load fresh data from API first, ignore any existing data
+            console.log('🚀 Force loading fresh data from API...');
+            await this.loadPerfumeData();
         } catch (error) {
             showErrorMessage('Failed to load perfume catalog. Please try again later.');
         }
