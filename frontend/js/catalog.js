@@ -94,6 +94,15 @@ export class CatalogModule {
                 ? apiData.data
                 : (Array.isArray(apiData) ? apiData : null);
 
+            console.log('🔍 Debug perfumes extraction:', {
+                hasApiData: !!apiData,
+                hasData: !!apiData?.data,
+                isDataArray: Array.isArray(apiData?.data),
+                dataLength: apiData?.data?.length,
+                perfumes: perfumes,
+                perfumesLength: perfumes?.length
+            });
+
             if (perfumes && perfumes.length > 0) {
                 // Store in global variable for compatibility with existing code
                 window.perfumesDatabase = perfumes;
