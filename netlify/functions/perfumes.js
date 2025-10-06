@@ -66,9 +66,14 @@ exports.handler = async (event, context) => {
 
     try {
         const queryParams = event.queryStringParameters || {};
-        const { search, brand, gender, category, page = 1, limit = 50 } = queryParams;
+        const { search, brand, gender, category, page = 1, limit = 1000 } = queryParams;
+
+        // Ensure reasonable limits for performance
+        const maxLimit = 1000;
+        const actualLimit = Math.min(parseInt(limit) || 1000, maxLimit);
 
         console.log('Query params:', queryParams);
+        console.log('Applied limit:', actualLimit);
 
         let query = supabase
             .from('perfumes')
@@ -95,9 +100,9 @@ exports.handler = async (event, context) => {
         }
 
         // Apply pagination
-        const offset = (parseInt(page) - 1) * parseInt(limit);
+        const offset = (parseInt(page) - 1) * actualLimit;
         query = query
-            .range(offset, offset + parseInt(limit) - 1)
+            .range(offset, offset + actualLimit - 1)
             .order('reference', { ascending: true });
 
         const { data: perfumes, error, count } = await query;
@@ -123,7 +128,7 @@ exports.handler = async (event, context) => {
                 data: perfumes || [],
                 total: count || 0,
                 page: parseInt(page),
-                totalPages: Math.ceil((count || 0) / parseInt(limit))
+                totalPages: Math.ceil((count || 0) / actualLimit)
             })
         };
 
