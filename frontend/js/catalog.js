@@ -64,7 +64,7 @@ export class CatalogModule {
             await new Promise(resolve => setTimeout(resolve, 100));
             
             // Use XMLHttpRequest directly to avoid fetch interception issues
-            response = await new Promise((resolve, reject) => {
+            let response = await new Promise((resolve, reject) => {
                 const xhr = new XMLHttpRequest();
                 xhr.open('GET', '/api/v2/perfumes?limit=506');
                 xhr.onload = () => {
