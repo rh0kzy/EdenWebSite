@@ -69,13 +69,13 @@ export class CatalogModule {
             // Direct fetch to the API endpoint using XMLHttpRequest as fallback if fetch fails
             let response;
             try {
-                response = await originalFetch.call(window, '/.netlify/functions/perfumes?limit=1000');
+                response = await originalFetch.call(window, '/api/v2/perfumes?limit=1000');
             } catch (fetchError) {
                 console.log('🔄 Fetch failed, trying XMLHttpRequest...');
                 // Fallback to XMLHttpRequest
                 response = await new Promise((resolve, reject) => {
                     const xhr = new XMLHttpRequest();
-                    xhr.open('GET', '/.netlify/functions/perfumes?limit=1000');
+                    xhr.open('GET', '/api/v2/perfumes?limit=1000');
                     xhr.onload = () => {
                         if (xhr.status >= 200 && xhr.status < 300) {
                             resolve({
