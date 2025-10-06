@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Catalog Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .warning { background: #fff3cd; color: #856404; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; font-size: 12px; }
+        button { background: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        .perfume-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-top: 10px; }
+        .perfume-card { background: #f8f9fa; padding: 10px; border-radius: 4px; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔬 Real-Time Catalog Debug Test</h1>
+        <p>This page will test exactly what's happening with the catalog loading process.</p>
+        
+        <div class="test-section">
+            <h3>🏃‍♂️ Quick Actions</h3>
+            <button onclick="testAPI()">Test API</button>
+            <button onclick="testGlobalVars()">Check Global Variables</button>
+            <button onclick="testModuleLoad()">Test Module Loading</button>
+            <button onclick="clearAllCache()">Clear All Cache</button>
+            <button onclick="runFullTest()">Run Full Test</button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const results = document.getElementById('results');
+        
+        function addResult(type, title, content, data = null) {
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.innerHTML = `<strong>${title}</strong><br>${content}`;
+            if (data) {
+                const pre = document.createElement('pre');
+                pre.textContent = JSON.stringify(data, null, 2);
+                div.appendChild(pre);
+            }
+            results.appendChild(div);
+        }
+        
+        function clearResults() {
+            results.innerHTML = '';
+        }
+        
+        async function testAPI() {
+            clearResults();
+            addResult('info', '🔄 Testing API', 'Making direct API call...');
+            
+            try {
+                const response = await fetch('/api/v2/perfumes?limit=506');
+                const data = await response.json();
+                
+                if (data.success && data.data && data.data.length > 0) {
+                    addResult('success', '✅ API Test Passed', 
+                        `Successfully retrieved ${data.data.length} perfumes (total: ${data.total})`);
+                    
+                    // Show sample data
+                    const samples = data.data.slice(0, 3).map(p => ({
+                        name: p.name,
+                        brand: p.brand,
+                        gender: p.gender
+                    }));
+                    addResult('info', '📋 Sample Data', 'First 3 perfumes:', samples);
+                } else {
+                    addResult('error', '❌ API Test Failed', 'API returned invalid data', data);
+                }
+            } catch (error) {
+                addResult('error', '❌ API Test Error', `Failed to call API: ${error.message}`);
+            }
+        }
+        
+        function testGlobalVars() {
+            clearResults();
+            addResult('info', '🔍 Global Variables Check', 'Checking current state...');
+            
+            const state = {
+                perfumesDatabase: window.perfumesDatabase ? {
+                    exists: true,
+                    length: window.perfumesDatabase.length,
+                    sample: window.perfumesDatabase.slice(0, 2)
+                } : { exists: false },
+                offlinePerfumeData: window.offlinePerfumeData ? {
+                    exists: true,
+                    length: window.offlinePerfumeData.perfumes ? window.offlinePerfumeData.perfumes.length : 0
+                } : { exists: false },
+                edenAPI: window.edenAPI ? { exists: true } : { exists: false },
+                mainController: window.edenWebsiteController ? { exists: true } : { exists: false }
+            };
+            
+            addResult('info', '📊 Current State', '', state);
+        }
+        
+        async function testModuleLoad() {
+            clearResults();
+            addResult('info', '🔄 Module Loading Test', 'Testing module system...');
+            
+            // Wait for modules to potentially load
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            
+            // Check if catalog module exists and is working
+            if (window.edenWebsiteController && window.edenWebsiteController.modules) {
+                const catalog = window.edenWebsiteController.modules.catalog;
+                if (catalog) {
+                    addResult('success', '✅ Catalog Module Found', 
+                        `Module is ${catalog.isInitialized ? 'initialized' : 'not initialized'}`);
+                } else {
+                    addResult('warning', '⚠️ Catalog Module Missing', 'Module system exists but catalog module not found');
+                }
+            } else {
+                addResult('warning', '⚠️ Module System Missing', 'Main controller not found');
+            }
+            
+            testGlobalVars();
+        }
+        
+        function clearAllCache() {
+            clearResults();
+            addResult('info', '🧹 Clearing Cache', 'Attempting to clear all cached data...');
+            
+            try {
+                // Clear global variables
+                window.perfumesDatabase = null;
+                window.offlinePerfumeData = null;
+                delete window.perfumesDatabase;
+                delete window.offlinePerfumeData;
+                
+                // Clear storage
+                localStorage.clear();
+                sessionStorage.clear();
+                
+                addResult('success', '✅ Cache Cleared', 'All cached data cleared successfully');
+            } catch (error) {
+                addResult('error', '❌ Cache Clear Failed', `Error: ${error.message}`);
+            }
+        }
+        
+        async function runFullTest() {
+            clearResults();
+            addResult('info', '🚀 Full Test Started', 'Running comprehensive test...');
+            
+            // Test 1: API
+            await testAPI();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Test 2: Global vars before loading
+            addResult('info', '📊 State Before Module Load', 'Checking initial state...');
+            testGlobalVars();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Test 3: Try to load fresh data
+            addResult('info', '🔄 Loading Fresh Data', 'Attempting to load data directly...');
+            try {
+                const response = await fetch('/api/v2/perfumes?limit=506');
+                const data = await response.json();
+                
+                if (data.success) {
+                    window.perfumesDatabase = data.data;
+                    addResult('success', '✅ Fresh Data Loaded', 
+                        `Set window.perfumesDatabase to ${data.data.length} perfumes`);
+                }
+            } catch (error) {
+                addResult('error', '❌ Fresh Data Load Failed', error.message);
+            }
+            
+            // Test 4: Final state
+            await new Promise(resolve => setTimeout(resolve, 500));
+            addResult('info', '📊 Final State', 'Checking final state...');
+            testGlobalVars();
+            
+            // Test 5: Diagnosis
+            addResult('info', '🎯 Diagnosis', getDiagnosis());
+        }
+        
+        function getDiagnosis() {
+            const dbCount = window.perfumesDatabase ? window.perfumesDatabase.length : 0;
+            const hasOffline = window.offlinePerfumeData ? true : false;
+            
+            if (dbCount >= 500) {
+                return '✅ SUCCESS: Catalog has the correct number of perfumes!';
+            } else if (dbCount === 40) {
+                return '❌ ISSUE: Still showing 40 perfumes (offline data). Check for script conflicts.';
+            } else if (dbCount === 0 || !window.perfumesDatabase) {
+                return '⚠️ ISSUE: No perfume data loaded. Module system may not be initializing.';
+            } else {
+                return `❓ UNKNOWN: Unexpected perfume count (${dbCount}). Needs investigation.`;
+            }
+        }
+        
+        // Auto-run basic test on load
+        window.addEventListener('load', () => {
+            setTimeout(testGlobalVars, 1000);
+        });
+    </script>
+</body>
+</html>
