@@ -94,24 +94,19 @@ export class CatalogModule {
                 ? apiData.data
                 : (Array.isArray(apiData) ? apiData : null);
 
-            console.log('🔍 Debug perfumes extraction:', {
-                hasApiData: !!apiData,
-                hasData: !!apiData?.data,
-                isDataArray: Array.isArray(apiData?.data),
-                dataLength: apiData?.data?.length,
-                perfumes: perfumes,
-                perfumesLength: perfumes?.length
-            });
-
             if (perfumes && perfumes.length > 0) {
                 // Store in global variable for compatibility with existing code
                 window.perfumesDatabase = perfumes;
+                
+                // Clear any cached offline data to prevent conflicts
+                window.offlinePerfumeData = null;
 
                 const totalCount = (typeof apiData?.total === 'number' && apiData.total >= perfumes.length)
                     ? apiData.total
                     : perfumes.length;
 
                 console.log(`✅ Loaded ${perfumes.length} perfumes directly from API (total: ${totalCount})`);
+                console.log('🔒 Clearing offline data to prevent conflicts');
 
                 // Dispatch event for other components
                 window.dispatchEvent(new CustomEvent('perfumesLoaded', {
