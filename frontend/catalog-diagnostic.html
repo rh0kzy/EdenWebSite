@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catalog Diagnostic Test - EDEN PARFUM</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .error { background-color: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .info { background-color: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+        .warning { background-color: #fff3cd; border: 1px solid #ffeaa7; color: #856404; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        .progress { margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>🧪 EDEN PARFUM Catalog Diagnostic Test</h1>
+    <div id="testResults"></div>
+    
+    <script>
+        const results = document.getElementById('testResults');
+        
+        function addResult(type, title, message, data = null) {
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.innerHTML = `<strong>${title}</strong><br>${message}`;
+            if (data) {
+                div.innerHTML += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            }
+            results.appendChild(div);
+        }
+        
+        function addProgress(message) {
+            const div = document.createElement('div');
+            div.className = 'progress';
+            div.innerHTML = `⏳ ${message}`;
+            results.appendChild(div);
+            return div;
+        }
+        
+        async function runDiagnostics() {
+            addResult('info', 'Starting Diagnostics', 'Testing EDEN PARFUM catalog data loading...');
+            
+            // Test 1: API Endpoint Direct Test
+            const apiProgress = addProgress('Testing API endpoint directly...');
+            try {
+                const apiResponse = await fetch('/api/v2/perfumes?limit=506');
+                const apiData = await apiResponse.json();
+                
+                if (apiData.success && apiData.data && apiData.data.length > 0) {
+                    addResult('success', '✅ API Endpoint Test', 
+                        `API is working correctly! Retrieved ${apiData.data.length} perfumes (total: ${apiData.total})`);
+                    
+                    // Show sample perfumes
+                    const samplePerfumes = apiData.data.slice(0, 3).map(p => 
+                        `${p.name} by ${p.brand} (${p.gender})`
+                    ).join(', ');
+                    addResult('info', 'Sample Data', `First 3 perfumes: ${samplePerfumes}`);
+                } else {
+                    addResult('error', '❌ API Endpoint Test', 'API returned invalid data', apiData);
+                }
+                apiProgress.remove();
+            } catch (error) {
+                addResult('error', '❌ API Endpoint Test', `API request failed: ${error.message}`);
+                apiProgress.remove();
+            }
+            
+            // Test 2: Check for Offline Data
+            const offlineProgress = addProgress('Checking for offline data conflicts...');
+            try {
+                if (window.offlinePerfumeData) {
+                    const offlineCount = window.offlinePerfumeData.perfumes ? window.offlinePerfumeData.perfumes.length : 0;
+                    addResult('warning', '⚠️ Offline Data Found', 
+                        `Offline data is present with ${offlineCount} perfumes. This may conflict with API data.`);
+                } else {
+                    addResult('success', '✅ No Offline Data Conflicts', 'No offline data found - good for API loading!');
+                }
+                offlineProgress.remove();
+            } catch (error) {
+                addResult('info', 'Offline Data Check', 'Unable to check offline data availability');
+                offlineProgress.remove();
+            }
+            
+            // Test 3: Test Catalog Module Loading
+            const moduleProgress = addProgress('Testing catalog module system...');
+            try {
+                // Wait a bit for modules to load
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                if (window.perfumesDatabase) {
+                    const dbCount = window.perfumesDatabase.length;
+                    if (dbCount >= 500) {
+                        addResult('success', '✅ Catalog Database Loaded', 
+                            `perfumesDatabase contains ${dbCount} perfumes - looks correct!`);
+                    } else if (dbCount === 40) {
+                        addResult('error', '❌ Catalog Using Offline Data', 
+                            `perfumesDatabase only has ${dbCount} perfumes - this suggests offline data is being used instead of API data`);
+                    } else {
+                        addResult('warning', '⚠️ Unexpected Perfume Count', 
+                            `perfumesDatabase has ${dbCount} perfumes - expected around 506`);
+                    }
+                } else {
+                    addResult('warning', '⚠️ No Catalog Database', 'window.perfumesDatabase is not set yet');
+                }
+                moduleProgress.remove();
+            } catch (error) {
+                addResult('error', '❌ Module System Test', `Error testing modules: ${error.message}`);
+                moduleProgress.remove();
+            }
+            
+            // Test 4: Check DOM Elements
+            const domProgress = addProgress('Checking catalog DOM elements...');
+            try {
+                const brandFilter = document.getElementById('brandFilter');
+                const genderFilter = document.getElementById('genderFilter');
+                const perfumeResults = document.getElementById('perfumeResults');
+                
+                if (brandFilter && genderFilter && perfumeResults) {
+                    addResult('success', '✅ DOM Elements Found', 'All required catalog elements are present');
+                } else {
+                    addResult('warning', '⚠️ Missing DOM Elements', 'Some catalog elements are missing - this might be a different page');
+                }
+                domProgress.remove();
+            } catch (error) {
+                addResult('error', '❌ DOM Check Failed', `Error checking DOM: ${error.message}`);
+                domProgress.remove();
+            }
+            
+            // Test 5: Final Recommendation
+            addResult('info', '📋 Test Summary', 
+                'Check the results above. If API is working but perfumesDatabase has only 40 items, ' +
+                'there\'s still an offline data conflict that needs to be resolved.');
+        }
+        
+        // Run diagnostics when page loads
+        window.addEventListener('load', runDiagnostics);
+    </script>
+</body>
+</html>
