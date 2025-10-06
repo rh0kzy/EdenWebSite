@@ -8,16 +8,27 @@
   # Environment settings
   NETLIFY_SKIP_YARN_INTEGRITY_CHECK = "1"
   NODE_VERSION = "18"
+  SUPABASE_URL = "https://ztofzphjvcsuqsjglluk.supabase.co"
+  SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp0b2Z6cGhqdmNzdXFzamdsbHVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgyMTY5MTMsImV4cCI6MjA3Mzc5MjkxM30.hMLOsqNXn9s5n2Mj_32jLxCdVv_BYqzTmXgub05_Wu8"
 
-# API redirects for production backend (Render)
+# Netlify Functions for API
+[functions]
+  directory = "netlify/functions"
+
+# API redirects to Netlify Functions
 [[redirects]]
-  from = "/api/*"
-  to = "https://edenwebsite.onrender.com/api/:splat"
+  from = "/api/v2/perfumes"
+  to = "/.netlify/functions/perfumes"
   status = 200
 
 [[redirects]]
-  from = "/api/v2/*"
-  to = "https://edenwebsite.onrender.com/api/v2/:splat"
+  from = "/api/v2/brands"
+  to = "/.netlify/functions/brands"
+  status = 200
+
+[[redirects]]
+  from = "/api/v2/photos/*"
+  to = "/.netlify/functions/photos"
   status = 200
 
 # Specific page redirects (exclude from catch-all)

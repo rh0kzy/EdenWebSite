@@ -1,0 +1,30 @@
+# Render deployment configuration for Simple API Server
+# This deploys the simple-server.js with Supabase integration
+
+services:
+  - type: web
+    name: eden-parfum-simple-api
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm run simple-api
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SUPABASE_URL
+        sync: false  # Set manually in Render dashboard
+      - key: SUPABASE_ANON_KEY
+        sync: false  # Set manually in Render dashboard
+      - key: PORT
+        value: 10000
+    healthCheckPath: /health
+
+    # Auto-deploy settings
+    autoDeploy: true
+    branch: main
+
+    # Resource limits (free tier)
+    disk:
+      name: eden-parfum-data
+      mountPath: /data
+      sizeGB: 1

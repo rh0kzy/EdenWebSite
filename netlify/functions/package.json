@@ -1,0 +1,8 @@
+{
+  "name": "eden-parfum-netlify-functions",
+  "version": "1.0.0",
+  "description": "Netlify Functions for Eden Parfum API",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.57.4"
+  }
+}
