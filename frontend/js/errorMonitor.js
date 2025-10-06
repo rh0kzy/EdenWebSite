@@ -58,10 +58,14 @@ class ErrorMonitor {
     monitorNetworkErrors() {
         // Intercept fetch requests
         const originalFetch = window.fetch;
+        
+        // Store reference to original fetch for emergency use
+        window.fetch.original = originalFetch;
+        
         window.fetch = async (...args) => {
             const startTime = performance.now();
             try {
-                const response = await originalFetch.apply(this, args);
+                const response = await originalFetch.apply(window, args);
                 const endTime = performance.now();
                 const duration = endTime - startTime;
 
