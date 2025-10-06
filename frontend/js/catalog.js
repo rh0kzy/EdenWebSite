@@ -57,6 +57,7 @@ export class CatalogModule {
     }
 
     async loadPerfumeData() {
+        let response;
         try {
             console.log('🔄 Starting direct API call...');
             
@@ -64,7 +65,7 @@ export class CatalogModule {
             await new Promise(resolve => setTimeout(resolve, 100));
             
             // Use XMLHttpRequest directly to avoid fetch interception issues
-            let response = await new Promise((resolve, reject) => {
+            response = await new Promise((resolve, reject) => {
                 const xhr = new XMLHttpRequest();
                 xhr.open('GET', '/api/v2/perfumes?limit=506');
                 xhr.onload = () => {
@@ -88,18 +89,26 @@ export class CatalogModule {
             
             const apiData = await response.json();
             console.log('✅ Direct API call successful:', apiData);
-            
-            if (apiData.success && apiData.data && apiData.data.length > 0) {
+
+            const perfumes = Array.isArray(apiData?.data)
+                ? apiData.data
+                : (Array.isArray(apiData) ? apiData : null);
+
+            if (perfumes && perfumes.length > 0 && apiData?.success !== false) {
                 // Store in global variable for compatibility with existing code
-                window.perfumesDatabase = apiData.data;
-                
-                console.log(`✅ Loaded ${apiData.data.length} perfumes directly from API (total: ${apiData.total})`);
-                
+                window.perfumesDatabase = perfumes;
+
+                const totalCount = (typeof apiData?.total === 'number' && apiData.total >= perfumes.length)
+                    ? apiData.total
+                    : perfumes.length;
+
+                console.log(`✅ Loaded ${perfumes.length} perfumes directly from API (total: ${totalCount})`);
+
                 // Dispatch event for other components
                 window.dispatchEvent(new CustomEvent('perfumesLoaded', {
-                    detail: { 
-                        perfumes: apiData.data,
-                        total: apiData.total,
+                    detail: {
+                        perfumes,
+                        total: totalCount,
                         offline: false
                     }
                 }));
