@@ -44,8 +44,24 @@ export class CatalogModule {
         showLoadingIndicator();
         
         try {
+            // FORCE CLEAR any cached offline data that might interfere
+            window.offlinePerfumeData = null;
+            window.perfumesDatabase = null;
+            delete window.offlinePerfumeData;
+            delete window.perfumesDatabase;
+            
+            // Clear localStorage and sessionStorage just in case
+            try {
+                localStorage.removeItem('perfumesDatabase');
+                localStorage.removeItem('offlinePerfumeData');
+                sessionStorage.removeItem('perfumesDatabase');
+                sessionStorage.removeItem('offlinePerfumeData');
+            } catch (e) {
+                console.log('Storage clear failed (expected in some environments)');
+            }
+            
             // Always try to load fresh data from API first, ignore any existing data
-            console.log('🚀 Force loading fresh data from API...');
+            console.log('🚀 Force loading fresh data from API (after clearing all cache)...');
             await this.loadPerfumeData();
         } catch (error) {
             showErrorMessage('Failed to load perfume catalog. Please try again later.');
@@ -56,6 +72,9 @@ export class CatalogModule {
         let response;
         try {
             console.log('🔄 Starting direct API call...');
+            console.log('🧹 Current state check:');
+            console.log('  - window.offlinePerfumeData:', window.offlinePerfumeData ? 'EXISTS' : 'null');
+            console.log('  - window.perfumesDatabase:', window.perfumesDatabase ? window.perfumesDatabase.length + ' items' : 'null');
             
             // Small delay to ensure other scripts don't interfere
             await new Promise(resolve => setTimeout(resolve, 100));
