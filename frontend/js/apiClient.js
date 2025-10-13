@@ -1,13 +1,56 @@
 // Eden Parfum API Client for Frontend
 // Uses fetch API to communicate with backend /api/v2/ endpoints
 
+// Minimal offline perfume data for fallback when API is unavailable
+const offlinePerfumeData = {
+    perfumes: [
+        {
+            id: 1,
+            name: "Sauvage",
+            brand: "Dior",
+            gender: "Homme",
+            concentration: "Eau de Toilette",
+            size: "100ml",
+            category: "Fresh",
+            reference: "D001"
+        },
+        {
+            id: 2,
+            name: "Bleu de Chanel",
+            brand: "Chanel",
+            gender: "Homme",
+            concentration: "Eau de Parfum",
+            size: "100ml",
+            category: "Woody",
+            reference: "C001"
+        },
+        {
+            id: 3,
+            name: "La Vie Est Belle",
+            brand: "Lancôme",
+            gender: "Femme",
+            concentration: "Eau de Parfum",
+            size: "75ml",
+            category: "Floral",
+            reference: "L001"
+        }
+    ],
+    brands: [
+        { id: 1, name: "Dior" },
+        { id: 2, name: "Chanel" },
+        { id: 3, name: "Lancôme" }
+    ]
+};
+
+// Don't set offline data globally initially - only use as fallback when API fails
+// window.offlinePerfumeData = offlinePerfumeData;
+
 class EdenParfumAPI {
     constructor() {
         // Determine the base URL based on environment
         this.baseUrl = this.getApiBaseUrl();
         this.cache = new Map();
         this.cacheExpiry = 5 * 60 * 1000; // 5 minutes
-        console.log('🔧 EdenParfumAPI initialized with base URL:', this.baseUrl);
     }
 
     getApiBaseUrl() {
@@ -16,7 +59,7 @@ class EdenParfumAPI {
         
         if (hostname === 'localhost' || hostname === '127.0.0.1') {
             // Development environment - use local server
-            return 'http://localhost:3001/api/v2';
+            return 'http://localhost:3000/api/v2';
         } else {
             // Production environment - use direct Netlify Functions path
             return '/.netlify/functions';
@@ -47,7 +90,6 @@ class EdenParfumAPI {
 
     // Clear all cache - useful for debugging
     clearCache() {
-        console.log('🗑️ Clearing API cache');
         this.cache.clear();
     }
 
@@ -57,7 +99,6 @@ class EdenParfumAPI {
         
         // If baseUrl is null, immediately use offline data
         if (!baseUrl) {
-            console.log('🔄 Using offline data (API not available)');
             return this.getOfflineData(endpoint, params);
         }
         
@@ -170,11 +211,12 @@ class EdenParfumAPI {
 
     // Offline data fallback
     getOfflineData(endpoint, params = {}) {
-        if (!window.offlinePerfumeData) {
+        // Use the local offlinePerfumeData constant as fallback
+        const data = offlinePerfumeData;
+        
+        if (!data || !data.perfumes) {
             throw new Error('No offline data available and API server is unreachable');
         }
-
-        const data = window.offlinePerfumeData;
         
         if (endpoint === '/perfumes') {
             let perfumes = data.perfumes;

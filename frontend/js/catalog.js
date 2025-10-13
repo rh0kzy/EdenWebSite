@@ -12,9 +12,7 @@ export class CatalogModule {
     }
 
     init() {
-        console.log('🎯 CatalogModule.init() called');
         if (this.isInitialized) {
-            console.log('⚠️ CatalogModule already initialized, skipping');
             return;
         }
         
@@ -80,9 +78,8 @@ export class CatalogModule {
     }
 
     async loadPerfumeData() {
-        let response;
         try {
-            console.log('🔄 Starting direct API call...');
+            console.log('🔄 Starting API call using edenAPI...');
             console.log('🧹 Current state check:');
             console.log('  - window.offlinePerfumeData:', window.offlinePerfumeData ? 'EXISTS' : 'null');
             console.log('  - window.perfumesDatabase:', window.perfumesDatabase ? window.perfumesDatabase.length + ' items' : 'null');
@@ -90,49 +87,29 @@ export class CatalogModule {
             // Small delay to ensure other scripts don't interfere
             await new Promise(resolve => setTimeout(resolve, 100));
             
-            // Use XMLHttpRequest directly to avoid fetch interception issues
-            response = await new Promise((resolve, reject) => {
-                const xhr = new XMLHttpRequest();
-                xhr.open('GET', '/api/v2/perfumes?limit=506');
-                xhr.onload = () => {
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        resolve({
-                            ok: true,
-                            status: xhr.status,
-                            json: () => Promise.resolve(JSON.parse(xhr.responseText))
-                        });
-                    } else {
-                        reject(new Error(`HTTP ${xhr.status}: ${xhr.statusText}`));
-                    }
-                };
-                xhr.onerror = () => reject(new Error('Network error'));
-                xhr.send();
-            });
-            
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-            
-            const apiData = await response.json();
-            console.log('✅ Direct API call successful:', apiData);
+            // Use the proper API client instead of direct XMLHttpRequest
+            const response = await window.edenAPI.getPerfumes({ limit: 506 });
+            console.log('✅ API call successful:', response);
 
-            const perfumes = Array.isArray(apiData?.data)
-                ? apiData.data
-                : (Array.isArray(apiData) ? apiData : null);
+            if (!response.success) {
+                throw new Error('API returned unsuccessful response');
+            }
+
+            const perfumes = Array.isArray(response.data) ? response.data : null;
 
             if (perfumes && perfumes.length > 0) {
+                // Convert API format to legacy format expected by frontend
+                const convertedPerfumes = window.edenAPI.convertToLegacyFormat(perfumes);
+                
                 // Store in global variable for compatibility with existing code
-                window.perfumesDatabase = perfumes;
+                window.perfumesDatabase = convertedPerfumes;
                 
                 // Clear any cached offline data to prevent conflicts
                 window.offlinePerfumeData = null;
 
-                const totalCount = (typeof apiData?.total === 'number' && apiData.total >= perfumes.length)
-                    ? apiData.total
+                const totalCount = (typeof response.total === 'number' && response.total >= perfumes.length)
+                    ? response.total
                     : perfumes.length;
-
-                console.log(`✅ Loaded ${perfumes.length} perfumes directly from API (total: ${totalCount})`);
-                console.log('🔒 Clearing offline data to prevent conflicts');
 
                 // Dispatch event for other components
                 window.dispatchEvent(new CustomEvent('perfumesLoaded', {
@@ -150,7 +127,7 @@ export class CatalogModule {
             }
             
         } catch (error) {
-            console.error('❌ Direct API call failed:', error);
+            console.error('❌ API call failed:', error);
             console.log('🔄 Falling back to offline data...');
             
             // Try fallback to offline data if available

@@ -397,45 +397,30 @@ async function loadPerfumeData() {
         // FORCE: Clear any cached offline data first
         window.offlinePerfumeData = null;
         
-        // Use direct fetch instead of edenAPI to avoid any cached data
-        const response = await fetch('/api/v2/perfumes?limit=506');
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        const data = await response.json();
-        console.log('📊 API Response (fallback):', data);
+        // Use edenAPI instead of direct fetch
+        const response = await window.edenAPI.getPerfumes({ limit: 506 });
+        console.log('📊 API Response (fallback):', response);
 
-        const perfumes = Array.isArray(data?.data)
-            ? data.data
-            : (Array.isArray(data) ? data : null);
+        if (!response.success) {
+            throw new Error('API returned unsuccessful response');
+        }
+
+        const perfumes = Array.isArray(response.data) ? response.data : null;
 
         if (perfumes && perfumes.length > 0) {
-            // Store in global variable for compatibility with existing code
-            window.perfumesDatabase = perfumes;
+            // Convert API format to legacy format
+            const convertedPerfumes = window.edenAPI.convertToLegacyFormat(perfumes);
             
-            console.log(`✅ FALLBACK: Loaded ${perfumes.length} perfumes from API`);
+            // Store in global variable for compatibility with existing code
+            window.perfumesDatabase = convertedPerfumes;
+            
+            console.log(`✅ FALLBACK: Loaded ${convertedPerfumes.length} perfumes from API`);
 
             window.dispatchEvent(new CustomEvent('perfumesLoaded', {
                 detail: { 
-                    perfumes,
-                    total: data.total || perfumes.length,
+                    perfumes: convertedPerfumes,
+                    total: response.total || convertedPerfumes.length,
                     offline: false
-                }
-            }));
-            
-            // Set up catalog with the loaded data
-            setupCatalogWithData();
-                showErrorMessage(`Running in offline mode - showing ${response.data.length} sample perfumes. Check API connection for full catalog.`, 'warning');
-            }
-            
-            // Dispatch event for other components
-            window.dispatchEvent(new CustomEvent('perfumesLoaded', {
-                detail: { 
-                    perfumes: response.data,
-                    total: response.total,
-                    offline: response.offline
                 }
             }));
             
@@ -446,23 +431,42 @@ async function loadPerfumeData() {
         }
         
     } catch (error) {
-        // Failed to load perfume data - NO FALLBACK TO OFFLINE DATA
+        // Failed to load perfume data - try offline fallback
         console.error('❌ Failed to load perfume data from API:', error);
+        console.log('🔄 Falling back to offline data...');
         
-        // Don't use offline data anymore - show error instead
-        showErrorMessage('Unable to load perfume catalog. Please refresh the page or try again later.');
-        
-        // Set empty database to prevent errors
-        window.perfumesDatabase = [];
-        
-        window.dispatchEvent(new CustomEvent('perfumesLoaded', {
-            detail: { 
-                perfumes: [],
-                total: 0,
-                offline: false,
-                error: true
-            }
-        }));
+        // Try fallback to offline data if available
+        if (window.offlinePerfumeData && window.offlinePerfumeData.perfumes) {
+            window.perfumesDatabase = window.offlinePerfumeData.perfumes;
+            
+            window.dispatchEvent(new CustomEvent('perfumesLoaded', {
+                detail: { 
+                    perfumes: window.offlinePerfumeData.perfumes,
+                    total: window.offlinePerfumeData.perfumes.length,
+                    offline: true
+                }
+            }));
+            
+            // Set up catalog with offline data
+            setupCatalogWithData();
+            
+            showErrorMessage('Running in offline mode - showing sample perfumes. Check API connection for full catalog.', 'warning');
+        } else {
+            // No offline data available
+            showErrorMessage('Unable to load perfume catalog. Please refresh the page or try again later.');
+            
+            // Set empty database to prevent errors
+            window.perfumesDatabase = [];
+            
+            window.dispatchEvent(new CustomEvent('perfumesLoaded', {
+                detail: { 
+                    perfumes: [],
+                    total: 0,
+                    offline: false,
+                    error: true
+                }
+            }));
+        }
     }
 }
 
