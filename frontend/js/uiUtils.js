@@ -10,6 +10,7 @@ export class UIUtilsModule {
         this.setupContactForm();
         this.setupMapErrorHandling();
         this.addNotificationStyles();
+        this.initDelegatedHandlers();
         
         this.isInitialized = true;
     }
@@ -163,7 +164,7 @@ export class UIUtilsModule {
                     <div>
                         <i class="fas ${icon}" style="font-size: 48px; margin-bottom: 15px; display: block;"></i>
                         <p>${message}</p>
-                        <button onclick="location.reload()" class="empty-state-button">Try Again</button>
+                        <button data-action="reload" class="empty-state-button">Try Again</button>
                     </div>
                 </div>
             `;
@@ -190,11 +191,25 @@ export class UIUtilsModule {
                     <i class="fas fa-map-marker-alt" style="font-size: 3rem; color: var(--text-lighter); margin-bottom: 1rem;"></i>
                     <h3>Map Not Available</h3>
                     <p>Google Maps is not accessible. Click below to open in your map app.</p>
-                    <button onclick="openMap()" class="empty-state-button">Open in Maps</button>
+                    <button data-action="open-map" class="empty-state-button">Open in Maps</button>
                 </div>
             `;
         }
     }
+
+            // Add delegated handlers for dynamic buttons (reload, open-map)
+            initDelegatedHandlers() {
+                document.addEventListener('click', (e) => {
+                    const btn = e.target.closest('[data-action]');
+                    if (!btn) return;
+                    const action = btn.getAttribute('data-action');
+                    if (action === 'reload') {
+                        location.reload();
+                    } else if (action === 'open-map') {
+                        openMap();
+                    }
+                });
+            }
 
     addNotificationStyles() {
         // Add CSS for notification animation

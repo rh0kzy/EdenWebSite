@@ -1,4 +1,4 @@
-const { supabase } = require('../config/supabase');
+const { supabase, supabaseAdmin } = require('../config/supabase');
 
 // Get all perfumes with optional filtering
 const getAllPerfumes = async (req, res) => {
@@ -157,15 +157,62 @@ const getUniqueGenders = async (req, res) => {
     }
 };
 
+// Helper: normalize and validate gender values to match DB constraints
+const normalizeGender = (raw) => {
+    if (raw === undefined || raw === null) return null;
+    const str = String(raw).trim();
+    if (!str) return null;
+    const map = {
+        men: 'Men',
+        man: 'Men',
+        male: 'Men',
+        women: 'Women',
+        woman: 'Women',
+        female: 'Women',
+        mixte: 'Mixte',
+        "mix": 'Mixte',
+        unisex: 'Mixte' // map 'unisex' to 'Mixte' for compatibility with current DB constraint
+    };
+    const key = str.toLowerCase();
+    if (map[key]) return map[key];
+    // If already in correct form (case-insensitive), normalize capitalization
+    const cap = str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+    const allowed = ['Men', 'Women', 'Mixte', 'Unisex'];
+    if (allowed.includes(cap)) return cap === 'Unisex' ? 'Mixte' : cap; // normalize Unisex -> Mixte for compatibility
+    return null;
+};
+
 // Create new perfume (for admin use)
 const createPerfume = async (req, res) => {
     try {
         const { reference, name, brand_name, gender, description, price, image_url } = req.body;
 
+        // Basic validation and normalization
+        // Normalize gender to values accepted by the DB to avoid constraint violations
+        const normalizedGender = normalizeGender(gender);
+        if (gender && !normalizedGender) {
+            return res.status(400).json({
+                error: 'Invalid gender value',
+                details: "Allowed values: Men, Women, Mixte (also accepts 'unisex', 'male', 'female')"
+            });
+        }
+
+        // Validate price if provided
+        let priceValue = null;
+        if (price !== undefined && price !== null && price !== '') {
+            priceValue = parseFloat(price);
+            if (Number.isNaN(priceValue)) {
+                return res.status(400).json({
+                    error: 'Invalid price value',
+                    details: 'Price must be a valid number'
+                });
+            }
+        }
+
         // Check if brand exists, create if not
         let brand_id = null;
         if (brand_name) {
-            const { data: existingBrand } = await supabase
+            const { data: existingBrand } = await supabaseAdmin
                 .from('brands')
                 .select('id')
                 .eq('name', brand_name)
@@ -174,7 +221,7 @@ const createPerfume = async (req, res) => {
             if (existingBrand) {
                 brand_id = existingBrand.id;
             } else {
-                const { data: newBrand, error: brandError } = await supabase
+                const { data: newBrand, error: brandError } = await supabaseAdmin
                     .from('brands')
                     .insert({ name: brand_name })
                     .select()
@@ -182,25 +229,25 @@ const createPerfume = async (req, res) => {
 
                 if (brandError) {
                     // Error logged via logger
-                    return res.status(500).json({ 
+                    return res.status(500).json({
                         error: 'Failed to create brand',
-                        details: brandError.message 
+                        details: brandError.message
                     });
                 }
                 brand_id = newBrand.id;
             }
         }
 
-        const { data: perfume, error } = await supabase
+        const { data: perfume, error } = await supabaseAdmin
             .from('perfumes')
             .insert({
                 reference,
                 name,
                 brand_id,
                 brand_name,
-                gender,
+                gender: normalizedGender,
                 description,
-                price,
+                price: priceValue,
                 image_url
             })
             .select()
@@ -208,9 +255,9 @@ const createPerfume = async (req, res) => {
 
         if (error) {
             // Error logged via logger
-            return res.status(500).json({ 
+            return res.status(500).json({
                 error: 'Failed to create perfume',
-                details: error.message 
+                details: error.message
             });
         }
 
@@ -228,7 +275,7 @@ const updatePerfume = async (req, res) => {
         const { id } = req.params;
         const updates = req.body;
 
-        const { data: perfume, error } = await supabase
+        const { data: perfume, error } = await supabaseAdmin
             .from('perfumes')
             .update(updates)
             .eq('id', id)
@@ -240,9 +287,9 @@ const updatePerfume = async (req, res) => {
                 return res.status(404).json({ error: 'Perfume not found' });
             }
             // Error logged via logger
-            return res.status(500).json({ 
+            return res.status(500).json({
                 error: 'Failed to update perfume',
-                details: error.message 
+                details: error.message
             });
         }
 
@@ -259,16 +306,16 @@ const deletePerfume = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const { error } = await supabase
+        const { error } = await supabaseAdmin
             .from('perfumes')
             .delete()
             .eq('id', id);
 
         if (error) {
             // Error logged via logger
-            return res.status(500).json({ 
+            return res.status(500).json({
                 error: 'Failed to delete perfume',
-                details: error.message 
+                details: error.message
             });
         }
 

@@ -69,7 +69,33 @@ const monitoringRoutes = require('./routes/monitoring');
 const socialRoutes = require('./routes/social');
 
 // Middleware
-app.use(helmet());
+const isDevelopment = process.env.NODE_ENV !== 'production';
+app.use(helmet({
+    contentSecurityPolicy: isDevelopment ? false : {
+        directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"],
+            imgSrc: ["'self'", "data:", "https:", "http:"],
+            connectSrc: [
+                "'self'",
+                "http://localhost:3000",
+                "http://localhost:3001",
+                "http://localhost:8080", 
+                "http://127.0.0.1:3000",
+                "http://127.0.0.1:3001",
+                "http://127.0.0.1:8080",
+                "https://edenparfum.netlify.app",
+                process.env.FRONTEND_URL
+            ].filter(Boolean),
+            frameSrc: ["'none'"],
+            objectSrc: ["'none'"],
+            upgradeInsecureRequests: [],
+        },
+    },
+    crossOriginEmbedderPolicy: false
+}));
 
 // Performance monitoring
 app.use(performanceMonitor);
@@ -253,20 +279,20 @@ function startServer() {
 
         // Graceful shutdown handling
         const gracefulShutdown = (signal) => {
-            logger.info('Graceful Shutdown Initiated', {
+            console.log('Graceful Shutdown Initiated', {
                 signal,
                 uptime: process.uptime(),
                 timestamp: new Date().toISOString()
             });
             
             server.close(() => {
-                logger.info('Server Closed Successfully');
+                console.log('Server Closed Successfully');
                 process.exit(0);
             });
 
             // Force close after 10 seconds
             setTimeout(() => {
-                logger.error('Forced Shutdown - Server did not close gracefully');
+                console.error('Forced Shutdown - Server did not close gracefully');
                 process.exit(1);
             }, 10000);
         };

@@ -396,14 +396,26 @@ class UserErrorHandler {
         }
 
         notification.innerHTML = `
-            <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div class="error-notification-inner" style="display: flex; align-items: center; justify-content: space-between;">
                 <span>${message}</span>
-                <button onclick="this.parentElement.parentElement.remove()" 
+                <button class="error-notification-close" data-action="close" 
+                        aria-label="Close notification"
                         style="background: none; border: none; color: inherit; cursor: pointer; font-size: 18px; padding: 0; margin-left: 10px;">×</button>
             </div>
         `;
 
         this.notificationContainer.appendChild(notification);
+
+        // Attach event listener to close button (event delegation fallback)
+        const closeBtn = notification.querySelector('.error-notification-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function () {
+                if (notification.parentElement) {
+                    notification.style.animation = 'slideOut 0.3s ease-in';
+                    setTimeout(() => notification.remove(), 300);
+                }
+            });
+        }
 
         // Auto-remove after duration
         if (duration > 0) {
@@ -497,12 +509,24 @@ class UserErrorHandler {
         notification.innerHTML = `
             <div style="display: flex; align-items: center; justify-content: space-between;">
                 <span>${message}</span>
-                <button onclick="this.parentElement.parentElement.remove()" 
+                <button class="error-notification-close" data-action="close"
+                        aria-label="Close notification"
                         style="background: none; border: none; color: inherit; cursor: pointer; font-size: 18px; padding: 0; margin-left: 10px;">×</button>
             </div>
         `;
 
         this.notificationContainer.appendChild(notification);
+
+        // Attach close listener
+        const closeBtn = notification.querySelector('.error-notification-close');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', function () {
+                if (notification.parentElement) {
+                    notification.style.animation = 'slideOut 0.3s ease-in';
+                    setTimeout(() => notification.remove(), 300);
+                }
+            });
+        }
 
         if (duration > 0) {
             setTimeout(() => {

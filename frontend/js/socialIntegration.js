@@ -90,7 +90,7 @@ class EdenSocialIntegration {
                     </a>
                 </div>
                 <div class="social-menu-footer">
-                    <button class="share-page-btn" onclick="window.edenSocial.showShareModal()">
+                    <button class="share-page-btn" data-action="share-page">
                         <i class="fas fa-share-alt"></i>
                         Share This Page
                     </button>
@@ -303,7 +303,7 @@ class EdenSocialIntegration {
                                 <div class="image-preview">
                                     <img src="${image}" alt="Share image" class="share-preview">
                                     <div class="image-overlay">
-                                        <button class="download-btn" onclick="window.edenSocial.downloadImage('${image}', '${title}')">
+                                        <button class="download-btn" data-action="download-image" data-image="${image}" data-title="${title}">
                                             <i class="fas fa-download"></i>
                                             Save to Phone
                                         </button>
@@ -366,7 +366,7 @@ Visit us: ${this.config.siteUrl}
                     </div>
                     
                     <div class="step-navigation">
-                        <button class="nav-btn prev-btn" onclick="window.edenSocial.previousStep(this)">
+                        <button class="nav-btn prev-btn" data-action="wizard-prev">
                             <i class="fas fa-chevron-left"></i>
                             Previous
                         </button>
@@ -375,7 +375,7 @@ Visit us: ${this.config.siteUrl}
                             <span class="dot" data-step="2"></span>
                             <span class="dot" data-step="3"></span>
                         </div>
-                        <button class="nav-btn next-btn" onclick="window.edenSocial.nextStep(this)">
+                        <button class="nav-btn next-btn" data-action="wizard-next">
                             Next
                             <i class="fas fa-chevron-right"></i>
                         </button>
@@ -465,7 +465,7 @@ What's your signature scent? Drop it below! 👇
                             <i class="fab fa-tiktok"></i>
                             Open TikTok
                         </a>
-                        <button class="action-btn secondary" onclick="window.edenSocial.downloadImage('${image}', '${title}')">
+                        <button class="action-btn secondary" data-action="download-image" data-image="${image}" data-title="${title}">
                             <i class="fas fa-download"></i>
                             Save Reference Image
                         </button>
@@ -663,12 +663,18 @@ What's your signature scent? Drop it below! 👇
                 <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'}"></i>
             </div>
             <span class="notification-text">${message}</span>
-            <button class="notification-close" onclick="this.parentElement.remove()">
+            <button class="notification-close" data-action="close-notification">
                 <i class="fas fa-times"></i>
             </button>
         `;
         
         document.body.appendChild(notification);
+        const closeBtn = notification.querySelector('[data-action="close-notification"]');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                if (notification.parentElement) notification.remove();
+            });
+        }
         
         setTimeout(() => {
             notification.classList.add('show');
@@ -789,6 +795,25 @@ What's your signature scent? Drop it below! 👇
         
         // Setup keyboard shortcuts
         this.setupKeyboardShortcuts();
+
+        // Delegated handlers for data-action buttons inside social UI
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-action]');
+            if (!btn) return;
+            const action = btn.getAttribute('data-action');
+
+            if (action === 'share-page') {
+                this.showShareModal();
+            } else if (action === 'download-image') {
+                const image = btn.getAttribute('data-image');
+                const title = btn.getAttribute('data-title');
+                if (image) this.downloadImage(image, title || 'image');
+            } else if (action === 'wizard-prev') {
+                this.previousStep(btn);
+            } else if (action === 'wizard-next') {
+                this.nextStep(btn);
+            }
+        });
     }
 
     setupOpenGraphTags() {

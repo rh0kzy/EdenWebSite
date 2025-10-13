@@ -622,12 +622,30 @@ export class FragranceDataModule {
     getFragranceImage(perfume) {
         if (!this.isInitialized) this.init();
         
-        let imageName = this.imageMap[perfume.name];
+        // Normalize the perfume name by trimming and removing extra spaces
+        const perfumeName = (perfume.name || '').trim().replace(/\s+/g, ' ');
         
+        // Try exact match first
+        let imageName = this.imageMap[perfumeName];
+        
+        // Try case-insensitive exact match
         if (!imageName) {
-            const lowerName = perfume.name.toLowerCase();
+            const lowerName = perfumeName.toLowerCase();
             for (const [key, value] of Object.entries(this.imageMap)) {
                 if (key.toLowerCase() === lowerName) {
+                    imageName = value;
+                    break;
+                }
+            }
+        }
+        
+        // Try partial match - check if the database name is contained in any mapping key
+        if (!imageName) {
+            const lowerName = perfumeName.toLowerCase();
+            for (const [key, value] of Object.entries(this.imageMap)) {
+                const lowerKey = key.toLowerCase();
+                // Check if perfume name contains the mapping key or vice versa
+                if (lowerKey.includes(lowerName) || lowerName.includes(lowerKey)) {
                     imageName = value;
                     break;
                 }
@@ -638,7 +656,7 @@ export class FragranceDataModule {
             return null; // Return null instead of placeholder.avif to avoid 404 errors
         }
         
-        return `Fragrances/${imageName}`;
+        return `photos/Fragrances/${imageName}`;
     }
 
     getBrandLogo(brand) {

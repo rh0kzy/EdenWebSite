@@ -209,19 +209,19 @@ logger.logSecurityEvent = (event, details) => {
 
 // Graceful shutdown handler
 const gracefulShutdown = () => {
-    logger.info('Logger shutdown initiated');
-    
+    console.log('Logger shutdown initiated');
+
     // Close all transports gracefully
     logger.transports.forEach(transport => {
         if (transport.close) {
             transport.close();
         }
     });
-    
-    // Explicitly end the logger
-    if (logger.end) {
-        logger.end();
-    }
+
+    // Don't call logger.end() as it causes write after end errors
+    // if (logger.end) {
+    //     logger.end();
+    // }
 };
 
 process.on('SIGINT', gracefulShutdown);

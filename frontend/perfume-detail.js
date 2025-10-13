@@ -10,8 +10,9 @@ class PerfumeDetailPage {
         const hostname = window.location.hostname;
         
         if (hostname === 'localhost' || hostname === '127.0.0.1') {
-            // Development environment
-            return 'http://localhost:3000/api/v2';
+            // Development environment - use the same port as the current page
+            const port = window.location.port || '80';
+            return `http://localhost:${port}/api/v2`;
         } else {
             // Production environment - Use API redirect
             return '/api/v2';
@@ -167,7 +168,7 @@ class PerfumeDetailPage {
             <div class="perfume-detail-content">
                 <!-- Header Section -->
                 <div class="perfume-header">
-                    <button class="back-button" onclick="history.back()">
+                    <button class="back-button" data-action="back">
                         <i class="fas fa-arrow-left"></i> Back to Catalog
                     </button>
                     <div class="breadcrumb">
@@ -182,8 +183,7 @@ class PerfumeDetailPage {
                     <!-- Left Side - Image -->
                     <div class="perfume-image-section">
                         <div class="perfume-image-container">
-                            <img src="${imageUrl}" alt="${perfumeName}" class="perfume-image" 
-                                 onerror="this.src='/photos/default-perfume.jpg'" />
+                       <img src="${imageUrl}" alt="${perfumeName}" class="perfume-image" />
                         </div>
                         <div class="perfume-gallery">
                             <img src="${imageUrl}" alt="${perfumeName}" class="gallery-thumb active" />
@@ -194,8 +194,7 @@ class PerfumeDetailPage {
                     <div class="perfume-details-section">
                         <!-- Brand Logo -->
                         <div class="brand-header">
-                            <img src="${brandLogo}" alt="${brandName}" class="brand-logo" 
-                                 onerror="this.style.display='none'" />
+                       <img src="${brandLogo}" alt="${brandName}" class="brand-logo" />
                             <h1 class="brand-name">${brandName}</h1>
                         </div>
 
@@ -230,11 +229,11 @@ class PerfumeDetailPage {
 
                         <!-- Action Buttons -->
                         <div class="action-buttons">
-                            <button class="whatsapp-btn" onclick="this.orderViaWhatsApp('${perfumeName}', '${brandName}')">
+                            <button class="whatsapp-btn" data-action="whatsapp" data-perfume="${encodeURIComponent(perfumeName)}" data-brand="${encodeURIComponent(brandName)}">
                                 <i class="fab fa-whatsapp"></i>
                                 Order via WhatsApp
                             </button>
-                            <button class="favorite-btn" onclick="this.toggleFavorite('${perfume.id}')">
+                            <button class="favorite-btn" data-action="favorite" data-id="${perfume.id}">
                                 <i class="far fa-heart"></i>
                                 Add to Favorites
                             </button>
@@ -430,7 +429,7 @@ class PerfumeDetailPage {
 
         // Create cards with placeholder images first
         container.innerHTML = perfumes.map(perfume => `
-            <div class="similar-perfume-card" onclick="window.location.href='perfume-detail.html?ref=${perfume.reference}'">
+                        <div class="similar-perfume-card" data-action="open-detail" data-ref="${perfume.reference}">
                 <div class="similar-perfume-image"></div>
                 <h4>${perfume.name}</h4>
                 <p>${perfume.brand_name || perfume.brands?.name || perfume.brand}</p>
@@ -455,8 +454,16 @@ class PerfumeDetailPage {
                 );
                 imageContainer.appendChild(optimizedImg);
             } else if (imageContainer) {
-                // Fallback
-                imageContainer.innerHTML = `<img src="${imageUrl}" alt="${perfume.name}" loading="lazy" onerror="this.src='photos/default-perfume.jpg'" />`;
+                // Fallback - create img element and attach error handler
+                const img = document.createElement('img');
+                img.src = imageUrl || 'photos/default-perfume.jpg';
+                img.alt = perfume.name;
+                img.loading = 'lazy';
+                img.className = 'similar-perfume-img';
+                img.addEventListener('error', function() {
+                    this.src = 'photos/default-perfume.jpg';
+                });
+                imageContainer.appendChild(img);
             }
         });
     }
@@ -807,7 +814,7 @@ class PerfumeDetailPage {
             ">
                 <i class="fas fa-exclamation-triangle" style="font-size: 64px; color: #e74c3c;"></i>
                 <h2 style="color: #333; margin: 0;">${message}</h2>
-                <button onclick="history.back()" style="
+                <button data-action="back" style="
                     background: #ff6b9d;
                     color: white;
                     border: none;
@@ -828,6 +835,30 @@ class PerfumeDetailPage {
             const isFavorited = favorites.includes(this.perfumeData.id);
             this.updateFavoriteButton(isFavorited);
         }
+
+        // Delegated handlers for actions
+        document.querySelector('.perfume-detail-content')?.addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-action]');
+            if (!btn) return;
+            const action = btn.getAttribute('data-action');
+
+            if (action === 'back') {
+                history.back();
+            } else if (action === 'whatsapp') {
+                const perfumeName = decodeURIComponent(btn.getAttribute('data-perfume') || '');
+                const brandName = decodeURIComponent(btn.getAttribute('data-brand') || '');
+                window.orderViaWhatsApp(perfumeName, brandName);
+            } else if (action === 'favorite') {
+                const id = btn.getAttribute('data-id');
+                window.toggleFavorite(id);
+                // toggle UI
+                const icon = btn.querySelector('i');
+                if (icon) icon.className = icon.className.includes('far') ? 'fas fa-heart' : 'far fa-heart';
+            } else if (action === 'open-detail') {
+                const ref = btn.getAttribute('data-ref');
+                if (ref) window.location.href = `perfume-detail.html?ref=${encodeURIComponent(ref)}`;
+            }
+        });
     }
 }
 

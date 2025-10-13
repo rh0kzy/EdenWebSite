@@ -74,6 +74,27 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // CTA explore button (no inline handlers)
+    const ctaBtn = document.getElementById('cta-explore');
+    if (ctaBtn) {
+        ctaBtn.addEventListener('click', function () {
+            const target = this.getAttribute('data-target');
+            if (target) scrollToSection(target.replace(/^#/, ''));
+        });
+    }
+
+    // WhatsApp float buttons (data-action)
+    document.querySelectorAll('[data-action="open-whatsapp"]').forEach(el => {
+        el.addEventListener('click', function () {
+            // Use UI utils openWhatsApp if available, else fallback
+            if (window.openWhatsApp) {
+                window.openWhatsApp();
+            } else if (typeof openWhatsApp === 'function') {
+                openWhatsApp();
+            }
+        });
+    });
+
     // Header scroll effect
     window.addEventListener('scroll', function() {
         const header = document.querySelector('.header');
@@ -1818,11 +1839,11 @@ function showMapFallback() {
                     Sidi M'Hamed 16000<br>
                     Algiers, Algeria</p>
                     <div class="map-actions">
-                        <button class="map-button" onclick="openMap()">
+                        <button class="map-button" data-action="open-map">
                             <i class="fas fa-external-link-alt"></i>
                             Open in Google Maps
                         </button>
-                        <button class="map-button" onclick="copyAddress()">
+                        <button class="map-button" data-action="copy-address">
                             <i class="fas fa-copy"></i>
                             Copy Address
                         </button>
@@ -1952,8 +1973,8 @@ function showErrorMessage(message, type = 'error') {
         const color = isWarning ? '#f39c12' : '#e74c3c';
         const icon = isWarning ? 'fa-exclamation-circle' : 'fa-exclamation-triangle';
         const buttonText = isWarning ? 'Continue Anyway' : 'Reload Page';
-        const buttonAction = isWarning ? 'this.parentElement.parentElement.remove()' : 'location.reload()';
-        
+        const actionType = isWarning ? 'dismiss' : 'reload';
+
         grid.innerHTML = `
             <div class="error-container" style="
                 display: flex; 
@@ -1972,7 +1993,7 @@ function showErrorMessage(message, type = 'error') {
                 <div>
                     <i class="fas ${icon}" style="font-size: 48px; margin-bottom: 15px; display: block;"></i>
                     <p>${message}</p>
-                    <button onclick="${buttonAction}" style="
+                    <button data-action="${actionType}" style="
                         background: ${isWarning ? '#f39c12' : '#ff6b9d'};
                         color: white;
                         border: none;
@@ -2018,6 +2039,44 @@ document.head.appendChild(notificationStyle);
 // Initialize map error handling when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     handleMapError();
+});
+
+    // Attach iframe load/error handlers and map button listener (CSP-safe)
+    const mapIframe = document.getElementById('eden-google-map');
+    if (mapIframe) {
+        mapIframe.addEventListener('load', function() { mapLoaded(); });
+        mapIframe.addEventListener('error', function() { showMapFallback(); });
+    }
+
+    document.querySelectorAll('[data-action="open-map"]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (typeof openMap === 'function') openMap();
+        });
+    });
+
+// Delegated handlers for map fallback actions
+document.addEventListener('click', function (e) {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const act = btn.getAttribute('data-action');
+    if (act === 'open-map') {
+        if (typeof openMap === 'function') openMap();
+    } else if (act === 'copy-address') {
+        if (typeof copyAddress === 'function') copyAddress();
+    }
+});
+
+// Delegated handler for error container actions (dismiss/reload)
+document.addEventListener('click', function (e) {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const action = btn.getAttribute('data-action');
+    if (action === 'dismiss') {
+        const container = btn.closest('.error-container');
+        if (container) container.remove();
+    } else if (action === 'reload') {
+        location.reload();
+    }
 });
 
 // Performance optimization for fast image loading

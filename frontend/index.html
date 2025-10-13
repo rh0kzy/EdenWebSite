@@ -43,6 +43,7 @@
                     <li><a href="#about" class="nav-link">About</a></li>
                     <li><a href="#collection" class="nav-link">Collection</a></li>
                     <li><a href="catalog.html" class="nav-link">Catalog</a></li>
+                    <li><a href="admin.html" class="nav-link">Admin</a></li>
                     <li><a href="#location" class="nav-link">Location</a></li>
                     <li><a href="#contact" class="nav-link">Contact</a></li>
                 </ul>
@@ -98,7 +99,7 @@
             <h1 class="hero-title">EDEN PARFUM</h1>
             <p class="hero-subtitle">Discover the Essence of Luxury</p>
             <p class="hero-description">Algeria's premier destination for premium fragrances with over 500 exquisite perfumes</p>
-            <button class="cta-button" onclick="scrollToSection('collection')">
+            <button class="cta-button" id="cta-explore" data-action="scroll-to" data-target="#collection">
                 <i class="fas fa-spray-can"></i>
                 Explore Collection
             </button>
@@ -458,13 +459,11 @@
                         allowfullscreen="" 
                         loading="lazy" 
                         referrerpolicy="no-referrer-when-downgrade"
-                        class="google-map"
-                        title="Eden Parfum Location"
-                        onload="mapLoaded()"
-                        onerror="showMapFallback()">
+                        class="google-map" id="eden-google-map"
+                        title="Eden Parfum Location">
                     </iframe>
                     <div class="map-overlay">
-                        <button class="map-button" onclick="openMap()">
+                        <button class="map-button" data-action="open-map">
                             <i class="fas fa-external-link-alt"></i>
                             Open in Google Maps
                         </button>
@@ -559,7 +558,7 @@
     </footer>
 
     <!-- WhatsApp Floating Button -->
-    <div class="whatsapp-float" onclick="openWhatsApp()">
+    <div class="whatsapp-float" data-action="open-whatsapp">
         <i class="fab fa-whatsapp"></i>
     </div>
 
