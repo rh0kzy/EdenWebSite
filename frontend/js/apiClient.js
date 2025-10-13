@@ -363,7 +363,7 @@ class EdenParfumAPI {
     // Helper method to convert old perfumesDatabase format to new format
     convertToLegacyFormat(perfumes) {
         return perfumes.map(perfume => ({
-            reference: perfume.id,
+            reference: perfume.reference,
             name: perfume.name,
             brand: perfume.brand_name || perfume.brands?.name,
             gender: perfume.gender === 'Mixte' ? 'Unisex' : perfume.gender,

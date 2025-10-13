@@ -19,9 +19,9 @@ class PerfumeDetailPage {
     }
 
     getPerfumeId() {
-        // Get ID from URL parameter - try both 'id' and 'ref' for backward compatibility
+        // Get reference from URL parameter - try both 'ref' and 'id' for backward compatibility
         const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get('id') || urlParams.get('ref') || '1';
+        return urlParams.get('ref') || urlParams.get('id') || '1';
     }
 
     async init() {
@@ -74,16 +74,16 @@ class PerfumeDetailPage {
 
     async loadPerfumeData() {
         try {
-            // Try to find perfume by ID first
-            let perfume = await this.findPerfumeById(this.perfumeId);
+            // Try to find perfume by reference first
+            let perfume = await this.findPerfumeByReference(this.perfumeId);
             
-            // If not found by ID, try to find by reference (backward compatibility)
+            // If not found by reference, try to find by ID (backward compatibility)
             if (!perfume) {
-                perfume = await this.findPerfumeByReference(this.perfumeId);
+                perfume = await this.findPerfumeById(this.perfumeId);
             }
             
             if (!perfume) {
-                throw new Error(`Perfume with ID/reference "${this.perfumeId}" not found`);
+                throw new Error(`Perfume with reference/ID "${this.perfumeId}" not found`);
             }
 
             this.perfumeData = perfume;
@@ -118,20 +118,11 @@ class PerfumeDetailPage {
 
     async findPerfumeByReference(reference) {
         try {
-            // Search for perfume by reference field
-            const response = await fetch(`${this.apiBaseUrl}/perfumes?search=${reference}&limit=1`);
+            const response = await fetch(`${this.apiBaseUrl}/perfumes/reference/${reference}`);
             
             if (response.ok) {
                 const result = await response.json();
-                if (result.success && result.data && result.data.length > 0) {
-                    // Look for exact match in reference field
-                    const exactMatch = result.data.find(p => 
-                        p.id === reference || 
-                        p.reference === reference ||
-                        p.name.toLowerCase().includes(reference.toLowerCase())
-                    );
-                    return exactMatch || result.data[0];
-                }
+                return result;
             }
             return null;
         } catch (error) {
@@ -439,7 +430,7 @@ class PerfumeDetailPage {
 
         // Create cards with placeholder images first
         container.innerHTML = perfumes.map(perfume => `
-            <div class="similar-perfume-card" onclick="window.location.href='perfume-detail.html?id=${perfume.id}'">
+            <div class="similar-perfume-card" onclick="window.location.href='perfume-detail.html?ref=${perfume.reference}'">
                 <div class="similar-perfume-image"></div>
                 <h4>${perfume.name}</h4>
                 <p>${perfume.brand_name || perfume.brands?.name || perfume.brand}</p>

@@ -228,7 +228,7 @@ class EdenSocialIntegration {
     // Share content with platform-specific optimization
     shareContent(platform, perfumeData = null) {
         const url = perfumeData ? 
-            `${this.config.siteUrl}/perfume-detail.html?id=${perfumeData.id}` : 
+            `${this.config.siteUrl}/perfume-detail.html?ref=${perfumeData.reference}` : 
             window.location.href;
         
         const title = perfumeData ? 
