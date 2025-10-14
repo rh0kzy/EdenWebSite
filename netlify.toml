@@ -9,6 +9,10 @@
   NETLIFY_SKIP_YARN_INTEGRITY_CHECK = "1"
   NODE_VERSION = "18"
 
+# Plugin to install function dependencies
+[[plugins]]
+  package = "@netlify/plugin-functions-install-core"
+
 # Environment variables for Netlify Functions
 [context.production.environment]
   SUPABASE_URL = "https://ztofzphjvcsuqsjglluk.supabase.co"
