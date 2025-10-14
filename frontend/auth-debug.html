@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth Debug Tool - EDEN PARFUM</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #2a2a2a;
+            padding: 30px;
+            border-radius: 10px;
+            border: 2px solid #00ff00;
+        }
+        h1 {
+            color: #00ff00;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #1a1a1a;
+            border-radius: 5px;
+            border-left: 4px solid #00ff00;
+        }
+        .label {
+            color: #ffff00;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .value {
+            color: #00ff00;
+            word-break: break-all;
+        }
+        .error {
+            color: #ff0000;
+        }
+        .success {
+            color: #00ff00;
+        }
+        button {
+            background: #00ff00;
+            color: #1a1a1a;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #00cc00;
+        }
+        .buttons {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 AUTHENTICATION DEBUG TOOL</h1>
+        
+        <div class="section">
+            <div class="label">LOCAL STORAGE:</div>
+            <div class="value" id="localStorage"></div>
+        </div>
+
+        <div class="section">
+            <div class="label">SESSION STORAGE:</div>
+            <div class="value" id="sessionStorage"></div>
+        </div>
+
+        <div class="section">
+            <div class="label">AUTHENTICATION STATUS:</div>
+            <div class="value" id="authStatus"></div>
+        </div>
+
+        <div class="section">
+            <div class="label">TOKEN VERIFICATION:</div>
+            <div class="value" id="tokenVerify"></div>
+        </div>
+
+        <div class="buttons">
+            <button onclick="checkAuth()">🔍 Refresh</button>
+            <button onclick="clearStorage()">🗑️ Clear All Storage</button>
+            <button onclick="testLogin()">🧪 Test Login API</button>
+            <button onclick="location.href='admin-login.html'">🔓 Go to Login</button>
+        </div>
+    </div>
+
+    <script>
+        function checkAuth() {
+            // Check localStorage
+            const localData = {
+                adminAuthenticated: localStorage.getItem('adminAuthenticated'),
+                adminToken: localStorage.getItem('adminToken'),
+                adminUsername: localStorage.getItem('adminUsername')
+            };
+
+            // Check sessionStorage
+            const sessionData = {
+                adminAuthenticated: sessionStorage.getItem('adminAuthenticated'),
+                adminToken: sessionStorage.getItem('adminToken'),
+                adminUsername: sessionStorage.getItem('adminUsername')
+            };
+
+            // Display results
+            document.getElementById('localStorage').innerHTML = `
+                <div>adminAuthenticated: <span class="${localData.adminAuthenticated === 'true' ? 'success' : 'error'}">${localData.adminAuthenticated || 'NOT SET'}</span></div>
+                <div>adminToken: <span class="${localData.adminToken ? 'success' : 'error'}">${localData.adminToken ? localData.adminToken.substring(0, 30) + '...' : 'NOT SET'}</span></div>
+                <div>adminUsername: <span class="${localData.adminUsername ? 'success' : 'error'}">${localData.adminUsername || 'NOT SET'}</span></div>
+            `;
+
+            document.getElementById('sessionStorage').innerHTML = `
+                <div>adminAuthenticated: <span class="${sessionData.adminAuthenticated === 'true' ? 'success' : 'error'}">${sessionData.adminAuthenticated || 'NOT SET'}</span></div>
+                <div>adminToken: <span class="${sessionData.adminToken ? 'success' : 'error'}">${sessionData.adminToken ? sessionData.adminToken.substring(0, 30) + '...' : 'NOT SET'}</span></div>
+                <div>adminUsername: <span class="${sessionData.adminUsername ? 'success' : 'error'}">${sessionData.adminUsername || 'NOT SET'}</span></div>
+            `;
+
+            // Check auth status
+            const isAuthenticated = localData.adminAuthenticated === 'true' || sessionData.adminAuthenticated === 'true';
+            const hasToken = !!localData.adminToken || !!sessionData.adminToken;
+
+            document.getElementById('authStatus').innerHTML = `
+                <div>Is Authenticated: <span class="${isAuthenticated ? 'success' : 'error'}">${isAuthenticated ? 'YES ✅' : 'NO ❌'}</span></div>
+                <div>Has Token: <span class="${hasToken ? 'success' : 'error'}">${hasToken ? 'YES ✅' : 'NO ❌'}</span></div>
+                <div>Should Pass Guard: <span class="${isAuthenticated && hasToken ? 'success' : 'error'}">${isAuthenticated && hasToken ? 'YES ✅' : 'NO ❌'}</span></div>
+            `;
+
+            // Verify token
+            if (hasToken) {
+                verifyToken(localData.adminToken || sessionData.adminToken);
+            } else {
+                document.getElementById('tokenVerify').innerHTML = '<span class="error">No token to verify</span>';
+            }
+        }
+
+        async function verifyToken(token) {
+            document.getElementById('tokenVerify').innerHTML = 'Verifying token...';
+            
+            try {
+                const response = await fetch('/api/v2/auth/verify', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    document.getElementById('tokenVerify').innerHTML = `
+                        <div class="success">✅ Token is VALID!</div>
+                        <div>Username: ${data.username}</div>
+                        <div>Status: ${response.status}</div>
+                    `;
+                } else {
+                    document.getElementById('tokenVerify').innerHTML = `
+                        <div class="error">❌ Token verification failed</div>
+                        <div>Error: ${data.error || 'Unknown error'}</div>
+                        <div>Status: ${response.status}</div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('tokenVerify').innerHTML = `
+                    <div class="error">❌ Network error</div>
+                    <div>${error.message}</div>
+                `;
+            }
+        }
+
+        function clearStorage() {
+            if (confirm('Clear all authentication data?')) {
+                localStorage.clear();
+                sessionStorage.clear();
+                alert('✅ All storage cleared!');
+                checkAuth();
+            }
+        }
+
+        async function testLogin() {
+            const username = prompt('Username:', 'admin');
+            const password = prompt('Password:', 'EDENPARFUM1974');
+            
+            if (!username || !password) return;
+
+            try {
+                const response = await fetch('/api/v2/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    alert('✅ Login successful!\n\nToken: ' + data.token.substring(0, 30) + '...');
+                    localStorage.setItem('adminAuthenticated', 'true');
+                    localStorage.setItem('adminToken', data.token);
+                    localStorage.setItem('adminUsername', username);
+                    checkAuth();
+                } else {
+                    alert('❌ Login failed!\n\nError: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('❌ Network error!\n\n' + error.message);
+            }
+        }
+
+        // Auto-refresh on load
+        checkAuth();
+    </script>
+</body>
+</html>

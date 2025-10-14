@@ -1,6 +1,13 @@
 // Catalog Module - Handles perfume catalog display, search, filtering, and interactions
 import { getFragranceImage, getBrandLogo } from './fragranceData.js';
 import { showLoadingIndicator, hideLoadingIndicator, showErrorMessage } from './uiUtils.js';
+import { 
+    debounce, 
+    searchInFields, 
+    setupSearchShortcuts, 
+    getSearchStats,
+    normalizeText
+} from './searchUtils.js';
 
 export class CatalogModule {
     constructor() {
@@ -16,20 +23,14 @@ export class CatalogModule {
             return;
         }
         
-        // Only initialize catalog if we're on a page with catalog elements
         const isCatalogPage = this.isCatalogPage();
-        console.log(`📄 Is catalog page: ${isCatalogPage}`);
         
         if (isCatalogPage) {
-            console.log('🚀 Starting catalog initialization...');
             this.initializeCatalog();
-        } else {
-            console.log('⏭️ Not a catalog page, skipping catalog initialization');
         }
 
         this.setupEventListeners();
         this.isInitialized = true;
-        console.log('✅ CatalogModule initialization complete');
     }
 
     isCatalogPage() {
@@ -41,6 +42,14 @@ export class CatalogModule {
         window.addEventListener('perfumesLoaded', (event) => {
             if (this.isCatalogPage()) {
                 this.setupCatalogWithData();
+            }
+        });
+        
+        // Listen for brand logos loaded event - refresh display to show new logos
+        window.addEventListener('brandLogosLoaded', (event) => {
+            if (this.isCatalogPage() && this.filteredPerfumes.length > 0) {
+                console.log('🎨 Brand logos updated, refreshing display...');
+                this.displayPerfumes();
             }
         });
     }
@@ -66,11 +75,9 @@ export class CatalogModule {
                 sessionStorage.removeItem('perfumesDatabase');
                 sessionStorage.removeItem('offlinePerfumeData');
             } catch (e) {
-                console.log('Storage clear failed (expected in some environments)');
+                // Silent storage clear
             }
             
-            // Always try to load fresh data from API first, ignore any existing data
-            console.log('🚀 Force loading fresh data from API (after clearing all cache)...');
             await this.loadPerfumeData();
         } catch (error) {
             showErrorMessage('Failed to load perfume catalog. Please try again later.');
@@ -79,17 +86,9 @@ export class CatalogModule {
 
     async loadPerfumeData() {
         try {
-            console.log('🔄 Starting API call using edenAPI...');
-            console.log('🧹 Current state check:');
-            console.log('  - window.offlinePerfumeData:', window.offlinePerfumeData ? 'EXISTS' : 'null');
-            console.log('  - window.perfumesDatabase:', window.perfumesDatabase ? window.perfumesDatabase.length + ' items' : 'null');
-            
-            // Small delay to ensure other scripts don't interfere
             await new Promise(resolve => setTimeout(resolve, 100));
             
-            // Use the proper API client instead of direct XMLHttpRequest
             const response = await window.edenAPI.getPerfumes({ limit: 506 });
-            console.log('✅ API call successful:', response);
 
             if (!response.success) {
                 throw new Error('API returned unsuccessful response');
@@ -98,7 +97,6 @@ export class CatalogModule {
             const perfumes = Array.isArray(response.data) ? response.data : null;
 
             if (perfumes && perfumes.length > 0) {
-                // Convert API format to legacy format expected by frontend
                 const convertedPerfumes = window.edenAPI.convertToLegacyFormat(perfumes);
                 
                 // Store in global variable for compatibility with existing code
@@ -120,17 +118,13 @@ export class CatalogModule {
                     }
                 }));
                 
-                // Set up catalog with the loaded data
                 this.setupCatalogWithData();
             } else {
                 throw new Error('No data received from API');
             }
             
         } catch (error) {
-            console.error('❌ API call failed:', error);
-            console.log('🔄 Falling back to offline data...');
-            
-            // Try fallback to offline data if available
+            // Fallback to offline data if available
             if (window.offlinePerfumeData) {
                 window.perfumesDatabase = window.offlinePerfumeData.perfumes;
                 
@@ -188,8 +182,29 @@ export class CatalogModule {
 
     applyUrlParameters() {
         const urlParams = new URLSearchParams(window.location.search);
-        const genderParam = urlParams.get('gender');
         
+        // Restore search term
+        const searchParam = urlParams.get('search');
+        if (searchParam) {
+            this.currentSearchTerm = searchParam;
+            const searchInput = document.getElementById('perfumeSearch');
+            if (searchInput) {
+                searchInput.value = searchParam;
+            }
+        }
+        
+        // Restore brand filter
+        const brandParam = urlParams.get('brand');
+        if (brandParam) {
+            this.currentBrandFilter = brandParam;
+            const brandFilter = document.getElementById('brandFilter');
+            if (brandFilter) {
+                brandFilter.value = brandParam;
+            }
+        }
+        
+        // Restore gender filter
+        const genderParam = urlParams.get('gender');
         if (genderParam) {
             // Convert URL parameter to the format used in the database
             let genderValue = '';
@@ -246,7 +261,7 @@ export class CatalogModule {
 
         // Clear existing options except the first "All" option
         brandFilter.innerHTML = '<option value="">All Brands</option>';
-        genderFilter.innerHTML = '<option value="">All Genders</option>';
+        genderFilter.innerHTML = '<option value="">All Categories</option>';
 
         // Populate brand filter
         const brands = this.getUniqueBrands();
@@ -279,26 +294,33 @@ export class CatalogModule {
         
         if (!searchInput || !brandFilter || !genderFilter) return;
         
-        // Search input with debounce
-        let searchTimeout;
-        searchInput.addEventListener('input', () => {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                this.currentSearchTerm = searchInput.value.toLowerCase();
-                this.filterPerfumes();
-            }, 300);
+        // Setup keyboard shortcuts (Ctrl+K to focus, Escape to clear)
+        setupSearchShortcuts(searchInput, () => {
+            this.currentSearchTerm = '';
+            this.filterPerfumes();
         });
+        
+        // Search input with optimized debounce
+        const debouncedSearch = debounce(() => {
+            this.currentSearchTerm = searchInput.value;
+            this.filterPerfumes();
+            this.updateUrlWithFilters();
+        }, 250);
+        
+        searchInput.addEventListener('input', debouncedSearch);
         
         // Brand filter
         brandFilter.addEventListener('change', () => {
             this.currentBrandFilter = brandFilter.value;
             this.filterPerfumes();
+            this.updateUrlWithFilters();
         });
         
         // Gender filter
         genderFilter.addEventListener('change', () => {
             this.currentGenderFilter = genderFilter.value;
             this.filterPerfumes();
+            this.updateUrlWithFilters();
         });
         
         // Clear filters
@@ -311,8 +333,31 @@ export class CatalogModule {
                 this.currentBrandFilter = '';
                 this.currentGenderFilter = '';
                 this.filterPerfumes();
+                this.updateUrlWithFilters();
             });
         }
+    }
+    
+    updateUrlWithFilters() {
+        // Update URL with current filters (without page reload)
+        const params = new URLSearchParams();
+        
+        if (this.currentSearchTerm) params.set('search', this.currentSearchTerm);
+        if (this.currentBrandFilter) params.set('brand', this.currentBrandFilter);
+        if (this.currentGenderFilter) {
+            const genderMap = {
+                'Men': 'men',
+                'Women': 'women',
+                'Unisex': 'unisex'
+            };
+            params.set('gender', genderMap[this.currentGenderFilter] || this.currentGenderFilter.toLowerCase());
+        }
+        
+        const newUrl = params.toString() ? 
+            `${window.location.pathname}?${params.toString()}` : 
+            window.location.pathname;
+        
+        window.history.replaceState({}, '', newUrl);
     }
 
     filterPerfumes() {
@@ -321,17 +366,21 @@ export class CatalogModule {
         }
         
         this.filteredPerfumes = window.perfumesDatabase.filter(perfume => {
-            // Search term filter
+            // Enhanced search - matches name, brand, or reference with accent-insensitive, multi-word support
             const matchesSearch = !this.currentSearchTerm || 
-                perfume.name.toLowerCase().includes(this.currentSearchTerm) ||
-                perfume.brand.toLowerCase().includes(this.currentSearchTerm) ||
-                perfume.reference.toLowerCase().includes(this.currentSearchTerm);
+                searchInFields(perfume, ['name', 'brand'], this.currentSearchTerm) ||
+                (perfume.reference && normalizeText(perfume.reference).includes(normalizeText(this.currentSearchTerm)));
             
-            // Brand filter
-            const matchesBrand = !this.currentBrandFilter || perfume.brand === this.currentBrandFilter;
+            // Brand filter - exact match (case-insensitive)
+            const matchesBrand = !this.currentBrandFilter || 
+                perfume.brand === this.currentBrandFilter;
             
-            // Gender filter
-            const matchesGender = !this.currentGenderFilter || perfume.gender === this.currentGenderFilter;
+            // Gender filter - exact match with Mixte/Unisex compatibility
+            const perfumeGender = perfume.gender || '';
+            const matchesGender = !this.currentGenderFilter || 
+                perfumeGender === this.currentGenderFilter ||
+                (this.currentGenderFilter === 'Unisex' && (perfumeGender === 'Mixte' || perfumeGender === 'Unisex')) ||
+                (this.currentGenderFilter === 'Mixte' && (perfumeGender === 'Unisex' || perfumeGender === 'Mixte'));
             
             return matchesSearch && matchesBrand && matchesGender;
         });
@@ -369,7 +418,17 @@ export class CatalogModule {
         item.className = 'perfume-item';
         
         const brandLogo = getBrandLogo(perfume.brand);
-        const fragranceImageName = getFragranceImage(perfume);
+        
+        // Get image URL with multiple fallbacks
+        const fragranceImage = getFragranceImage(perfume);
+        let imageUrl = 'photos/placeholder.svg';
+        if (fragranceImage) {
+            imageUrl = fragranceImage;
+        } else if (perfume.image_url) {
+            imageUrl = perfume.image_url;
+        } else if (perfume.image) {
+            imageUrl = perfume.image;
+        }
         
         const brandSection = brandLogo 
             ? `<div class="perfume-brand">
@@ -380,10 +439,12 @@ export class CatalogModule {
                    <span>${perfume.brand || 'No Brand'}</span>
                </div>`;
         
-        // Create the basic structure
+        // Create the structure with image directly in HTML
         item.innerHTML = `
             ${perfume.multiplier ? `<div class="price-multiplier">${perfume.multiplier}</div>` : ''}
-            <div class="perfume-image"></div>
+            <div class="perfume-image">
+                <img src="${imageUrl}" alt="${perfume.name}" class="fragrance-image" loading="lazy">
+            </div>
             <div class="perfume-header">
                 <div class="perfume-name">${perfume.name}</div>
                 <div class="perfume-reference">#${perfume.reference}</div>
@@ -393,26 +454,6 @@ export class CatalogModule {
                 <div class="perfume-gender">${perfume.gender}</div>
             </div>
         `;
-        
-        // Add optimized image using fast loader
-        const imageContainer = item.querySelector('.perfume-image');
-        if (fragranceImageName && fragranceImageName !== null) {
-            if (window.createOptimizedImage) {
-                const optimizedImg = window.createOptimizedImage(
-                    fragranceImageName, 
-                    `${perfume.name} by ${perfume.brand}`, 
-                    'fragrance-image', 
-                    'medium'
-                );
-                imageContainer.appendChild(optimizedImg);
-            } else {
-                // Fallback for when fast loader isn't available
-                imageContainer.innerHTML = `<img src="${fragranceImageName}" alt="${perfume.name}" class="fragrance-image" loading="lazy">`;
-            }
-        } else {
-            // Default placeholder
-            imageContainer.innerHTML = '<div class="perfume-image-placeholder"><i class="fas fa-spray-can"></i></div>';
-        }
         
         // Add click handler for WhatsApp integration
         item.addEventListener('click', () => {

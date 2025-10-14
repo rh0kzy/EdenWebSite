@@ -1,10 +1,12 @@
-const { supabase } = require('../config/supabase');
+const { supabase, supabaseAdmin } = require('../config/supabase');
+const { logActivity } = require('../utils/activityLogger');
 
 // Get all brands
 const getAllBrands = async (req, res) => {
     try {
         const { limit = 100, offset = 0 } = req.query;
 
+        // First, fetch all brands
         const { data: brands, error, count } = await supabase
             .from('brands')
             .select('*', { count: 'exact' })
@@ -19,8 +21,23 @@ const getAllBrands = async (req, res) => {
             });
         }
 
+        // For each brand, count the perfumes
+        const brandsWithCount = await Promise.all(
+            brands.map(async (brand) => {
+                const { count: perfumeCount, error: countError } = await supabase
+                    .from('perfumes')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('brand_id', brand.id);
+
+                return {
+                    ...brand,
+                    perfume_count: countError ? 0 : (perfumeCount || 0)
+                };
+            })
+        );
+
         res.json({
-            data: brands,
+            data: brandsWithCount,
             total: count,
             page: Math.floor(offset / limit) + 1,
             limit: parseInt(limit),
@@ -156,7 +173,7 @@ const createBrand = async (req, res) => {
             return res.status(400).json({ error: 'Brand name is required' });
         }
 
-        const { data: brand, error } = await supabase
+        const { data: brand, error } = await supabaseAdmin
             .from('brands')
             .insert({
                 name: name.trim(),
@@ -166,21 +183,32 @@ const createBrand = async (req, res) => {
             .single();
 
         if (error) {
-            if (error.code === '23505') { // Unique constraint violation
+            if (error.code === '23505') {
                 return res.status(409).json({ error: 'Brand already exists' });
             }
-            // Error: Error creating brand: - logged via logger
-            return res.status(500).json({ 
-                error: 'Failed to create brand',
-                details: error.message 
-            });
+            return res.status(500).json({ error: 'Failed to create brand' });
         }
+
+        // Log activity
+        await logActivity({
+            entityType: 'brand',
+            entityId: brand.id,
+            entityName: brand.name,
+            actionType: 'create',
+            details: {
+                logo_url: brand.logo_url
+            },
+            req
+        });
 
         res.status(201).json(brand);
 
     } catch (error) {
-        // Error: Server error: - logged via logger
-        res.status(500).json({ error: 'Internal server error' });
+        console.error('❌ Server error creating brand:', error);
+        res.status(500).json({ 
+            error: 'Internal server error',
+            details: error.message 
+        });
     }
 };
 
@@ -190,7 +218,14 @@ const updateBrand = async (req, res) => {
         const { id } = req.params;
         const updates = req.body;
 
-        const { data: brand, error } = await supabase
+        // Get old brand data for logging
+        const { data: oldBrand } = await supabaseAdmin
+            .from('brands')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        const { data: brand, error } = await supabaseAdmin
             .from('brands')
             .update(updates)
             .eq('id', id)
@@ -211,6 +246,20 @@ const updateBrand = async (req, res) => {
             });
         }
 
+        // Log activity
+        await logActivity({
+            entityType: 'brand',
+            entityId: brand.id,
+            entityName: brand.name,
+            actionType: 'update',
+            details: {
+                old: oldBrand,
+                new: brand,
+                changes: updates
+            },
+            req
+        });
+
         res.json(brand);
 
     } catch (error) {
@@ -224,7 +273,14 @@ const deleteBrand = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const { error } = await supabase
+        // Get brand data before deletion for logging
+        const { data: brandToDelete } = await supabaseAdmin
+            .from('brands')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        const { error } = await supabaseAdmin
             .from('brands')
             .delete()
             .eq('id', id);
@@ -234,6 +290,20 @@ const deleteBrand = async (req, res) => {
             return res.status(500).json({ 
                 error: 'Failed to delete brand',
                 details: error.message 
+            });
+        }
+
+        // Log activity if brand was found
+        if (brandToDelete) {
+            await logActivity({
+                entityType: 'brand',
+                entityId: brandToDelete.id,
+                entityName: brandToDelete.name,
+                actionType: 'delete',
+                details: {
+                    deleted_brand: brandToDelete
+                },
+                req
             });
         }
 

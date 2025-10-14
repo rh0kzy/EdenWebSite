@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - EDEN PARFUM</title>
+    <link rel="icon" type="image/png" href="photos/eden parfum logo.png">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background: var(--bg-secondary);
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .admin-wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .admin-sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #2c2c2c 0%, #1a1a1a 100%);
+            color: white;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 30px 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .sidebar-logo {
+            width: 120px;
+            height: auto;
+            margin-bottom: 15px;
+        }
+
+        .sidebar-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-gold);
+            margin: 0;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-subtitle {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+
+        .nav-item {
+            margin: 5px 15px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--primary-gold);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background: rgba(165, 139, 76, 0.15);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .nav-link:hover::before {
+            transform: scaleY(1);
+        }
+
+        .nav-link.active {
+            background: linear-gradient(135deg, var(--primary-gold), var(--primary-gold-light));
+            color: white;
+            box-shadow: 0 4px 15px rgba(165, 139, 76, 0.3);
+        }
+
+        .nav-link.active::before {
+            transform: scaleY(1);
+        }
+
+        .nav-icon {
+            width: 24px;
+            text-align: center;
+            margin-right: 15px;
+            font-size: 18px;
+        }
+
+        .nav-text {
+            flex: 1;
+            font-size: 15px;
+        }
+
+        .nav-badge {
+            background: var(--error-color);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background: #1a1a1a;
+        }
+
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 12px;
+            background: rgba(244, 67, 54, 0.1);
+            border: 1px solid rgba(244, 67, 54, 0.3);
+            color: #f44336;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #f44336;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+        }
+
+        /* Main Content */
+        .admin-main {
+            margin-left: 280px;
+            flex: 1;
+            padding: 40px;
+            min-height: 100vh;
+        }
+
+        .admin-header {
+            margin-bottom: 40px;
+        }
+
+        .admin-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+
+        .admin-header p {
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        /* Dashboard Stats */
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-gold), var(--primary-gold-light));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        .stat-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--primary-gold), var(--primary-gold-light));
+            color: white;
+            box-shadow: 0 4px 15px rgba(165, 139, 76, 0.3);
+        }
+
+        .stat-details h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .stat-change {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .stat-change.positive {
+            color: var(--success-color);
+        }
+
+        .stat-change.negative {
+            color: var(--error-color);
+        }
+
+        .stat-change i {
+            margin-right: 4px;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title i {
+            margin-right: 12px;
+            color: var(--primary-gold);
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .action-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            text-decoration: none;
+            color: var(--text-primary);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .action-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border-color: var(--primary-gold);
+        }
+
+        .action-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin: 0 auto 15px;
+            background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-quaternary));
+            color: var(--primary-gold);
+            transition: all 0.3s ease;
+        }
+
+        .action-card:hover .action-icon {
+            background: linear-gradient(135deg, var(--primary-gold), var(--primary-gold-light));
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .action-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .action-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        /* Recent Activity */
+        .recent-activity {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .activity-list {
+            list-style: none;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--bg-secondary);
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 16px;
+            background: var(--bg-secondary);
+            color: var(--primary-gold);
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-text {
+            font-size: 14px;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .activity-time {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .loading-spinner {
+            text-align: center;
+            padding: 40px;
+            color: var(--primary-gold);
+        }
+
+        .loading-spinner i {
+            font-size: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .admin-sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .admin-sidebar.active {
+                transform: translateX(0);
+            }
+
+            .admin-main {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .dashboard-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <!-- Authentication Guard - Must be loaded before body -->
+    <script src="js/authGuard.js"></script>
+</head>
+<body>
+    <div class="admin-wrapper">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                <img src="photos/eden parfum logo.png" alt="EDEN PARFUM" class="sidebar-logo">
+                <h2 class="sidebar-title">EDEN PARFUM</h2>
+                <p class="sidebar-subtitle">Admin Panel</p>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-item">
+                    <a href="admin-dashboard.html" class="nav-link active">
+                        <i class="nav-icon fas fa-chart-line"></i>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="admin-add.html" class="nav-link">
+                        <i class="nav-icon fas fa-plus-circle"></i>
+                        <span class="nav-text">Add Perfume</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="admin-manage.html" class="nav-link">
+                        <i class="nav-icon fas fa-boxes"></i>
+                        <span class="nav-text">Manage Perfumes</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="admin-brands.html" class="nav-link">
+                        <i class="nav-icon fas fa-tag"></i>
+                        <span class="nav-text">Manage Brands</span>
+                    </a>
+                </div>
+                <div class="nav-item">
+                    <a href="catalog.html" class="nav-link">
+                        <i class="nav-icon fas fa-eye"></i>
+                        <span class="nav-text">View Catalog</span>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="index.html" class="logout-btn">
+                    <i class="fas fa-sign-out-alt" style="margin-right: 10px;"></i>
+                    Back to Website
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <div class="admin-header">
+                <h1>Dashboard</h1>
+                <p>Welcome back! Here's what's happening with your perfume collection.</p>
+            </div>
+
+            <!-- Dashboard Stats -->
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-spray-can"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3>Total Perfumes</h3>
+                        <div class="stat-value" id="total-perfumes">-</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i>
+                            <span id="perfumes-change">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-tags"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3>Total Brands</h3>
+                        <div class="stat-value" id="total-brands">-</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i>
+                            <span id="brands-change">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-venus-mars"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3>Categories</h3>
+                        <div class="stat-value" id="total-categories">-</div>
+                        <div class="stat-change">
+                            <span id="categories-breakdown">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-warehouse"></i>
+                    </div>
+                    <div class="stat-details">
+                        <h3>Storage Locations</h3>
+                        <div class="stat-value" id="total-locations">-</div>
+                        <div class="stat-change">
+                            <span id="locations-breakdown">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <h2 class="section-title">
+                    <i class="fas fa-bolt"></i>
+                    Quick Actions
+                </h2>
+                <div class="actions-grid">
+                    <a href="admin-add.html" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                        <div class="action-title">Add Perfume</div>
+                        <div class="action-desc">Add a new perfume to inventory</div>
+                    </a>
+
+                    <a href="admin-manage.html" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-edit"></i>
+                        </div>
+                        <div class="action-title">Manage Perfumes</div>
+                        <div class="action-desc">Edit or delete perfumes</div>
+                    </a>
+
+                    <a href="admin-brands.html" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-tag"></i>
+                        </div>
+                        <div class="action-title">Manage Brands</div>
+                        <div class="action-desc">Add or edit brands</div>
+                    </a>
+
+                    <a href="catalog.html" class="action-card">
+                        <div class="action-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="action-title">Browse Catalog</div>
+                        <div class="action-desc">View the perfume catalog</div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="recent-activity">
+                <h2 class="section-title">
+                    <i class="fas fa-clock"></i>
+                    Recent Activity
+                </h2>
+                <div class="loading-spinner" id="activity-loading">
+                    <i class="fas fa-spinner"></i>
+                    <p>Loading activity...</p>
+                </div>
+                <ul class="activity-list" id="activity-list" style="display: none;">
+                    <!-- Activity items will be loaded here -->
+                </ul>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        const getApiBaseUrl = () => {
+            const port = window.location.port || '3000';
+            return `http://localhost:${port}/api/v2`;
+        };
+
+        async function loadDashboardStats() {
+            try {
+                // Fetch perfumes
+                const perfumesRes = await fetch(`${getApiBaseUrl()}/perfumes?limit=1000`);
+                const perfumesData = await perfumesRes.json();
+                const perfumes = perfumesData.data || [];
+
+                // Fetch brands
+                const brandsRes = await fetch(`${getApiBaseUrl()}/brands?limit=1000`);
+                const brandsData = await brandsRes.json();
+                const brands = brandsData.data || [];
+
+                // Update perfumes stats
+                document.getElementById('total-perfumes').textContent = perfumes.length;
+                document.getElementById('perfumes-change').textContent = `${perfumes.length} items in stock`;
+
+                // Update brands stats
+                document.getElementById('total-brands').textContent = brands.length;
+                document.getElementById('brands-change').textContent = `${brands.length} unique brands`;
+
+                // Calculate categories
+                const genderCounts = {
+                    'Men': perfumes.filter(p => p.gender === 'Men').length,
+                    'Women': perfumes.filter(p => p.gender === 'Women').length,
+                    'Unisex': perfumes.filter(p => p.gender === 'Unisex').length
+                };
+                document.getElementById('total-categories').textContent = '3';
+                document.getElementById('categories-breakdown').textContent = 
+                    `M: ${genderCounts.Men} | W: ${genderCounts.Women} | U: ${genderCounts.Unisex}`;
+
+                // Calculate storage locations (armoires)
+                const armoires = new Set(perfumes.map(p => p.reference?.slice(0, 2)).filter(Boolean));
+                document.getElementById('total-locations').textContent = armoires.size;
+                document.getElementById('locations-breakdown').textContent = `${armoires.size} armoires in use`;
+
+                // Load recent activity
+                loadRecentActivity(perfumes);
+
+            } catch (error) {
+                document.getElementById('total-perfumes').textContent = 'Error';
+                document.getElementById('total-brands').textContent = 'Error';
+                document.getElementById('total-categories').textContent = 'Error';
+                document.getElementById('total-locations').textContent = 'Error';
+            }
+        }
+
+        function loadRecentActivity(perfumes) {
+            const activityList = document.getElementById('activity-list');
+            const activityLoading = document.getElementById('activity-loading');
+
+            // Get last 10 perfumes (newest first)
+            const recentPerfumes = perfumes
+                .sort((a, b) => b.id - a.id)
+                .slice(0, 10);
+
+            if (recentPerfumes.length === 0) {
+                activityLoading.innerHTML = '<p style="color: var(--text-secondary);">No recent activity</p>';
+                return;
+            }
+
+            activityList.innerHTML = recentPerfumes.map((perfume, index) => `
+                <li class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-text">
+                            <strong>${perfume.name}</strong> by ${perfume.brand} was added
+                        </div>
+                        <div class="activity-time">
+                            Reference: ${perfume.reference || 'N/A'} • ${perfume.gender}
+                        </div>
+                    </div>
+                </li>
+            `).join('');
+
+            activityLoading.style.display = 'none';
+            activityList.style.display = 'block';
+        }
+
+        // Load dashboard on page load
+        document.addEventListener('DOMContentLoaded', loadDashboardStats);
+    </script>
+</body>
+</html>

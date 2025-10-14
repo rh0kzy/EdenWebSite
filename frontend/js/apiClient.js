@@ -58,9 +58,17 @@ class EdenParfumAPI {
         const hostname = window.location.hostname;
         
         if (hostname === 'localhost' || hostname === '127.0.0.1') {
-            // Development environment - use the same port as the current page
-            const port = window.location.port || '80';
-            return `http://localhost:${port}/api/v2`;
+            // Development environment - detect backend port
+            const possiblePorts = [3000, 3001, 5000, 8080];
+            const currentPort = parseInt(window.location.port);
+            
+            // If we're already on a known backend port, use it
+            if (possiblePorts.includes(currentPort)) {
+                return `${window.location.protocol}//${hostname}:${currentPort}/api/v2`;
+            }
+            
+            // Otherwise, default to port 3000 (most common backend port)
+            return `http://${hostname}:3000/api/v2`;
         } else {
             // Production environment - use direct Netlify Functions path
             return '/.netlify/functions';
@@ -363,25 +371,30 @@ class EdenParfumAPI {
 
     // Helper method to convert old perfumesDatabase format to new format
     convertToLegacyFormat(perfumes) {
-        return perfumes.map(perfume => ({
-            reference: perfume.reference,
-            name: perfume.name,
-            brand: perfume.brand_name || perfume.brands?.name,
-            gender: perfume.gender === 'Mixte' ? 'Unisex' : perfume.gender,
-            category: perfume.category,
-            concentration: perfume.concentration,
-            size: perfume.size,
-            price: perfume.price,
-            image: perfume.photo_url || `/photos/${perfume.name?.replace(/[^a-zA-Z0-9]/g, '_')}.jpg`,
-            // Legacy fields for compatibility
-            brandLogo: perfume.brands?.photo_url,
-            description: `${perfume.concentration} ${perfume.size}`,
-            notes: {
-                top: [],
-                middle: [],
-                base: []
-            }
-        }));
+        return perfumes.map(perfume => {
+            const imageUrl = perfume.image_url || perfume.photo_url || `/photos/${perfume.name?.replace(/[^a-zA-Z0-9]/g, '_')}.jpg`;
+            
+            return {
+                reference: perfume.reference,
+                name: perfume.name,
+                brand: perfume.brand_name || perfume.brands?.name,
+                gender: perfume.gender === 'Mixte' ? 'Unisex' : perfume.gender,
+                category: perfume.category,
+                concentration: perfume.concentration,
+                size: perfume.size,
+                price: perfume.price,
+                image: imageUrl,  // Legacy field
+                image_url: imageUrl,  // Modern field - ADD THIS for compatibility
+                // Legacy fields for compatibility
+                brandLogo: perfume.brands?.photo_url,
+                description: `${perfume.concentration} ${perfume.size}`,
+                notes: {
+                    top: [],
+                    middle: [],
+                    base: []
+                }
+            };
+        });
     }
 }
 

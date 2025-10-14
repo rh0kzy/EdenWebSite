@@ -15,19 +15,10 @@ const envValidator = new EnvironmentValidator();
 const validationResults = envValidator.validate();
 
 if (!validationResults.valid) {
-    console.error('\n❌ Environment validation failed! Server cannot start with invalid configuration.');
-    console.error('📝 Please check your .env file and fix the issues above.\n');
-    
-    // In production, we should exit immediately
+    // Environment validation failed
     if (process.env.NODE_ENV === 'production') {
-        console.error('🚨 Production environment detected - exiting immediately for security.');
         process.exit(1);
-    } else {
-        console.warn('⚠️  Development environment detected - continuing with warnings.');
-        console.warn('   Please fix these issues before deploying to production.\n');
     }
-} else {
-    // Environment validation passed - starting server
 }
 
 // Import logger and error handling middleware
@@ -67,6 +58,8 @@ const photoRoutes = require('./routes/photos');
 const healthRoutes = require('./routes/health');
 const monitoringRoutes = require('./routes/monitoring');
 const socialRoutes = require('./routes/social');
+const activityRoutes = require('./routes/activities');
+const authRoutes = require('./routes/auth');
 
 // Middleware
 const isDevelopment = process.env.NODE_ENV !== 'production';
@@ -203,10 +196,16 @@ app.post('/api/clear-cache', cacheBustingMiddleware.getClearCacheEndpoint());
 // Apply rate limiting to other API routes
 app.use('/api/', limiter);
 
+// Authentication API (no rate limit for login)
+app.use('/api/v2/auth', authRoutes);
+
 // Supabase API v2 (current)
 app.use('/api/v2/perfumes', supabasePerfumeRoutes);
 app.use('/api/v2/brands', supabaseBrandRoutes);
 app.use('/api/v2/photos', photoRoutes);
+
+// Activity Log API
+app.use('/api/activities', activityRoutes);
 
 // Social Media Integration API
 app.use('/api/social', socialRoutes);
@@ -279,20 +278,12 @@ function startServer() {
 
         // Graceful shutdown handling
         const gracefulShutdown = (signal) => {
-            console.log('Graceful Shutdown Initiated', {
-                signal,
-                uptime: process.uptime(),
-                timestamp: new Date().toISOString()
-            });
-            
             server.close(() => {
-                console.log('Server Closed Successfully');
                 process.exit(0);
             });
 
             // Force close after 10 seconds
             setTimeout(() => {
-                console.error('Forced Shutdown - Server did not close gracefully');
                 process.exit(1);
             }, 10000);
         };

@@ -55,11 +55,11 @@ const consoleFormat = winston.format.combine(
 // Create transports array
 const transports = [];
 
-// Console transport for development
+// Console transport for errors only (to help debugging)
 if (process.env.NODE_ENV !== 'production') {
     transports.push(
         new winston.transports.Console({
-            level: 'debug',
+            level: 'error',
             format: consoleFormat
         })
     );
@@ -209,19 +209,12 @@ logger.logSecurityEvent = (event, details) => {
 
 // Graceful shutdown handler
 const gracefulShutdown = () => {
-    console.log('Logger shutdown initiated');
-
-    // Close all transports gracefully
+    // Silent shutdown
     logger.transports.forEach(transport => {
         if (transport.close) {
             transport.close();
         }
     });
-
-    // Don't call logger.end() as it causes write after end errors
-    // if (logger.end) {
-    //     logger.end();
-    // }
 };
 
 process.on('SIGINT', gracefulShutdown);
@@ -229,14 +222,12 @@ process.on('SIGTERM', gracefulShutdown);
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (error) => {
-    console.error('Uncaught Exception:', error);
     gracefulShutdown();
     process.exit(1);
 });
 
 // Handle unhandled rejections
 process.on('unhandledRejection', (reason, promise) => {
-    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
     gracefulShutdown();
     process.exit(1);
 });

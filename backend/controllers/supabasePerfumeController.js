@@ -1,4 +1,5 @@
 const { supabase, supabaseAdmin } = require('../config/supabase');
+const { logActivity } = require('../utils/activityLogger');
 
 // Get all perfumes with optional filtering
 const getAllPerfumes = async (req, res) => {
@@ -148,7 +149,11 @@ const getUniqueGenders = async (req, res) => {
             });
         }
 
-        const uniqueGenders = [...new Set(genders.map(item => item.gender))];
+        let uniqueGenders = [...new Set(genders.map(item => item.gender))];
+        
+        // Normalize display: Show "Unisex" instead of "Mixte" for better international compatibility
+        uniqueGenders = uniqueGenders.map(g => g === 'Mixte' ? 'Unisex' : g);
+        
         res.json(uniqueGenders);
 
     } catch (error) {
@@ -261,6 +266,21 @@ const createPerfume = async (req, res) => {
             });
         }
 
+        // Log activity
+        await logActivity({
+            entityType: 'perfume',
+            entityId: perfume.id,
+            entityName: perfume.name,
+            actionType: 'create',
+            details: {
+                reference: perfume.reference,
+                brand_name: perfume.brand_name,
+                gender: perfume.gender,
+                price: perfume.price
+            },
+            req
+        });
+
         res.status(201).json(perfume);
 
     } catch (error) {
@@ -274,6 +294,13 @@ const updatePerfume = async (req, res) => {
     try {
         const { id } = req.params;
         const updates = req.body;
+
+        // Get old perfume data for logging
+        const { data: oldPerfume } = await supabaseAdmin
+            .from('perfumes')
+            .select('*')
+            .eq('id', id)
+            .single();
 
         const { data: perfume, error } = await supabaseAdmin
             .from('perfumes')
@@ -293,6 +320,20 @@ const updatePerfume = async (req, res) => {
             });
         }
 
+        // Log activity
+        await logActivity({
+            entityType: 'perfume',
+            entityId: perfume.id,
+            entityName: perfume.name,
+            actionType: 'update',
+            details: {
+                old: oldPerfume,
+                new: perfume,
+                changes: updates
+            },
+            req
+        });
+
         res.json(perfume);
 
     } catch (error) {
@@ -306,6 +347,13 @@ const deletePerfume = async (req, res) => {
     try {
         const { id } = req.params;
 
+        // Get perfume data before deletion for logging
+        const { data: perfumeToDelete } = await supabaseAdmin
+            .from('perfumes')
+            .select('*')
+            .eq('id', id)
+            .single();
+
         const { error } = await supabaseAdmin
             .from('perfumes')
             .delete()
@@ -316,6 +364,20 @@ const deletePerfume = async (req, res) => {
             return res.status(500).json({
                 error: 'Failed to delete perfume',
                 details: error.message
+            });
+        }
+
+        // Log activity if perfume was found
+        if (perfumeToDelete) {
+            await logActivity({
+                entityType: 'perfume',
+                entityId: perfumeToDelete.id,
+                entityName: perfumeToDelete.name,
+                actionType: 'delete',
+                details: {
+                    deleted_perfume: perfumeToDelete
+                },
+                req
             });
         }
 

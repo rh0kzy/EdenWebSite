@@ -300,8 +300,6 @@ class EnvironmentValidator {
      * Validate all environment variables
      */
     validate() {
-        console.log('🔍 Starting environment validation...\n');
-        
         this.validationResults = {
             valid: true,
             errors: [],
@@ -553,85 +551,14 @@ class EnvironmentValidator {
      * Generate validation report
      */
     generateValidationReport() {
-        console.log('📋 Environment Validation Report\n');
-        
-        if (this.validationResults.valid) {
-            console.log('✅ All environment variables are valid!\n');
-        } else {
-            console.log('❌ Environment validation failed!\n');
-        }
-
-        // Report missing variables
-        if (this.validationResults.missing.length > 0) {
-            console.log('🚨 Missing Required Variables:');
-            this.validationResults.missing.forEach(item => {
-                console.log(`   ❌ ${item.key}: ${item.rule.description}`);
-                if (item.rule.defaultValue !== undefined) {
-                    console.log(`      💡 Suggested value: ${item.rule.defaultValue}`);
-                }
-            });
-            console.log('');
-        }
-
-        // Report invalid variables
-        if (this.validationResults.invalid.length > 0) {
-            console.log('⚠️  Invalid Variables:');
-            this.validationResults.invalid.forEach(item => {
-                console.log(`   ❌ ${item.key}: ${item.message}`);
-                console.log(`      Current value: ${item.value}`);
-            });
-            console.log('');
-        }
-
-        // Report warnings
-        if (this.validationResults.warnings.length > 0) {
-            console.log('⚠️  Warnings:');
-            this.validationResults.warnings.forEach(item => {
-                console.log(`   ⚠️  ${item.message}`);
-            });
-            console.log('');
-        }
-
-        // Report suggestions
-        if (this.validationResults.suggestions.length > 0) {
-            console.log('💡 Suggestions:');
-            this.validationResults.suggestions.forEach(item => {
-                console.log(`   💡 ${item.message}`);
-            });
-            console.log('');
-        }
-
-        // Summary by category
-        this.generateCategorySummary();
+        // Silent validation - no console output
     }
 
     /**
      * Generate category-wise summary
      */
     generateCategorySummary() {
-        const categories = {};
-        
-        Object.entries(this.validationRules).forEach(([key, rule]) => {
-            if (!categories[rule.category]) {
-                categories[rule.category] = { total: 0, configured: 0, missing: 0 };
-            }
-            
-            categories[rule.category].total++;
-            
-            if (process.env[key]) {
-                categories[rule.category].configured++;
-            } else if (rule.required) {
-                categories[rule.category].missing++;
-            }
-        });
-
-        console.log('📊 Configuration by Category:');
-        Object.entries(categories).forEach(([category, stats]) => {
-            const percentage = Math.round((stats.configured / stats.total) * 100);
-            const status = stats.missing > 0 ? '❌' : percentage > 50 ? '✅' : '⚠️';
-            console.log(`   ${status} ${category}: ${stats.configured}/${stats.total} configured (${percentage}%)`);
-        });
-        console.log('');
+        // Silent validation - no console output
     }
 
     /**

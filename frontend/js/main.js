@@ -2,7 +2,7 @@
 import { NavigationModule } from './navigation.js';
 import { AnimationsModule } from './animations.js';
 import { UIUtilsModule } from './uiUtils.js';
-import { FragranceDataModule } from './fragranceData.js';
+import fragranceDataInstance from './fragranceData.js';
 import { CatalogModule } from './catalog.js';
 
 class EdenWebsiteController {
@@ -11,7 +11,7 @@ class EdenWebsiteController {
             navigation: new NavigationModule(),
             animations: new AnimationsModule(),
             uiUtils: new UIUtilsModule(),
-            fragranceData: new FragranceDataModule(),
+            fragranceData: fragranceDataInstance, // Use singleton instance
             catalog: new CatalogModule()
         };
         this.isInitialized = false;
@@ -33,18 +33,15 @@ class EdenWebsiteController {
             // Setup performance monitoring
             this.setupPerformanceMonitoring();
             
-            // Initialize page-specific functionality
             this.initializePageSpecificFeatures();
             
             this.isInitialized = true;
             
-            // Dispatch initialization complete event
             window.dispatchEvent(new CustomEvent('edenWebsiteInitialized', {
                 detail: { modules: Object.keys(this.modules) }
             }));
             
         } catch (error) {
-            console.error('❌ Failed to initialize Eden Website:', error);
             this.showInitializationError();
         }
     }
@@ -66,6 +63,9 @@ class EdenWebsiteController {
     async initializeModules() {
         // Initialize data module first (other modules depend on it)
         this.modules.fragranceData.init();
+        
+        // Expose fragranceData globally for debugging and console access
+        window.fragranceData = this.modules.fragranceData;
         
         // Initialize UI utilities early (needed for error handling)
         this.modules.uiUtils.init();

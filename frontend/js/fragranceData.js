@@ -3,7 +3,9 @@ export class FragranceDataModule {
     constructor() {
         this.imageMap = null;
         this.brandLogos = null;
+        this.dynamicBrandLogos = {}; // Store logos loaded from API
         this.isInitialized = false;
+        this.brandsLoaded = false;
     }
 
     init() {
@@ -13,6 +15,98 @@ export class FragranceDataModule {
         this.brandLogos = this.getBrandLogosMap();
         
         this.isInitialized = true;
+        
+        // Load brand logos from API
+        this.loadBrandLogosFromAPI();
+    }
+    
+    async loadBrandLogosFromAPI() {
+        if (this.brandsLoaded) return;
+        
+        try {
+            const response = await fetch('/api/v2/brands?limit=1000');
+            if (!response.ok) {
+                console.warn('Could not load brand logos from API');
+                return;
+            }
+            
+            const data = await response.json();
+            if (data.success && data.data) {
+                // Store brand logos from API with priority for database logos
+                for (const brand of data.data) {
+                    if (brand.name) {
+                        // Use logo_url from database if available
+                        if (brand.logo_url) {
+                            // Ensure the path is correct (handle both relative and absolute paths)
+                            let logoPath = brand.logo_url;
+                            
+                            // If it doesn't start with 'photos/', add it
+                            if (!logoPath.startsWith('photos/') && !logoPath.startsWith('/photos/')) {
+                                logoPath = `photos/${logoPath}`;
+                            }
+                            
+                            this.dynamicBrandLogos[brand.name] = logoPath;
+                            console.log(`📷 Loaded logo for ${brand.name}: ${logoPath}`);
+                        } else {
+                            // Try to auto-detect logo from common patterns
+                            const detectedLogo = await this.tryDetectBrandLogo(brand.name);
+                            if (detectedLogo) {
+                                this.dynamicBrandLogos[brand.name] = detectedLogo;
+                                console.log(`🔍 Auto-detected logo for ${brand.name}: ${detectedLogo}`);
+                            }
+                        }
+                    }
+                }
+                
+                console.log(`✅ Loaded ${Object.keys(this.dynamicBrandLogos).length} brand logos from database`);
+                this.brandsLoaded = true;
+                
+                // Trigger a custom event to notify that brands are loaded
+                window.dispatchEvent(new CustomEvent('brandLogosLoaded', {
+                    detail: { 
+                        count: Object.keys(this.dynamicBrandLogos).length,
+                        brands: data.data 
+                    }
+                }));
+            }
+        } catch (error) {
+            console.warn('Error loading brand logos:', error);
+        }
+    }
+    
+    async tryDetectBrandLogo(brandName) {
+        // Try common file extensions and naming patterns
+        const extensions = ['png', 'jpg', 'jpeg', 'svg', 'webp', 'avif'];
+        const patterns = [
+            brandName,                          // Exact name: "Dove"
+            brandName.toLowerCase(),            // Lowercase: "dove"
+            brandName.replace(/\s+/g, '_'),    // Underscore: "Dove_Logo"
+            brandName.replace(/\s+/g, '-'),    // Hyphen: "Dove-Logo"
+            brandName.replace(/\s+/g, '')      // No spaces: "DoveLogo"
+        ];
+        
+        for (const pattern of patterns) {
+            for (const ext of extensions) {
+                const path = `photos/${pattern}.${ext}`;
+                
+                // Quick check without actually loading (will be validated when displayed)
+                const exists = await this.checkImageExists(path);
+                if (exists) {
+                    return path;
+                }
+            }
+        }
+        
+        return null;
+    }
+    
+    async checkImageExists(imagePath) {
+        try {
+            const response = await fetch(imagePath, { method: 'HEAD' });
+            return response.ok;
+        } catch (error) {
+            return false;
+        }
     }
 
     getFragranceImageMap() {
@@ -662,6 +756,12 @@ export class FragranceDataModule {
     getBrandLogo(brand) {
         if (!this.isInitialized) this.init();
         
+        // Priority: 1. Dynamic (from API/database) 2. Static (hardcoded map)
+        // This ensures newly added brands with logos are recognized immediately
+        if (this.dynamicBrandLogos[brand]) {
+            return this.dynamicBrandLogos[brand];
+        }
+        
         return this.brandLogos[brand] || null;
     }
 
@@ -696,13 +796,22 @@ export class FragranceDataModule {
     }
 }
 
+// Create and export a singleton instance
+const fragranceDataInstance = new FragranceDataModule();
+
+// Expose to window for debugging and console access
+if (typeof window !== 'undefined') {
+    window.fragranceData = fragranceDataInstance;
+}
+
+// Export the singleton instance as default
+export default fragranceDataInstance;
+
 // Export utility functions for backwards compatibility
 export function getFragranceImage(perfume) {
-    const dataModule = new FragranceDataModule();
-    return dataModule.getFragranceImage(perfume);
+    return fragranceDataInstance.getFragranceImage(perfume);
 }
 
 export function getBrandLogo(brand) {
-    const dataModule = new FragranceDataModule();
-    return dataModule.getBrandLogo(brand);
+    return fragranceDataInstance.getBrandLogo(brand);
 }
