@@ -24,8 +24,18 @@
 
 # API redirects to Netlify Functions
 [[redirects]]
-  from = "/api/v2/auth/*"
-  to = "/.netlify/functions/auth"
+  from = "/api/v2/auth/login"
+  to = "/.netlify/functions/auth-login"
+  status = 200
+
+[[redirects]]
+  from = "/api/v2/auth/verify"
+  to = "/.netlify/functions/auth-verify"
+  status = 200
+
+[[redirects]]
+  from = "/api/v2/auth/logout"
+  to = "/.netlify/functions/auth-logout"
   status = 200
 
 [[redirects]]

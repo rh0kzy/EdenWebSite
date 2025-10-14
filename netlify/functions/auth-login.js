@@ -1,4 +1,4 @@
-// Netlify Function for Authentication
+// Netlify Function for Login
 const bcrypt = require('bcryptjs');
 
 // Admin credentials (should be in environment variables)
@@ -11,12 +11,12 @@ const ADMIN_CREDENTIALS = {
 const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Content-Type': 'application/json'
 };
 
 /**
- * Main handler for authentication endpoints
+ * Login handler
  */
 exports.handler = async (event, context) => {
     // Handle CORS preflight
@@ -28,30 +28,19 @@ exports.handler = async (event, context) => {
         };
     }
 
-    const path = event.path.replace('/.netlify/functions/auth', '');
-    
-    // Route to appropriate handler
-    if (path === '/login' && event.httpMethod === 'POST') {
-        return handleLogin(event);
-    } else if (path === '/verify' && event.httpMethod === 'GET') {
-        return handleVerify(event);
-    } else if (path === '/logout' && event.httpMethod === 'POST') {
-        return handleLogout(event);
-    } else {
+    // Only accept POST
+    if (event.httpMethod !== 'POST') {
         return {
-            statusCode: 404,
+            statusCode: 405,
             headers,
-            body: JSON.stringify({ error: 'Not found' })
+            body: JSON.stringify({ error: 'Method not allowed' })
         };
     }
-};
 
-/**
- * Handle login request
- */
-async function handleLogin(event) {
     try {
         const { username, password } = JSON.parse(event.body);
+
+        console.log('Login attempt for user:', username);
 
         if (!username || !password) {
             return {
@@ -66,6 +55,7 @@ async function handleLogin(event) {
 
         // Check username
         if (username !== ADMIN_CREDENTIALS.username) {
+            console.log('Invalid username');
             return {
                 statusCode: 401,
                 headers,
@@ -80,6 +70,7 @@ async function handleLogin(event) {
         const isPasswordValid = await bcrypt.compare(password, ADMIN_CREDENTIALS.passwordHash);
 
         if (!isPasswordValid) {
+            console.log('Invalid password');
             return {
                 statusCode: 401,
                 headers,
@@ -92,6 +83,8 @@ async function handleLogin(event) {
 
         // Generate token (simple base64 encoding)
         const token = Buffer.from(`${username}:${Date.now()}`).toString('base64');
+
+        console.log('Login successful for user:', username);
 
         return {
             statusCode: 200,
@@ -114,77 +107,4 @@ async function handleLogin(event) {
             })
         };
     }
-}
-
-/**
- * Handle token verification
- */
-function handleVerify(event) {
-    try {
-        const authHeader = event.headers.authorization || event.headers.Authorization;
-        const token = authHeader?.replace('Bearer ', '');
-
-        if (!token) {
-            return {
-                statusCode: 401,
-                headers,
-                body: JSON.stringify({
-                    success: false,
-                    error: 'No token provided'
-                })
-            };
-        }
-
-        // Decode and verify token
-        const decoded = Buffer.from(token, 'base64').toString('utf-8');
-        const [username, timestamp] = decoded.split(':');
-
-        // Token valid for 24 hours
-        const tokenAge = Date.now() - parseInt(timestamp);
-        const maxAge = 24 * 60 * 60 * 1000;
-
-        if (tokenAge > maxAge) {
-            return {
-                statusCode: 401,
-                headers,
-                body: JSON.stringify({
-                    success: false,
-                    error: 'Token expired'
-                })
-            };
-        }
-
-        return {
-            statusCode: 200,
-            headers,
-            body: JSON.stringify({
-                success: true,
-                username: username
-            })
-        };
-    } catch (error) {
-        console.error('Verify error:', error);
-        return {
-            statusCode: 401,
-            headers,
-            body: JSON.stringify({
-                success: false,
-                error: 'Invalid token'
-            })
-        };
-    }
-}
-
-/**
- * Handle logout request
- */
-function handleLogout(event) {
-    return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({
-            success: true,
-            message: 'Logout successful'
-        })
-    };
-}
+};
