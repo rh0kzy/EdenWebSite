@@ -1,6 +1,6 @@
 # Eden Parfum - Premium Fragrance E-commerce Platform
 
-A modern, full-stack e-commerce platform for premium perfumes built with Node.js, Express, Supabase, and vanilla JavaScript.
+A modern, full-stack e-commerce platform for premium perfumes built with Node.js, Express, Firebase Firestore, and vanilla JavaScript.
 
 ## 🏗️ Project Structure
 
@@ -32,7 +32,7 @@ eden-parfum/
 ### Prerequisites
 - Node.js 18+
 - npm or yarn
-- Supabase account
+- Google Firebase account
 
 ### Installation
 
@@ -49,18 +49,18 @@ eden-parfum/
    cd ../frontend && npm install
    ```
 
-3. **Environment Setup**
+3. **Firebase Setup**
    ```bash
-   cp backend/.env.example backend/.env
-   # Edit .env with your Supabase credentials
+   # Create a Firebase project at https://console.firebase.google.com/
+   # Generate a service account key and download the JSON file
+   # Update backend/.env with your Firebase credentials
    ```
 
-4. **Database Setup**
+4. **Database Migration (if migrating from Supabase)**
    ```bash
-   cd database
-   # Run migrations in order
-   psql -f schema.sql
-   psql -f complete_migration.js
+   cd backend
+   # Run migration script to transfer data from Supabase to Firebase
+   node migrate-to-firebase.js
    ```
 
 ### Development
@@ -86,7 +86,7 @@ eden-parfum/
 
 ### Backend (`/backend`)
 - **Express.js API server** with modular architecture
-- **Supabase integration** for database operations
+- **Firebase Firestore integration** for database operations
 - **Comprehensive logging** and error handling
 - **Health monitoring** and performance tracking
 
@@ -97,7 +97,7 @@ eden-parfum/
 - **Offline support** with service workers
 
 ### Database (`/database`)
-- **Supabase schema** definitions
+- **Firebase Firestore collections** for brands and perfumes
 - **Migration scripts** for data updates
 - **Seed data** for development
 

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Netlify Functions for Eden Parfum API",
   "dependencies": {
-    "@supabase/supabase-js": "^2.57.4",
+    "firebase-admin": "^12.0.0",
     "bcryptjs": "^2.4.3"
   }
 }

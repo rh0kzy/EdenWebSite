@@ -8,7 +8,7 @@ const {
     createBrand,
     updateBrand,
     deleteBrand
-} = require('../controllers/supabaseBrandController');
+} = require('../controllers/firebaseBrandController');
 
 // Get all brands
 router.get('/', getAllBrands);

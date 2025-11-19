@@ -1,10 +1,6 @@
-const { createClient } = require('@supabase/supabase-js');
+const { initializeFirebase } = require('./firebase-config');
 
-// Supabase configuration
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_ANON_KEY;
-
-const supabase = createClient(supabaseUrl, supabaseKey);
+let db;
 
 exports.handler = async (event, context) => {
     // Enable CORS
@@ -32,23 +28,42 @@ exports.handler = async (event, context) => {
         };
     }
 
+    // Initialize Firebase if not already initialized
     try {
-        const { data: brands, error, count } = await supabase
-            .from('brands')
-            .select('*', { count: 'exact' })
-            .order('name', { ascending: true });
+        if (!db) {
+            db = initializeFirebase();
+        }
+    } catch (error) {
+        console.error('Firebase initialization error:', error);
+        return {
+            statusCode: 500,
+            headers,
+            body: JSON.stringify({
+                success: false,
+                error: 'Database initialization failed',
+                details: error.message
+            })
+        };
+    }
 
-        if (error) {
-            console.error('Error fetching brands:', error);
-            return {
-                statusCode: 500,
-                headers,
-                body: JSON.stringify({
-                    success: false,
-                    error: 'Failed to fetch brands',
-                    details: error.message
-                })
-            };
+    try {
+        const brandsSnapshot = await db.collection('brands')
+            .orderBy('name')
+            .get();
+
+        const brands = [];
+        for (const brandDoc of brandsSnapshot.docs) {
+            const brandData = brandDoc.data();
+
+            // Count perfumes for this brand
+            const perfumesQuery = db.collection('perfumes').where('brand_id', '==', brandDoc.id);
+            const perfumesSnapshot = await perfumesQuery.get();
+
+            brands.push({
+                id: brandDoc.id,
+                ...brandData,
+                perfume_count: perfumesSnapshot.size
+            });
         }
 
         return {
@@ -56,19 +71,20 @@ exports.handler = async (event, context) => {
             headers,
             body: JSON.stringify({
                 success: true,
-                data: brands || [],
-                total: count || 0
+                data: brands,
+                total: brands.length
             })
         };
 
     } catch (error) {
-        console.error('Server error:', error);
+        console.error('Error fetching brands:', error);
         return {
             statusCode: 500,
             headers,
             body: JSON.stringify({
                 success: false,
-                error: 'Internal server error'
+                error: 'Internal server error',
+                details: error.message
             })
         };
     }
