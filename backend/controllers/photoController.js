@@ -1,8 +1,15 @@
-const { supabase } = require('../config/supabase');
+// Legacy photoController - To be migrated to Firebase
+// const { supabase } = require('../config/supabase');
+const { db } = require('../config/firebase');
 
 // Get perfumes with complete photo information
 const getPerfumesWithPhotos = async (req, res) => {
     try {
+        // TODO: Convert to Firebase
+        return res.status(501).json({ 
+            error: 'Photo endpoints not yet migrated to Firebase',
+            message: 'This feature is temporarily unavailable during migration'
+        });
         const { brand, gender, search, limit = 20, offset = 0 } = req.query;
         
         let query = supabase

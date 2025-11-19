@@ -1,7 +1,7 @@
 // Activity Logger Utility
-// Handles logging of all CRUD operations to the activity_log table
+// Handles logging of all CRUD operations to Firestore
 
-const { supabaseAdmin } = require('../config/supabase');
+const { db } = require('../config/firebase');
 
 /**
  * Log an activity to the activity_log table
@@ -41,25 +41,25 @@ async function logActivity({
             timestamp: new Date().toISOString()
         } : null;
 
-        // Insert activity log entry
-        const { data, error } = await supabaseAdmin
-            .from('activity_log')
-            .insert({
-                entity_type: entityType,
-                entity_id: entityId,
-                entity_name: entityName,
-                action_type: actionType,
-                details: details,
-                user_info: userInfo,
-                ip_address: ipAddress,
-                user_agent: userAgent
-            })
-            .select()
-            .single();
+        // Insert activity log entry to Firestore
+        const activityLog = {
+            entity_type: entityType,
+            entity_id: String(entityId),
+            entity_name: entityName,
+            action_type: actionType,
+            details: details,
+            user_info: userInfo,
+            ip_address: ipAddress,
+            user_agent: userAgent,
+            created_at: new Date()
+        };
 
-        if (error) {
+        const docRef = await db.collection('activity_log').add(activityLog);
+        const data = { id: docRef.id, ...activityLog };
+
+        if (!docRef.id) {
             // Log error but don't throw - activity logging should not break main operations
-            console.error('Failed to log activity:', error);
+            console.error('Failed to log activity: No document ID');
             return null;
         }
 
@@ -87,30 +87,33 @@ async function getRecentActivities({
     actionType = null
 } = {}) {
     try {
-        let query = supabaseAdmin
-            .from('activity_log')
-            .select('*', { count: 'exact' })
-            .order('created_at', { ascending: false })
-            .range(offset, offset + limit - 1);
+        let query = db.collection('activity_log')
+            .orderBy('created_at', 'desc');
 
         // Apply filters if provided
         if (entityType) {
-            query = query.eq('entity_type', entityType);
+            query = query.where('entity_type', '==', entityType);
         }
 
         if (actionType) {
-            query = query.eq('action_type', actionType);
+            query = query.where('action_type', '==', actionType);
         }
 
-        const { data, error, count } = await query;
-
-        if (error) {
-            throw error;
+        // Apply pagination
+        if (offset > 0) {
+            const offsetSnapshot = await query.limit(offset).get();
+            const lastDoc = offsetSnapshot.docs[offsetSnapshot.docs.length - 1];
+            if (lastDoc) {
+                query = query.startAfter(lastDoc);
+            }
         }
+
+        const snapshot = await query.limit(limit).get();
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
         return {
             activities: data || [],
-            total: count || 0,
+            total: snapshot.size,
             limit,
             offset
         };

@@ -24,7 +24,10 @@ export class FragranceDataModule {
         if (this.brandsLoaded) return;
         
         try {
-            const response = await fetch('/api/v2/brands?limit=1000');
+            // Use the global API client base URL if available, otherwise default to relative path
+            const baseUrl = (window.edenAPI && window.edenAPI.baseUrl) ? window.edenAPI.baseUrl : '/api/v2';
+            const response = await fetch(`${baseUrl}/brands?limit=1000`);
+            
             if (!response.ok) {
                 console.warn('Could not load brand logos from API');
                 return;

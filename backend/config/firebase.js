@@ -22,14 +22,23 @@ if (!serviceAccount.project_id || !serviceAccount.private_key) {
     process.exit(1);
 }
 
+console.log('🔥 Initializing Firebase Admin SDK...');
+
 // Initialize Firebase Admin SDK
 if (!admin.apps.length) {
-    admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-        databaseURL: `https://${serviceAccount.project_id}.firebaseio.com`
-    });
+    try {
+        admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount),
+            databaseURL: `https://${serviceAccount.project_id}.firebaseio.com`
+        });
+        console.log('✅ Firebase Admin SDK initialized successfully');
+    } catch (error) {
+        console.error('❌ Firebase initialization failed:', error.message);
+        process.exit(1);
+    }
 }
 
 const db = admin.firestore();
+console.log('✅ Firestore client ready');
 
 module.exports = { db, admin };

@@ -59,7 +59,7 @@ class EdenParfumAPI {
         
         if (hostname === 'localhost' || hostname === '127.0.0.1') {
             // Development environment - detect backend port
-            const possiblePorts = [3000, 3001, 5000, 8080];
+            const possiblePorts = [3000, 3001, 5000]; // Removed 8080 to prevent frontend self-referencing
             const currentPort = parseInt(window.location.port);
             
             // If we're already on a known backend port, use it
@@ -372,8 +372,13 @@ class EdenParfumAPI {
     // Helper method to convert old perfumesDatabase format to new format
     convertToLegacyFormat(perfumes) {
         return perfumes.map(perfume => {
-            const imageUrl = perfume.image_url || perfume.photo_url || `/photos/${perfume.name?.replace(/[^a-zA-Z0-9]/g, '_')}.jpg`;
+            let imageUrl = perfume.image_url || perfume.photo_url || `/photos/${perfume.name?.replace(/[^a-zA-Z0-9]/g, '_')}.jpg`;
             
+            // Fix double photos/ prefix if present
+            if (imageUrl && imageUrl.startsWith('photos/photos/')) {
+                imageUrl = imageUrl.replace('photos/photos/', 'photos/');
+            }
+
             return {
                 reference: perfume.reference,
                 name: perfume.name,

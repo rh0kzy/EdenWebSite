@@ -37,9 +37,25 @@ class FastImageLoader {
         };
 
         const sizeConfig = sizes[size] || sizes.medium;
-        
-        // For local images, just return the path with cache busting
-        return `/photos/${imageName}?w=${sizeConfig.width}&q=${sizeConfig.quality}&t=${Date.now()}`;
+
+        // Remote images keep their original URL to avoid invalid cache parameters
+        if (/^https?:\/\//i.test(imageName)) {
+            return imageName;
+        }
+
+        let imagePath = imageName;
+        if (imageName.startsWith('/photos/')) {
+            imagePath = imageName;
+        } else if (imageName.startsWith('photos/')) {
+            imagePath = `/${imageName}`;
+        } else if (imageName.startsWith('/')) {
+            imagePath = imageName;
+        } else {
+            imagePath = `/photos/${imageName}`;
+        }
+
+        const separator = imagePath.includes('?') ? '&' : '?';
+        return `${imagePath}${separator}w=${sizeConfig.width}&q=${sizeConfig.quality}&t=${Date.now()}`;
     }
 
     // Create optimized image element with lazy loading
@@ -51,6 +67,7 @@ class FastImageLoader {
         img.dataset.src = optimizedSrc;
         img.alt = alt;
         img.className = `lazy-image ${className}`;
+        img.loading = 'lazy';
         
         // Add loading placeholder
         img.style.backgroundColor = 'var(--bg-lighter)';
@@ -120,6 +137,7 @@ class FastImageLoader {
         };
         
         imgElement.src = src;
+        imgElement.removeAttribute('data-src');
     }
 
     // Show loading animation
@@ -177,8 +195,11 @@ class FastImageLoader {
             const images = document.querySelectorAll('.lazy-image');
             images.forEach(img => {
                 if (img.dataset.src && !img.src) {
+                    // Use the full path from dataset.src instead of just filename
+                    // to preserve subdirectories like Fragrances/
+                    const imagePath = img.dataset.src.split('?')[0];
                     const thumbnailSrc = this.getOptimizedImageUrl(
-                        img.dataset.src.split('?')[0].split('/').pop(), 
+                        imagePath, 
                         'thumbnail'
                     );
                     img.style.filter = 'blur(2px)';

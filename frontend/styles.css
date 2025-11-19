@@ -1326,6 +1326,39 @@ mark.search-highlight {
     margin-bottom: 40px;
 }
 
+.catalog-sentinel {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 24px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.catalog-sentinel__spinner {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 3px solid rgba(165, 139, 76, 0.25);
+    border-top-color: var(--primary-gold);
+    animation: catalog-spin 0.9s linear infinite;
+}
+
+.catalog-sentinel__label {
+    font-size: 0.95rem;
+}
+
+.catalog-sentinel.is-hidden {
+    display: none;
+}
+
+@keyframes catalog-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
 .perfume-item {
     background: white;
     border-radius: 15px;

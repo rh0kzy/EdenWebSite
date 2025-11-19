@@ -16,6 +16,13 @@ export class CatalogModule {
         this.currentBrandFilter = '';
         this.currentGenderFilter = '';
         this.isInitialized = false;
+        this.batchSize = 60;
+        this.renderedCount = 0;
+        this.batchObserver = null;
+        this.batchSentinel = null;
+        this.resultsContainer = null;
+        this.isRenderingBatch = false;
+        this.scrollListenerBound = null;
     }
 
     init() {
@@ -49,7 +56,7 @@ export class CatalogModule {
         window.addEventListener('brandLogosLoaded', (event) => {
             if (this.isCatalogPage() && this.filteredPerfumes.length > 0) {
                 console.log('🎨 Brand logos updated, refreshing display...');
-                this.displayPerfumes();
+                this.displayPerfumes(true);
             }
         });
     }
@@ -149,6 +156,7 @@ export class CatalogModule {
         }
 
         hideLoadingIndicator();
+        this.resultsContainer = document.getElementById('perfumeResults');
         
         // Check if perfumes database is loaded
         if (!window.perfumesDatabase || window.perfumesDatabase.length === 0) {
@@ -172,7 +180,7 @@ export class CatalogModule {
         if (this.currentGenderFilter) {
             this.filterPerfumes();
         } else {
-            this.displayPerfumes();
+            this.displayPerfumes(true);
             this.updateResultsCount();
         }
         
@@ -386,31 +394,160 @@ export class CatalogModule {
         });
         
         this.sortPerfumes();
-        this.displayPerfumes();
+        this.displayPerfumes(true);
         this.updateResultsCount();
     }
 
-    displayPerfumes() {
-        const resultsContainer = document.getElementById('perfumeResults');
+    displayPerfumes(resetBatches = false) {
+        if (!this.resultsContainer) {
+            this.resultsContainer = document.getElementById('perfumeResults');
+        }
+
+        const resultsContainer = this.resultsContainer;
         const noResultsDiv = document.getElementById('noResults');
-        
+
         if (!resultsContainer) return;
-        
+
         if (this.filteredPerfumes.length === 0) {
             resultsContainer.style.display = 'none';
+            resultsContainer.innerHTML = '';
             if (noResultsDiv) noResultsDiv.style.display = 'block';
+            this.teardownBatchObserver();
             return;
         }
-        
+
         resultsContainer.style.display = 'grid';
         if (noResultsDiv) noResultsDiv.style.display = 'none';
-        
-        resultsContainer.innerHTML = '';
-        
-        this.filteredPerfumes.forEach(perfume => {
-            const perfumeItem = this.createPerfumeItem(perfume);
-            resultsContainer.appendChild(perfumeItem);
-        });
+
+        if (resetBatches || !this.batchSentinel) {
+            this.resetBatchRendering();
+        }
+
+        this.renderNextBatch();
+        this.ensureBatchObserver();
+    }
+
+    resetBatchRendering() {
+        if (!this.resultsContainer) {
+            return;
+        }
+
+        this.teardownBatchObserver();
+        this.resultsContainer.innerHTML = '';
+        this.renderedCount = 0;
+        this.isRenderingBatch = false;
+
+        this.batchSentinel = document.createElement('div');
+        this.batchSentinel.id = 'catalogSentinel';
+        this.batchSentinel.className = 'catalog-sentinel';
+        this.batchSentinel.innerHTML = `
+            <div class="catalog-sentinel__spinner"></div>
+            <span class="catalog-sentinel__label">Loading more perfumes...</span>
+        `;
+
+        this.resultsContainer.appendChild(this.batchSentinel);
+    }
+
+    ensureBatchObserver() {
+        if (!this.batchSentinel) {
+            return;
+        }
+
+        if ('IntersectionObserver' in window) {
+            if (this.batchObserver) {
+                this.batchObserver.disconnect();
+            }
+
+            this.batchObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        this.renderNextBatch();
+                    }
+                });
+            }, {
+                root: null,
+                rootMargin: '400px 0px',
+                threshold: 0
+            });
+
+            this.batchObserver.observe(this.batchSentinel);
+        } else if (!this.scrollListenerBound) {
+            this.scrollListenerBound = this.handleScrollLoadMore.bind(this);
+            window.addEventListener('scroll', this.scrollListenerBound, { passive: true });
+        }
+    }
+
+    handleScrollLoadMore() {
+        if (!this.batchSentinel) return;
+        const rect = this.batchSentinel.getBoundingClientRect();
+        if (rect.top < window.innerHeight + 200) {
+            this.renderNextBatch();
+        }
+    }
+
+    renderNextBatch() {
+        if (this.isRenderingBatch) {
+            return;
+        }
+
+        if (this.renderedCount >= this.filteredPerfumes.length) {
+            this.hideBatchSentinel();
+            return;
+        }
+
+        this.isRenderingBatch = true;
+        const start = this.renderedCount;
+        const end = Math.min(this.renderedCount + this.batchSize, this.filteredPerfumes.length);
+
+        const fragment = document.createDocumentFragment();
+        for (let index = start; index < end; index++) {
+            fragment.appendChild(this.createPerfumeItem(this.filteredPerfumes[index]));
+        }
+
+        if (this.batchSentinel && this.batchSentinel.parentNode === this.resultsContainer) {
+            this.resultsContainer.insertBefore(fragment, this.batchSentinel);
+        } else {
+            this.resultsContainer.appendChild(fragment);
+        }
+
+        this.renderedCount = end;
+        this.isRenderingBatch = false;
+
+        if (window.fastImageLoader && typeof window.fastImageLoader.loadVisibleImages === 'function') {
+            window.fastImageLoader.loadVisibleImages();
+        }
+
+        if (this.renderedCount >= this.filteredPerfumes.length) {
+            this.hideBatchSentinel();
+        } else if (this.batchSentinel) {
+            this.batchSentinel.classList.remove('is-hidden');
+        }
+    }
+
+    hideBatchSentinel() {
+        if (this.batchSentinel) {
+            this.batchSentinel.classList.add('is-hidden');
+        }
+    }
+
+    teardownBatchObserver() {
+        if (this.batchObserver) {
+            this.batchObserver.disconnect();
+            this.batchObserver = null;
+        }
+
+        if (this.scrollListenerBound) {
+            window.removeEventListener('scroll', this.scrollListenerBound);
+            this.scrollListenerBound = null;
+        }
+
+        if (this.batchSentinel && this.batchSentinel.parentNode) {
+            this.batchSentinel.parentNode.removeChild(this.batchSentinel);
+        }
+
+        this.batchSentinel = null;
+        this.renderedCount = 0;
+        this.isRenderingBatch = false;
     }
 
     createPerfumeItem(perfume) {
@@ -439,12 +576,10 @@ export class CatalogModule {
                    <span>${perfume.brand || 'No Brand'}</span>
                </div>`;
         
-        // Create the structure with image directly in HTML
+        // Create the structure with image container only; image will be attached lazily
         item.innerHTML = `
             ${perfume.multiplier ? `<div class="price-multiplier">${perfume.multiplier}</div>` : ''}
-            <div class="perfume-image">
-                <img src="${imageUrl}" alt="${perfume.name}" class="fragrance-image" loading="lazy">
-            </div>
+            <div class="perfume-image"></div>
             <div class="perfume-header">
                 <div class="perfume-name">${perfume.name}</div>
                 <div class="perfume-reference">#${perfume.reference}</div>
@@ -454,6 +589,12 @@ export class CatalogModule {
                 <div class="perfume-gender">${perfume.gender}</div>
             </div>
         `;
+
+        const imageContainer = item.querySelector('.perfume-image');
+        if (imageContainer) {
+            const imageElement = this.createPerfumeImageElement(imageUrl, perfume);
+            imageContainer.appendChild(imageElement);
+        }
         
         // Add click handler for WhatsApp integration
         item.addEventListener('click', () => {
@@ -461,6 +602,22 @@ export class CatalogModule {
         });
         
         return item;
+    }
+
+    createPerfumeImageElement(imageUrl, perfume) {
+        const altText = perfume.name || 'Perfume image';
+
+        if (window.fastImageLoader && typeof window.fastImageLoader.createLazyImage === 'function') {
+            const normalizedSource = imageUrl.startsWith('/') ? imageUrl.slice(1) : imageUrl;
+            return window.fastImageLoader.createLazyImage(normalizedSource, altText, 'fragrance-image', 'medium');
+        }
+
+        const img = document.createElement('img');
+        img.src = imageUrl;
+        img.alt = altText;
+        img.className = 'fragrance-image';
+        img.loading = 'lazy';
+        return img;
     }
 
     showPerfumeDetails(perfume) {

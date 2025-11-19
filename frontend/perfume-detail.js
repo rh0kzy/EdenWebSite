@@ -10,9 +10,8 @@ class PerfumeDetailPage {
         const hostname = window.location.hostname;
         
         if (hostname === 'localhost' || hostname === '127.0.0.1') {
-            // Development environment - use the same port as the current page
-            const port = window.location.port || '80';
-            return `http://localhost:${port}/api/v2`;
+            // Development environment - use backend port 3000
+            return `http://localhost:3000/api/v2`;
         } else {
             // Production environment - Use API redirect
             return '/api/v2';
