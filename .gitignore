@@ -15,6 +15,9 @@ build/
 .env.test.local
 .env.production.local
 
+# Firebase service account keys
+*-firebase-adminsdk-*.json
+
 # OS generated files
 .DS_Store
 .DS_Store?
