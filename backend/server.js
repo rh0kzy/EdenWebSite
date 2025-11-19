@@ -210,32 +210,34 @@ app.use('/api/activities', activityRoutes);
 // Social Media Integration API
 app.use('/api/social', socialRoutes);
 
-// Serve frontend for any non-API routes
+// MAINTENANCE MODE - Redirect all routes to maintenance page
 app.get('*', (req, res) => {
+    // Keep API endpoints returning 503 Service Unavailable
     if (req.path.startsWith('/api/')) {
-        logger.warn('API Route Not Found', {
+        logger.warn('API Request During Maintenance', {
             path: req.path,
             method: req.method,
             ip: req.ip,
             timestamp: new Date().toISOString()
         });
-        return res.status(404).json({ 
+        return res.status(503).json({ 
             success: false,
             error: {
-                message: 'API endpoint not found',
-                statusCode: 404
+                message: 'Service temporarily unavailable due to maintenance',
+                statusCode: 503
             },
             timestamp: new Date().toISOString()
         });
     }
     
-    logger.debug('Serving Frontend', {
+    // Serve maintenance page for all frontend routes
+    logger.debug('Serving Maintenance Page', {
         path: req.path,
         ip: req.ip,
         timestamp: new Date().toISOString()
     });
     
-    res.sendFile(path.join(__dirname, '../frontend/index.html'));
+    res.sendFile(path.join(__dirname, '../frontend/maintenance.html'));
 });
 
 // 404 handler for undefined routes

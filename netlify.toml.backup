@@ -1,0 +1,59 @@
+[[redirects]]
+  from = "/api/v2/auth/login"
+  to = "/.netlify/functions/auth-login"
+  status = 200
+
+[[redirects]]
+  from = "/api/v2/auth/verify"
+  to = "/.netlify/functions/auth-verify"
+  status = 200
+
+[[redirects]]
+  from = "/api/v2/auth/logout"
+  to = "/.netlify/functions/auth-logout"
+  status = 200
+
+[[redirects]]
+  from = "/api/v2/perfumes"
+  to = "/.netlify/functions/perfumes"
+  status = 200
+
+[[redirects]]
+  from = "/api/v2/brands"
+  to = "/.netlify/functions/brands"
+  status = 200
+
+[[redirects]]
+  from = "/api/v2/photos/*"
+  to = "/.netlify/functions/photos"
+  status = 200
+
+[[redirects]]
+  from = "/api/v2/errors"
+  to = "/.netlify/functions/errors"
+  status = 200
+
+[[redirects]]
+  from = "/api/social/analytics"
+  to = "/.netlify/functions/social-analytics"
+  status = 200
+
+# Specific page redirects (exclude from catch-all)
+[[redirects]]
+  from = "/catalog.html"
+  to = "/catalog.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/perfume-detail.html"
+  to = "/perfume-detail.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  # Handle SPA routing - redirect all other requests to index.html
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = false

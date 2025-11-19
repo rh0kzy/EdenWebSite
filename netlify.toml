@@ -1,7 +1,7 @@
 [build]
-  # Frontend static site deployment
+  # Frontend static site deployment - MAINTENANCE MODE
   publish = "frontend"
-  command = "echo 'No build process needed for static frontend'"
+  command = "echo 'Maintenance mode active - static site only'"
   ignore = "exit 0"
 
 [build.environment]
@@ -47,45 +47,38 @@
   to = "/.netlify/functions/perfumes"
   status = 200
 
+# MAINTENANCE MODE - Return 503 for all API endpoints
 [[redirects]]
-  from = "/api/v2/brands"
-  to = "/.netlify/functions/brands"
-  status = 200
+  from = "/api/*"
+  to = "/maintenance.html"
+  status = 503
+  force = true
 
-[[redirects]]
-  from = "/api/v2/photos/*"
-  to = "/.netlify/functions/photos"
-  status = 200
-
-[[redirects]]
-  from = "/api/v2/errors"
-  to = "/.netlify/functions/errors"
-  status = 200
-
-[[redirects]]
-  from = "/api/social/analytics"
-  to = "/.netlify/functions/social-analytics"
-  status = 200
-
-# Specific page redirects (exclude from catch-all)
+# MAINTENANCE MODE - Redirect all pages to maintenance
 [[redirects]]
   from = "/catalog.html"
-  to = "/catalog.html"
+  to = "/maintenance.html"
   status = 200
   force = true
 
 [[redirects]]
   from = "/perfume-detail.html"
-  to = "/perfume-detail.html"
+  to = "/maintenance.html"
   status = 200
   force = true
 
 [[redirects]]
-  # Handle SPA routing - redirect all other requests to index.html
-  from = "/*"
-  to = "/index.html"
+  from = "/admin-*"
+  to = "/maintenance.html"
   status = 200
-  force = false
+  force = true
+
+[[redirects]]
+  # Redirect all other requests to maintenance page
+  from = "/*"
+  to = "/maintenance.html"
+  status = 200
+  force = true
 
 # Security headers
 [[headers]]
