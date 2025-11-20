@@ -52,6 +52,11 @@
   to = "/.netlify/functions/brands"
   status = 200
 
+[[redirects]]
+  from = "/api/v2/brands"
+  to = "/.netlify/functions/brands"
+  status = 200
+
 # Security headers
 [[headers]]
   for = "/*"
