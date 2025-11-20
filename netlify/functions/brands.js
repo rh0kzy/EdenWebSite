@@ -34,7 +34,6 @@ exports.handler = async (event, context) => {
             db = initializeFirebase();
         }
     } catch (error) {
-        console.error('Firebase initialization error:', error);
         return {
             statusCode: 500,
             headers,
@@ -76,7 +75,6 @@ exports.handler = async (event, context) => {
                     perfume_count: perfumesSnapshot.size
                 };
             } catch (err) {
-                console.error('Error counting perfumes for brand', brandDoc.id, err);
                 return {
                     id: brandDoc.id,
                     ...brandData,
@@ -93,7 +91,7 @@ exports.handler = async (event, context) => {
                 total = totalSnapshot.size;
             }
         } catch (err) {
-            console.warn('Could not compute total count efficiently', err);
+            // Silent fallback
         }
 
         return {
@@ -111,7 +109,6 @@ exports.handler = async (event, context) => {
         };
 
     } catch (error) {
-        console.error('Error fetching brands:', error);
         return {
             statusCode: 500,
             headers,

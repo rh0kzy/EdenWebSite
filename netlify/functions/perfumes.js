@@ -34,7 +34,6 @@ exports.handler = async (event, context) => {
             db = initializeFirebase();
         }
     } catch (error) {
-        console.error('Firebase initialization error:', error);
         return {
             statusCode: 500,
             headers,
@@ -57,7 +56,7 @@ exports.handler = async (event, context) => {
         const offset = (pageNum - 1) * actualLimit;
         const limitWasCapped = requestedLimit > MAX_LIMIT;
 
-        console.log('Query params:', { search, brand, gender, page: pageNum, limit: actualLimit, limitWasCapped });
+
 
         let query = db.collection('perfumes');
 
@@ -89,7 +88,7 @@ exports.handler = async (event, context) => {
                     }
                 }
             } catch (err) {
-                console.error('Error fetching brand for perfume', doc.id, err);
+                // Silent error
             }
 
             return {
@@ -118,7 +117,7 @@ exports.handler = async (event, context) => {
                 total = totalSnapshot.size;
             }
         } catch (err) {
-            console.warn('Could not compute total count efficiently', err);
+            // Silent fallback
         }
 
         return {
@@ -136,7 +135,6 @@ exports.handler = async (event, context) => {
         };
 
     } catch (error) {
-        console.error('Server error:', error);
         return {
             statusCode: 500,
             headers,

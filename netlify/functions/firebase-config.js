@@ -44,28 +44,20 @@ function initializeFirebase() {
 
         // Detailed error logging for debugging
         if (!serviceAccount.project_id) {
-            console.error('FIREBASE_PROJECT_ID is missing');
             throw new Error('Firebase credentials missing: FIREBASE_PROJECT_ID');
         }
         if (!serviceAccount.private_key) {
-            console.error('FIREBASE_PRIVATE_KEY is missing');
             throw new Error('Firebase credentials missing: FIREBASE_PRIVATE_KEY');
         }
         if (!serviceAccount.client_email) {
-            console.error('FIREBASE_CLIENT_EMAIL is missing');
             throw new Error('Firebase credentials missing: FIREBASE_CLIENT_EMAIL');
         }
-
-        console.log('Initializing Firebase with project:', serviceAccount.project_id);
-        console.log('Private key starts with:', privateKey.substring(0, 50));
 
         try {
             admin.initializeApp({
                 credential: admin.credential.cert(serviceAccount)
             });
-            console.log('Firebase initialized successfully');
         } catch (error) {
-            console.error('Firebase initialization failed:', error.message);
             throw error;
         }
     }
