@@ -141,7 +141,7 @@ export class CatalogModule {
                 // Dispatch event for other components
                 window.dispatchEvent(new CustomEvent('perfumesLoaded', {
                     detail: {
-                        perfumes,
+                        perfumes: convertedPerfumes,
                         total: totalCount,
                         offline: false
                     }
