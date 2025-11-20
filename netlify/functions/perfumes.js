@@ -47,14 +47,17 @@ exports.handler = async (event, context) => {
     }
     try {
         const queryParams = event.queryStringParameters || {};
-        const { search, brand, gender, category, page = 1, limit = 1000 } = queryParams;
+        const { search, brand, gender, category, page = 1, limit = 100 } = queryParams;
 
-        // Ensure reasonable limits for performance
-        const maxLimit = 1000;
-        const actualLimit = Math.min(parseInt(limit) || 1000, maxLimit);
+        // Cap limits to prevent resource exhaustion
+        const MAX_LIMIT = 200;
+        const requestedLimit = parseInt(limit, 10) || 100;
+        const actualLimit = Math.min(requestedLimit, MAX_LIMIT);
+        const pageNum = parseInt(page, 10) || 1;
+        const offset = (pageNum - 1) * actualLimit;
+        const limitWasCapped = requestedLimit > MAX_LIMIT;
 
-        console.log('Query params:', queryParams);
-        console.log('Applied limit:', actualLimit);
+        console.log('Query params:', { search, brand, gender, page: pageNum, limit: actualLimit, limitWasCapped });
 
         let query = db.collection('perfumes');
 
@@ -69,32 +72,34 @@ exports.handler = async (event, context) => {
         }
 
         // Apply pagination and sorting
-        const offset = (parseInt(page) - 1) * actualLimit;
         query = query.orderBy('reference').limit(actualLimit).offset(offset);
 
         const snapshot = await query.get();
-        const perfumes = [];
 
-        // Get brand data for each perfume
-        for (const doc of snapshot.docs) {
+        // Get brand data in parallel per perfume
+        const perfumes = await Promise.all(snapshot.docs.map(async (doc) => {
             const perfumeData = doc.data();
             let brandData = null;
 
-            if (perfumeData.brand_id) {
-                const brandDoc = await db.collection('brands').doc(perfumeData.brand_id).get();
-                if (brandDoc.exists) {
-                    brandData = { id: brandDoc.id, ...brandDoc.data() };
+            try {
+                if (perfumeData.brand_id) {
+                    const brandDoc = await db.collection('brands').doc(perfumeData.brand_id).get();
+                    if (brandDoc.exists) {
+                        brandData = { id: brandDoc.id, ...brandDoc.data() };
+                    }
                 }
+            } catch (err) {
+                console.error('Error fetching brand for perfume', doc.id, err);
             }
 
-            perfumes.push({
+            return {
                 id: doc.id,
                 ...perfumeData,
                 brands: brandData
-            });
-        }
+            };
+        }));
 
-        // Apply search filter (since Firestore doesn't support OR queries easily)
+        // Apply search filter (client-side since Firestore doesn't support OR queries)
         let filteredPerfumes = perfumes;
         if (search && search !== '') {
             const searchLower = search.toLowerCase();
@@ -105,9 +110,16 @@ exports.handler = async (event, context) => {
             );
         }
 
-        // Get total count
-        const totalSnapshot = await db.collection('perfumes').get();
-        const total = totalSnapshot.size;
+        // Get total count efficiently
+        let total = snapshot.size + offset;
+        try {
+            if (!limitWasCapped) {
+                const totalSnapshot = await db.collection('perfumes').get();
+                total = totalSnapshot.size;
+            }
+        } catch (err) {
+            console.warn('Could not compute total count efficiently', err);
+        }
 
         return {
             statusCode: 200,
@@ -116,8 +128,10 @@ exports.handler = async (event, context) => {
                 success: true,
                 data: filteredPerfumes || [],
                 total: total,
-                page: parseInt(page),
-                totalPages: Math.ceil(total / actualLimit)
+                page: pageNum,
+                limit: actualLimit,
+                totalPages: Math.ceil(total / actualLimit),
+                limit_was_capped: limitWasCapped
             })
         };
 
@@ -129,7 +143,8 @@ exports.handler = async (event, context) => {
             body: JSON.stringify({
                 success: false,
                 error: 'Internal server error',
-                details: error.message
+                details: error.message,
+                stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
             })
         };
     }
