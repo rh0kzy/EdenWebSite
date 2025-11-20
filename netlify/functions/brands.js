@@ -47,23 +47,53 @@ exports.handler = async (event, context) => {
     }
 
     try {
+        // Parse query parameters with defensive caps
+        const params = event.queryStringParameters || {};
+        const MAX_LIMIT = 200;
+        const requestedLimit = parseInt(params.limit, 10) || 100;
+        const limitNum = Math.min(requestedLimit, MAX_LIMIT);
+        const offsetNum = parseInt(params.offset, 10) || 0;
+        const limitWasCapped = requestedLimit > MAX_LIMIT;
+
+        // Fetch brands with pagination
         const brandsSnapshot = await db.collection('brands')
             .orderBy('name')
+            .limit(limitNum)
+            .offset(offsetNum)
             .get();
 
-        const brands = [];
-        for (const brandDoc of brandsSnapshot.docs) {
+        // Count perfumes in parallel per brand (safer and faster)
+        const brands = await Promise.all(brandsSnapshot.docs.map(async (brandDoc) => {
             const brandData = brandDoc.data();
+            try {
+                const perfumesSnapshot = await db.collection('perfumes')
+                    .where('brand_id', '==', brandDoc.id)
+                    .get();
 
-            // Count perfumes for this brand
-            const perfumesQuery = db.collection('perfumes').where('brand_id', '==', brandDoc.id);
-            const perfumesSnapshot = await perfumesQuery.get();
+                return {
+                    id: brandDoc.id,
+                    ...brandData,
+                    perfume_count: perfumesSnapshot.size
+                };
+            } catch (err) {
+                console.error('Error counting perfumes for brand', brandDoc.id, err);
+                return {
+                    id: brandDoc.id,
+                    ...brandData,
+                    perfume_count: 0
+                };
+            }
+        }));
 
-            brands.push({
-                id: brandDoc.id,
-                ...brandData,
-                perfume_count: perfumesSnapshot.size
-            });
+        // Try to get total count efficiently
+        let total = brandsSnapshot.size + offsetNum;
+        try {
+            if (!limitWasCapped) {
+                const totalSnapshot = await db.collection('brands').get();
+                total = totalSnapshot.size;
+            }
+        } catch (err) {
+            console.warn('Could not compute total count efficiently', err);
         }
 
         return {
@@ -72,7 +102,11 @@ exports.handler = async (event, context) => {
             body: JSON.stringify({
                 success: true,
                 data: brands,
-                total: brands.length
+                total: total,
+                page: Math.floor(offsetNum / limitNum) + 1,
+                limit: limitNum,
+                totalPages: limitNum > 0 ? Math.ceil(total / limitNum) : 1,
+                limit_was_capped: limitWasCapped
             })
         };
 
@@ -84,7 +118,8 @@ exports.handler = async (event, context) => {
             body: JSON.stringify({
                 success: false,
                 error: 'Internal server error',
-                details: error.message
+                details: error.message,
+                stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
             })
         };
     }
