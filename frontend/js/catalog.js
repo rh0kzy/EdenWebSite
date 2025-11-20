@@ -95,16 +95,40 @@ export class CatalogModule {
         try {
             await new Promise(resolve => setTimeout(resolve, 100));
             
-            const response = await window.edenAPI.getPerfumes({ limit: 506 });
+            // Fetch all perfumes using pagination (API caps at 200)
+            let allPerfumes = [];
+            let page = 1;
+            let hasMore = true;
+            
+            while (hasMore) {
+                const response = await window.edenAPI.getPerfumes({ 
+                    page: page,
+                    limit: 200 
+                });
 
-            if (!response.success) {
-                throw new Error('API returned unsuccessful response');
+                if (!response.success) {
+                    throw new Error('API returned unsuccessful response');
+                }
+
+                const perfumes = Array.isArray(response.data) ? response.data : [];
+                
+                if (perfumes.length > 0) {
+                    allPerfumes = allPerfumes.concat(perfumes);
+                }
+                
+                // Check if there are more pages
+                if (response.totalPages && page >= response.totalPages) {
+                    hasMore = false;
+                } else if (perfumes.length < 200) {
+                    // If we got less than requested, we're on the last page
+                    hasMore = false;
+                } else {
+                    page++;
+                }
             }
 
-            const perfumes = Array.isArray(response.data) ? response.data : null;
-
-            if (perfumes && perfumes.length > 0) {
-                const convertedPerfumes = window.edenAPI.convertToLegacyFormat(perfumes);
+            if (allPerfumes && allPerfumes.length > 0) {
+                const convertedPerfumes = window.edenAPI.convertToLegacyFormat(allPerfumes);
                 
                 // Store in global variable for compatibility with existing code
                 window.perfumesDatabase = convertedPerfumes;
@@ -112,9 +136,7 @@ export class CatalogModule {
                 // Clear any cached offline data to prevent conflicts
                 window.offlinePerfumeData = null;
 
-                const totalCount = (typeof response.total === 'number' && response.total >= perfumes.length)
-                    ? response.total
-                    : perfumes.length;
+                const totalCount = allPerfumes.length;
 
                 // Dispatch event for other components
                 window.dispatchEvent(new CustomEvent('perfumesLoaded', {
