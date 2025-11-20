@@ -8,9 +8,25 @@ function initializeFirebase() {
         // More robust private key handling for Netlify environment
         let privateKey = process.env.FIREBASE_PRIVATE_KEY;
         
-        // Netlify sometimes escapes newlines - handle both cases
-        if (privateKey && !privateKey.includes('\n')) {
+        // Handle multiple newline encoding scenarios
+        if (privateKey) {
+            // Replace literal \n with actual newlines
             privateKey = privateKey.replace(/\\n/g, '\n');
+            
+            // Ensure proper PEM format with clean newlines
+            privateKey = privateKey.trim();
+            
+            // If it's all on one line, reconstruct it properly
+            if (!privateKey.includes('\n')) {
+                // Extract the key content between BEGIN and END
+                const match = privateKey.match(/-----BEGIN PRIVATE KEY-----(.*?)-----END PRIVATE KEY-----/);
+                if (match && match[1]) {
+                    const keyContent = match[1].replace(/\s/g, '');
+                    // Split into 64-character lines (standard PEM format)
+                    const lines = keyContent.match(/.{1,64}/g) || [];
+                    privateKey = `-----BEGIN PRIVATE KEY-----\n${lines.join('\n')}\n-----END PRIVATE KEY-----`;
+                }
+            }
         }
 
         const serviceAccount = {
@@ -41,6 +57,7 @@ function initializeFirebase() {
         }
 
         console.log('Initializing Firebase with project:', serviceAccount.project_id);
+        console.log('Private key starts with:', privateKey.substring(0, 50));
 
         try {
             admin.initializeApp({
