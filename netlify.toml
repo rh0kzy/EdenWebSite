@@ -47,38 +47,10 @@
   to = "/.netlify/functions/perfumes"
   status = 200
 
-# MAINTENANCE MODE - Return 503 for all API endpoints
 [[redirects]]
-  from = "/api/*"
-  to = "/maintenance.html"
-  status = 503
-  force = true
-
-# MAINTENANCE MODE - Redirect all pages to maintenance
-[[redirects]]
-  from = "/catalog.html"
-  to = "/maintenance.html"
+  from = "/api/v2/brands"
+  to = "/.netlify/functions/brands"
   status = 200
-  force = true
-
-[[redirects]]
-  from = "/perfume-detail.html"
-  to = "/maintenance.html"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/admin-*"
-  to = "/maintenance.html"
-  status = 200
-  force = true
-
-[[redirects]]
-  # Redirect all other requests to maintenance page
-  from = "/*"
-  to = "/maintenance.html"
-  status = 200
-  force = true
 
 # Security headers
 [[headers]]
