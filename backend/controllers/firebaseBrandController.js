@@ -6,40 +6,70 @@ const getAllBrands = async (req, res) => {
     try {
         const { limit = 100, offset = 0 } = req.query;
 
-        // Fetch all brands
+        // Defensive caps to avoid very large requests that can exhaust resources
+        const MAX_LIMIT = 200;
+        const requestedLimit = parseInt(limit, 10) || 100;
+        const limitNum = Math.min(requestedLimit, MAX_LIMIT);
+        const offsetNum = parseInt(offset, 10) || 0;
+        const limitWasCapped = requestedLimit > MAX_LIMIT;
+
+        // Fetch brands page
         const brandsQuery = db.collection('brands')
             .orderBy('name')
-            .limit(parseInt(limit))
-            .offset(parseInt(offset));
+            .limit(limitNum)
+            .offset(offsetNum);
 
         const brandsSnapshot = await brandsQuery.get();
-        const brands = [];
 
-        // For each brand, count the perfumes
-        for (const brandDoc of brandsSnapshot.docs) {
+        // Count perfumes in parallel per brand (safer and faster than sequential awaits)
+        const brands = await Promise.all(brandsSnapshot.docs.map(async (brandDoc) => {
             const brandData = brandDoc.data();
+            try {
+                const perfumesSnapshot = await db.collection('perfumes')
+                    .where('brand_id', '==', brandDoc.id)
+                    .get();
 
-            // Count perfumes for this brand
-            const perfumesQuery = db.collection('perfumes').where('brand_id', '==', brandDoc.id);
-            const perfumesSnapshot = await perfumesQuery.get();
+                return {
+                    id: brandDoc.id,
+                    ...brandData,
+                    perfume_count: perfumesSnapshot.size
+                };
+            } catch (err) {
+                console.error('Error counting perfumes for brand', brandDoc.id, err);
+                // On per-brand failure, return the brand with a zero count so the whole request doesn't fail
+                return {
+                    id: brandDoc.id,
+                    ...brandData,
+                    perfume_count: 0
+                };
+            }
+        }));
 
-            brands.push({
-                id: brandDoc.id,
-                ...brandData,
-                perfume_count: perfumesSnapshot.size
-            });
+        // Try to use Firestore count() aggregate if available to avoid fetching all docs
+        let total = brandsSnapshot.size + offsetNum; // fallback approximation
+        try {
+            if (typeof db.collection('brands').count === 'function') {
+                const countResult = await db.collection('brands').count().get();
+                // Newer SDKs expose .data().count
+                total = (countResult.data && countResult.data().count) || (countResult._query && countResult._query.__count) || total;
+            } else {
+                // Fallback (potentially expensive) - only run when small limits are requested
+                if (!limitWasCapped) {
+                    const totalSnapshot = await db.collection('brands').get();
+                    total = totalSnapshot.size;
+                }
+            }
+        } catch (err) {
+            console.warn('Could not compute total count efficiently, returning approximation', err);
         }
-
-        // Get total count
-        const totalSnapshot = await db.collection('brands').get();
-        const total = totalSnapshot.size;
 
         res.json({
             data: brands,
             total: total,
-            page: Math.floor(offset / limit) + 1,
-            limit: parseInt(limit),
-            totalPages: Math.ceil(total / limit)
+            page: Math.floor(offsetNum / limitNum) + 1,
+            limit: limitNum,
+            totalPages: limitNum > 0 ? Math.ceil(total / limitNum) : 1,
+            limit_was_capped: limitWasCapped
         });
 
     } catch (error) {

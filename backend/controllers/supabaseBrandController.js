@@ -6,40 +6,68 @@ const getAllBrands = async (req, res) => {
     try {
         const { limit = 100, offset = 0 } = req.query;
 
-        // Fetch all brands
+        // Defensive caps to avoid very large requests that can exhaust resources
+        const MAX_LIMIT = 200;
+        const requestedLimit = parseInt(limit, 10) || 100;
+        const limitNum = Math.min(requestedLimit, MAX_LIMIT);
+        const offsetNum = parseInt(offset, 10) || 0;
+        const limitWasCapped = requestedLimit > MAX_LIMIT;
+
+        // Fetch brands page
         const brandsQuery = db.collection('brands')
             .orderBy('name')
-            .limit(parseInt(limit))
-            .offset(parseInt(offset));
+            .limit(limitNum)
+            .offset(offsetNum);
 
         const brandsSnapshot = await brandsQuery.get();
-        const brands = [];
 
-        // For each brand, count the perfumes
-        for (const brandDoc of brandsSnapshot.docs) {
+        // Count perfumes in parallel per brand (safer and faster than sequential awaits)
+        const brands = await Promise.all(brandsSnapshot.docs.map(async (brandDoc) => {
             const brandData = brandDoc.data();
+            try {
+                const perfumesSnapshot = await db.collection('perfumes')
+                    .where('brand_id', '==', brandDoc.id)
+                    .get();
 
-            // Count perfumes for this brand
-            const perfumesQuery = db.collection('perfumes').where('brand_id', '==', brandDoc.id);
-            const perfumesSnapshot = await perfumesQuery.get();
+                return {
+                    id: brandDoc.id,
+                    ...brandData,
+                    perfume_count: perfumesSnapshot.size
+                };
+            } catch (err) {
+                console.error('Error counting perfumes for brand', brandDoc.id, err);
+                // On per-brand failure, return the brand with a zero count so the whole request doesn't fail
+                return {
+                    id: brandDoc.id,
+                    ...brandData,
+                    perfume_count: 0
+                };
+            }
+        }));
 
-            brands.push({
-                id: brandDoc.id,
-                ...brandData,
-                perfume_count: perfumesSnapshot.size
-            });
+        // Try to use Firestore count() aggregate if available to avoid fetching all docs
+        let total = brandsSnapshot.size + offsetNum; // fallback approximation
+        try {
+            if (typeof db.collection('brands').count === 'function') {
+                const countResult = await db.collection('brands').count().get();
+                total = (countResult.data && countResult.data().count) || (countResult._query && countResult._query.__count) || total;
+            } else {
+                if (!limitWasCapped) {
+                    const totalSnapshot = await db.collection('brands').get();
+                    total = totalSnapshot.size;
+                }
+            }
+        } catch (err) {
+            console.warn('Could not compute total count efficiently, returning approximation', err);
         }
-
-        // Get total count
-        const totalSnapshot = await db.collection('brands').get();
-        const total = totalSnapshot.size;
 
         res.json({
             data: brands,
             total: total,
-            page: Math.floor(offset / limit) + 1,
-            limit: parseInt(limit),
-            totalPages: Math.ceil(total / limit)
+            page: Math.floor(offsetNum / limitNum) + 1,
+            limit: limitNum,
+            totalPages: limitNum > 0 ? Math.ceil(total / limitNum) : 1,
+            limit_was_capped: limitWasCapped
         });
 
     } catch (error) {
@@ -128,33 +156,47 @@ const getBrandByName = async (req, res) => {
 // Get brands with perfume count
 const getBrandsWithCount = async (req, res) => {
     try {
-        const { data: brands, error } = await supabase
-            .from('brands')
-            .select(`
-                *,
-                perfumes (count)
-            `)
-            .order('name', { ascending: true });
+        // Provide a safe brands-with-count endpoint using Firestore
+        const { limit = 100, offset = 0 } = req.query;
+        const MAX_LIMIT = 200;
+        const requestedLimit = parseInt(limit, 10) || 100;
+        const limitNum = Math.min(requestedLimit, MAX_LIMIT);
+        const offsetNum = parseInt(offset, 10) || 0;
 
-        if (error) {
-            // Error: Error fetching brands with count: - logged via logger
-            return res.status(500).json({ 
-                error: 'Failed to fetch brands',
-                details: error.message 
-            });
-        }
+        const brandsSnapshot = await db.collection('brands')
+            .orderBy('name')
+            .limit(limitNum)
+            .offset(offsetNum)
+            .get();
 
-        // Transform the data to include perfume count
-        const brandsWithCount = brands.map(brand => ({
-            ...brand,
-            perfume_count: brand.perfumes[0]?.count || 0,
-            perfumes: undefined // Remove the nested perfumes object
+        const brands = await Promise.all(brandsSnapshot.docs.map(async (brandDoc) => {
+            const brandData = brandDoc.data();
+            try {
+                const perfumesSnapshot = await db.collection('perfumes')
+                    .where('brand_id', '==', brandDoc.id)
+                    .get();
+
+                return {
+                    id: brandDoc.id,
+                    name: brandData.name,
+                    logo_url: brandData.logo_url,
+                    perfume_count: perfumesSnapshot.size
+                };
+            } catch (err) {
+                console.error('Error counting perfumes for brand', brandDoc.id, err);
+                return {
+                    id: brandDoc.id,
+                    name: brandData.name,
+                    logo_url: brandData.logo_url,
+                    perfume_count: 0
+                };
+            }
         }));
 
-        res.json(brandsWithCount);
+        res.json({ data: brands, limit: limitNum, offset: offsetNum });
 
     } catch (error) {
-        // Error: Server error: - logged via logger
+        console.error('Error fetching brands with count:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };
