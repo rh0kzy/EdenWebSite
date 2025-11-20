@@ -5,11 +5,19 @@ let db;
 // Initialize Firebase Admin SDK
 function initializeFirebase() {
     if (admin.apps.length === 0) {
+        // More robust private key handling for Netlify environment
+        let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+        
+        // Netlify sometimes escapes newlines - handle both cases
+        if (privateKey && !privateKey.includes('\n')) {
+            privateKey = privateKey.replace(/\\n/g, '\n');
+        }
+
         const serviceAccount = {
             type: "service_account",
             project_id: process.env.FIREBASE_PROJECT_ID,
             private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID,
-            private_key: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+            private_key: privateKey,
             client_email: process.env.FIREBASE_CLIENT_EMAIL,
             client_id: process.env.FIREBASE_CLIENT_ID,
             auth_uri: "https://accounts.google.com/o/oauth2/auth",
@@ -18,13 +26,31 @@ function initializeFirebase() {
             client_x509_cert_url: process.env.FIREBASE_CLIENT_X509_CERT_URL
         };
 
-        if (!serviceAccount.project_id || !serviceAccount.private_key) {
-            throw new Error('Firebase credentials missing in environment variables');
+        // Detailed error logging for debugging
+        if (!serviceAccount.project_id) {
+            console.error('FIREBASE_PROJECT_ID is missing');
+            throw new Error('Firebase credentials missing: FIREBASE_PROJECT_ID');
+        }
+        if (!serviceAccount.private_key) {
+            console.error('FIREBASE_PRIVATE_KEY is missing');
+            throw new Error('Firebase credentials missing: FIREBASE_PRIVATE_KEY');
+        }
+        if (!serviceAccount.client_email) {
+            console.error('FIREBASE_CLIENT_EMAIL is missing');
+            throw new Error('Firebase credentials missing: FIREBASE_CLIENT_EMAIL');
         }
 
-        admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount)
-        });
+        console.log('Initializing Firebase with project:', serviceAccount.project_id);
+
+        try {
+            admin.initializeApp({
+                credential: admin.credential.cert(serviceAccount)
+            });
+            console.log('Firebase initialized successfully');
+        } catch (error) {
+            console.error('Firebase initialization failed:', error.message);
+            throw error;
+        }
     }
 
     db = admin.firestore();
