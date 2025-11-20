@@ -78,6 +78,11 @@ export class FragranceDataModule {
     }
     
     async tryDetectBrandLogo(brandName) {
+        // Skip invalid or placeholder brand names (less than 2 characters)
+        if (!brandName || brandName.trim().length <= 1) {
+            return null;
+        }
+        
         // Try common file extensions and naming patterns
         const extensions = ['png', 'jpg', 'jpeg', 'svg', 'webp', 'avif'];
         const patterns = [
