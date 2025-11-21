@@ -77,7 +77,9 @@ function generatePossibleLogoPaths(brandName) {
     // Try normalized name (remove accents/diacritics)
     // e.g. "Lancôme" -> "Lancome"
     const normalized = brandName.normalize('NFD').replace(/[\u0300-\u036f]/g, "");
+    console.log(`🔍 Checking logo for "${brandName}" -> normalized: "${normalized}"`);
     if (normalized !== brandName) {
+        console.log(`🔍 Adding normalized paths for "${brandName}"`);
         extensions.forEach(ext => {
             paths.push(`photos/${normalized}${ext}`);
             paths.push(`photos/${normalized.toLowerCase()}${ext}`);
