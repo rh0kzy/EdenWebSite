@@ -117,13 +117,12 @@ export class CatalogModule {
                 }
                 
                 // Check if there are more pages
-                if (response.totalPages && page >= response.totalPages) {
-                    hasMore = false;
-                } else if (perfumes.length < 200) {
-                    // If we got less than requested, we're on the last page
-                    hasMore = false;
-                } else {
+                // Continue if we got a full page (200 items) - there might be more
+                if (perfumes.length === 200) {
                     page++;
+                } else {
+                    // Got less than 200, we're done
+                    hasMore = false;
                 }
             }
 
