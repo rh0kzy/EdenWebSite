@@ -146,14 +146,28 @@ exports.handler = async (event, context) => {
         };
 
     } catch (error) {
+        console.error('Error fetching perfumes:', error);
+        
+        // Handle Quota Exceeded specifically
+        if (error.code === 8 || (error.message && error.message.includes('Quota exceeded'))) {
+            return {
+                statusCode: 429, // Too Many Requests
+                headers,
+                body: JSON.stringify({
+                    success: false,
+                    error: 'Daily quota exceeded. Please try again tomorrow.',
+                    details: error.message
+                })
+            };
+        }
+
         return {
             statusCode: 500,
             headers,
             body: JSON.stringify({
                 success: false,
-                error: 'Internal server error',
-                details: error.message,
-                stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+                error: 'Failed to fetch perfumes',
+                details: error.message
             })
         };
     }

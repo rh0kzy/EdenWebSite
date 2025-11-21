@@ -145,6 +145,14 @@ class EdenParfumAPI {
             if (!response.ok) {
                 const error = new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
                 
+                // Handle Quota Exceeded (429) specifically
+                if (response.status === 429) {
+                    console.warn('API Quota Exceeded. Switching to offline mode.');
+                    if (window.UserErrorHandler) {
+                        window.UserErrorHandler.showToast('Daily limit reached. Showing cached data.', 'warning');
+                    }
+                }
+
                 // Log API error to monitoring system
                 if (window.ErrorMonitor) {
                     window.ErrorMonitor.logError({

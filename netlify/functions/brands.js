@@ -53,6 +53,7 @@ exports.handler = async (event, context) => {
         const limitNum = Math.min(requestedLimit, MAX_LIMIT);
         const offsetNum = parseInt(params.offset, 10) || 0;
         const limitWasCapped = requestedLimit > MAX_LIMIT;
+        const includeCounts = params.include_counts === 'true';
 
         // Fetch brands with pagination
         const brandsSnapshot = await db.collection('brands')
@@ -61,27 +62,39 @@ exports.handler = async (event, context) => {
             .offset(offsetNum)
             .get();
 
-        // Count perfumes in parallel per brand (safer and faster)
-        const brands = await Promise.all(brandsSnapshot.docs.map(async (brandDoc) => {
-            const brandData = brandDoc.data();
-            try {
-                const perfumesSnapshot = await db.collection('perfumes')
-                    .where('brand_id', '==', brandDoc.id)
-                    .get();
-
-                return {
-                    id: brandDoc.id,
-                    ...brandData,
-                    perfume_count: perfumesSnapshot.size
-                };
-            } catch (err) {
-                return {
-                    id: brandDoc.id,
-                    ...brandData,
-                    perfume_count: 0
-                };
-            }
+        let brands = brandsSnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+            perfume_count: 0 // Default to 0 to save reads
         }));
+
+        // Only count perfumes if explicitly requested
+        // This saves massive amounts of reads (N+1 problem)
+        if (includeCounts && brands.length > 0) {
+            try {
+                // Optimization: Fetch all perfumes (brand_id only) in one query
+                // instead of N queries. This is much cheaper and faster.
+                const perfumesSnapshot = await db.collection('perfumes')
+                    .select('brand_id')
+                    .get();
+                
+                const counts = {};
+                perfumesSnapshot.forEach(doc => {
+                    const brandId = doc.data().brand_id;
+                    if (brandId) {
+                        counts[brandId] = (counts[brandId] || 0) + 1;
+                    }
+                });
+
+                brands = brands.map(brand => ({
+                    ...brand,
+                    perfume_count: counts[brand.id] || 0
+                }));
+            } catch (error) {
+                console.error('Error counting perfumes:', error);
+                // Continue with 0 counts
+            }
+        }
 
         // Try to get total count efficiently
         let total = brandsSnapshot.size + offsetNum;
@@ -109,14 +122,28 @@ exports.handler = async (event, context) => {
         };
 
     } catch (error) {
+        console.error('Error fetching brands:', error);
+        
+        // Handle Quota Exceeded specifically
+        if (error.code === 8 || (error.message && error.message.includes('Quota exceeded'))) {
+            return {
+                statusCode: 429, // Too Many Requests
+                headers,
+                body: JSON.stringify({
+                    success: false,
+                    error: 'Daily quota exceeded. Please try again tomorrow.',
+                    details: error.message
+                })
+            };
+        }
+
         return {
             statusCode: 500,
             headers,
             body: JSON.stringify({
                 success: false,
-                error: 'Internal server error',
-                details: error.message,
-                stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+                error: 'Failed to fetch brands',
+                details: error.message
             })
         };
     }
