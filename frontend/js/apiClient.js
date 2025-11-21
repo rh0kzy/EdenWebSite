@@ -148,7 +148,7 @@ class EdenParfumAPI {
                 // Handle Quota Exceeded (429) specifically
                 if (response.status === 429) {
                     console.warn('API Quota Exceeded.');
-                    if (window.UserErrorHandler) {
+                    if (window.UserErrorHandler && typeof window.UserErrorHandler.showToast === 'function') {
                         window.UserErrorHandler.showToast('Daily limit reached. Please try again tomorrow.', 'error');
                     }
                     throw new Error('API Quota Exceeded');

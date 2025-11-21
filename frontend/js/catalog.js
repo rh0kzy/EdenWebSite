@@ -157,7 +157,7 @@ export class CatalogModule {
             // Check if this is a quota error - don't fall back to offline in live mode
             if (error.message && error.message.includes('Quota Exceeded')) {
                 console.error('Firebase quota exceeded - cannot load perfumes in live mode');
-                if (window.UserErrorHandler) {
+                if (window.UserErrorHandler && typeof window.UserErrorHandler.showToast === 'function') {
                     window.UserErrorHandler.showToast('Daily limit reached. Please try again tomorrow.', 'error');
                 }
                 // Don't fall back to offline data for quota errors
