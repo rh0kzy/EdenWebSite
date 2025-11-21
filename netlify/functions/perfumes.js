@@ -75,27 +75,38 @@ exports.handler = async (event, context) => {
 
         const snapshot = await query.get();
 
-        // Get brand data in parallel per perfume
-        const perfumes = await Promise.all(snapshot.docs.map(async (doc) => {
-            const perfumeData = doc.data();
-            let brandData = null;
+        // Get all perfumes data first
+        const perfumesList = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
 
+        // Extract unique brand IDs to minimize database reads
+        // This prevents N+1 problem where we fetch the same brand multiple times
+        const brandIds = [...new Set(perfumesList.map(p => p.brand_id).filter(id => id))];
+        const brandsMap = {};
+
+        // Fetch unique brands in parallel
+        if (brandIds.length > 0) {
             try {
-                if (perfumeData.brand_id) {
-                    const brandDoc = await db.collection('brands').doc(perfumeData.brand_id).get();
-                    if (brandDoc.exists) {
-                        brandData = { id: brandDoc.id, ...brandDoc.data() };
+                const brandSnapshots = await Promise.all(
+                    brandIds.map(id => db.collection('brands').doc(id).get())
+                );
+                
+                brandSnapshots.forEach(doc => {
+                    if (doc.exists) {
+                        brandsMap[doc.id] = { id: doc.id, ...doc.data() };
                     }
-                }
-            } catch (err) {
-                // Silent error
+                });
+            } catch (error) {
+                // Silent error on brand fetch, continue with perfumes
             }
+        }
 
-            return {
-                id: doc.id,
-                ...perfumeData,
-                brands: brandData
-            };
+        // Attach brand data to perfumes
+        const perfumes = perfumesList.map(perfume => ({
+            ...perfume,
+            brands: perfume.brand_id ? brandsMap[perfume.brand_id] : null
         }));
 
         // Apply search filter (client-side since Firestore doesn't support OR queries)
