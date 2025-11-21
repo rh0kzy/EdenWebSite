@@ -26,11 +26,30 @@
 [functions]
   directory = "netlify/functions"
 
-# MAINTENANCE MODE - Redirect all pages to maintenance page
+# MAINTENANCE MODE - Redirect all pages to maintenance page (MUST BE FIRST)
+[[redirects]]
+  from = "/"
+  to = "/maintenance.html"
+  status = 302
+  force = true
+
+[[redirects]]
+  from = "/index.html"
+  to = "/maintenance.html"
+  status = 302
+  force = true
+
+[[redirects]]
+  from = "/catalog.html"
+  to = "/maintenance.html"
+  status = 302
+  force = true
+
 [[redirects]]
   from = "/*"
   to = "/maintenance.html"
   status = 302
+  force = true
 
 # API redirects to Netlify Functions
 
