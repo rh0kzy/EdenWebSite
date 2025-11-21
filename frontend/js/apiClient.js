@@ -147,10 +147,11 @@ class EdenParfumAPI {
                 
                 // Handle Quota Exceeded (429) specifically
                 if (response.status === 429) {
-                    console.warn('API Quota Exceeded. Switching to offline mode.');
+                    console.warn('API Quota Exceeded.');
                     if (window.UserErrorHandler) {
-                        window.UserErrorHandler.showToast('Daily limit reached. Showing cached data.', 'warning');
+                        window.UserErrorHandler.showToast('Daily limit reached. Please try again tomorrow.', 'error');
                     }
+                    throw new Error('API Quota Exceeded');
                 }
 
                 // Log API error to monitoring system
@@ -221,8 +222,8 @@ class EdenParfumAPI {
                 // API Error handled silently in production
             }
             
-            // Try to use offline data as fallback
-            return this.getOfflineData(endpoint, params);
+            // Throw error instead of falling back to offline data
+            throw error;
         }
     }
 
