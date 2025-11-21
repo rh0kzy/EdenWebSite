@@ -73,6 +73,22 @@ function generatePossibleLogoPaths(brandName) {
         paths.push(`photos/${brandName}-logo${ext}`);
         paths.push(`photos/${brandName} logo${ext}`);
     });
+
+    // Try normalized name (remove accents/diacritics)
+    // e.g. "Lancôme" -> "Lancome"
+    const normalized = brandName.normalize('NFD').replace(/[\u0300-\u036f]/g, "");
+    if (normalized !== brandName) {
+        extensions.forEach(ext => {
+            paths.push(`photos/${normalized}${ext}`);
+            paths.push(`photos/${normalized.toLowerCase()}${ext}`);
+        });
+        
+        // Try normalized with spaces replaced by underscores
+        const normalizedUnderscored = normalized.replace(/\s+/g, '_');
+        extensions.forEach(ext => {
+            paths.push(`photos/${normalizedUnderscored}${ext}`);
+        });
+    }
     
     return paths;
 }
