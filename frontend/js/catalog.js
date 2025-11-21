@@ -154,7 +154,17 @@ export class CatalogModule {
             }
             
         } catch (error) {
-            // Fallback to offline data if available
+            // Check if this is a quota error - don't fall back to offline in live mode
+            if (error.message && error.message.includes('Quota Exceeded')) {
+                console.error('Firebase quota exceeded - cannot load perfumes in live mode');
+                if (window.UserErrorHandler) {
+                    window.UserErrorHandler.showToast('Daily limit reached. Please try again tomorrow.', 'error');
+                }
+                // Don't fall back to offline data for quota errors
+                throw error;
+            }
+            
+            // Fallback to offline data for other errors
             if (window.offlinePerfumeData) {
                 window.perfumesDatabase = window.offlinePerfumeData.perfumes;
                 
