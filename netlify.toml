@@ -26,16 +26,13 @@
 [functions]
   directory = "netlify/functions"
 
-# API redirects to Netlify Functions
+# MAINTENANCE MODE - Redirect all pages to maintenance page
 [[redirects]]
-  from = "/api/v2/auth/login"
-  to = "/.netlify/functions/auth-login"
-  status = 200
+  from = "/*"
+  to = "/maintenance.html"
+  status = 302
 
-[[redirects]]
-  from = "/api/v2/auth/verify"
-  to = "/.netlify/functions/auth-verify"
-  status = 200
+# API redirects to Netlify Functions
 
 [[redirects]]
   from = "/api/v2/auth/logout"
