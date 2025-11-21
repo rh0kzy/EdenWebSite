@@ -24,17 +24,30 @@ export class FragranceDataModule {
         if (this.brandsLoaded) return;
         
         try {
-            // Use the global API client base URL if available, otherwise default to relative path
-            const baseUrl = (window.edenAPI && window.edenAPI.baseUrl) ? window.edenAPI.baseUrl : '/api/v2';
-            const response = await fetch(`${baseUrl}/brands?limit=1000`);
+            let data;
             
-            if (!response.ok) {
-                console.warn('Could not load brand logos from API');
-                return;
+            // Use the global API client if available to handle offline fallback and error monitoring
+            if (window.edenAPI) {
+                try {
+                    data = await window.edenAPI.fetchAPI('/brands', { limit: 1000 });
+                } catch (err) {
+                    console.warn('Failed to load brands via API client:', err);
+                }
             }
             
-            const data = await response.json();
-            if (data.success && data.data) {
+            // Fallback to direct fetch if API client didn't work or isn't available
+            if (!data) {
+                const baseUrl = (window.edenAPI && window.edenAPI.baseUrl) ? window.edenAPI.baseUrl : '/api/v2';
+                const response = await fetch(`${baseUrl}/brands?limit=1000`);
+                
+                if (!response.ok) {
+                    console.warn('Could not load brand logos from API');
+                    return;
+                }
+                data = await response.json();
+            }
+            
+            if (data && data.success && data.data) {
                 // Store brand logos from API with priority for database logos
                 for (const brand of data.data) {
                     if (brand.name) {
