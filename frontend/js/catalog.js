@@ -120,6 +120,8 @@ export class CatalogModule {
                 // Continue if we got a full page (200 items) - there might be more
                 if (perfumes.length === 200) {
                     page++;
+                    // Add small delay to avoid quota limits
+                    await new Promise(resolve => setTimeout(resolve, 500));
                 } else {
                     // Got less than 200, we're done
                     hasMore = false;
