@@ -8,7 +8,7 @@ const {
     createPerfume,
     updatePerfume,
     deletePerfume
-} = require('../controllers/firebasePerfumeController');
+} = require('../controllers/supabasePerfumeController');
 
 // Get all perfumes with optional filtering
 router.get('/', getAllPerfumes);

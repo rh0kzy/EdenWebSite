@@ -1,70 +1,55 @@
-const { db } = require('../config/firebase');
+const { supabase } = require('../config/supabase');
 const { logActivity } = require('../utils/activityLogger');
 
 // Get all perfumes with optional filtering
 const getAllPerfumes = async (req, res) => {
     try {
-        const { brand, gender, search, limit = 50, offset = 0 } = req.query;
+        const { brand, gender, search, limit = 50, page = 1 } = req.query;
+        const offset = (parseInt(page) - 1) * parseInt(limit);
 
-        let query = db.collection('perfumes');
+        let query = supabase
+            .from('perfumes')
+            .select(`
+                *,
+                brands (
+                    id,
+                    name,
+                    logo_url
+                )
+            `, { count: 'exact' });
 
         // Apply filters
         if (brand && brand !== '') {
-            query = query.where('brand_name', '>=', brand.toLowerCase())
-                         .where('brand_name', '<=', brand.toLowerCase() + '\uf8ff');
+            query = query.ilike('brand_name', `%${brand}%`);
         }
 
         if (gender && gender !== '') {
-            query = query.where('gender', '==', gender);
+            query = query.eq('gender', gender);
+        }
+
+        // Apply search filter
+        if (search && search !== '') {
+            query = query.or(`name.ilike.%${search}%,brand_name.ilike.%${search}%,reference.ilike.%${search}%`);
         }
 
         // Apply sorting and pagination
-        query = query.orderBy('reference').limit(parseInt(limit)).offset(parseInt(offset));
+        query = query
+            .order('reference', { ascending: true })
+            .range(offset, offset + parseInt(limit) - 1);
 
-        const snapshot = await query.get();
-        const perfumes = [];
+        const { data, error, count } = await query;
 
-        // Get brand data for each perfume
-        for (const doc of snapshot.docs) {
-            const perfumeData = doc.data();
-            let brandData = null;
-
-            if (perfumeData.brand_id) {
-                const brandDoc = await db.collection('brands').doc(perfumeData.brand_id).get();
-                if (brandDoc.exists) {
-                    brandData = { id: brandDoc.id, ...brandDoc.data() };
-                }
-            }
-
-            perfumes.push({
-                id: doc.id,
-                ...perfumeData,
-                brands: brandData
-            });
+        if (error) {
+            console.error('Supabase error:', error);
+            throw error;
         }
-
-        // Apply search filter if provided (since Firestore doesn't support OR queries easily)
-        let filteredPerfumes = perfumes;
-        if (search && search !== '') {
-            const searchLower = search.toLowerCase();
-            filteredPerfumes = perfumes.filter(p =>
-                p.name?.toLowerCase().includes(searchLower) ||
-                p.brand_name?.toLowerCase().includes(searchLower) ||
-                p.reference?.toLowerCase().includes(searchLower)
-            );
-        }
-
-        // Get total count (this is approximate for Firestore)
-        const totalQuery = db.collection('perfumes');
-        const totalSnapshot = await totalQuery.get();
-        const total = totalSnapshot.size;
 
         res.json({
-            data: filteredPerfumes,
-            total: total,
-            page: Math.floor(offset / limit) + 1,
+            data: data || [],
+            total: count || 0,
+            page: parseInt(page),
             limit: parseInt(limit),
-            totalPages: Math.ceil(total / limit)
+            totalPages: Math.ceil((count || 0) / parseInt(limit))
         });
 
     } catch (error) {
@@ -78,33 +63,27 @@ const getPerfumeByReference = async (req, res) => {
     try {
         const { reference } = req.params;
 
-        const snapshot = await db.collection('perfumes').where('reference', '==', reference).limit(1).get();
+        const { data, error } = await supabase
+            .from('perfumes')
+            .select(`
+                *,
+                brands (
+                    id,
+                    name,
+                    logo_url
+                )
+            `)
+            .eq('reference', reference)
+            .single();
 
-        if (snapshot.empty) {
+        if (error || !data) {
             return res.status(404).json({ error: 'Perfume not found' });
         }
 
-        const doc = snapshot.docs[0];
-        const perfumeData = doc.data();
-        let brandData = null;
-
-        if (perfumeData.brand_id) {
-            const brandDoc = await db.collection('brands').doc(perfumeData.brand_id).get();
-            if (brandDoc.exists) {
-                brandData = { id: brandDoc.id, ...brandDoc.data() };
-            }
-        }
-
-        const perfume = {
-            id: doc.id,
-            ...perfumeData,
-            brands: brandData
-        };
-
-        res.json(perfume);
+        res.json({ data });
 
     } catch (error) {
-        console.error('Error fetching perfume:', error);
+        console.error('Error fetching perfume by reference:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };
@@ -114,32 +93,27 @@ const getPerfumeById = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const doc = await db.collection('perfumes').doc(id).get();
+        const { data, error } = await supabase
+            .from('perfumes')
+            .select(`
+                *,
+                brands (
+                    id,
+                    name,
+                    logo_url
+                )
+            `)
+            .eq('id', id)
+            .single();
 
-        if (!doc.exists) {
+        if (error || !data) {
             return res.status(404).json({ error: 'Perfume not found' });
         }
 
-        const perfumeData = doc.data();
-        let brandData = null;
-
-        if (perfumeData.brand_id) {
-            const brandDoc = await db.collection('brands').doc(perfumeData.brand_id).get();
-            if (brandDoc.exists) {
-                brandData = { id: brandDoc.id, ...brandDoc.data() };
-            }
-        }
-
-        const perfume = {
-            id: doc.id,
-            ...perfumeData,
-            brands: brandData
-        };
-
-        res.json(perfume);
+        res.json({ data });
 
     } catch (error) {
-        console.error('Error fetching perfume:', error);
+        console.error('Error fetching perfume by ID:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };
@@ -147,22 +121,17 @@ const getPerfumeById = async (req, res) => {
 // Get unique genders
 const getUniqueGenders = async (req, res) => {
     try {
-        const snapshot = await db.collection('perfumes').select('gender').get();
-        const genders = [];
+        const { data, error } = await supabase
+            .from('perfumes')
+            .select('gender');
 
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            if (data.gender) {
-                genders.push(data.gender);
-            }
-        });
+        if (error) {
+            throw error;
+        }
 
-        let uniqueGenders = [...new Set(genders)];
+        const genders = [...new Set(data.map(p => p.gender))].filter(Boolean);
 
-        // Normalize display: Show "Unisex" instead of "Mixte" for better international compatibility
-        uniqueGenders = uniqueGenders.map(g => g === 'Mixte' ? 'Unisex' : g);
-
-        res.json(uniqueGenders);
+        res.json({ data: genders });
 
     } catch (error) {
         console.error('Error fetching genders:', error);
@@ -170,108 +139,24 @@ const getUniqueGenders = async (req, res) => {
     }
 };
 
-// Helper: normalize and validate gender values to match DB constraints
-const normalizeGender = (raw) => {
-    if (raw === undefined || raw === null) return null;
-    const str = String(raw).trim();
-    if (!str) return null;
-    const map = {
-        men: 'Men',
-        man: 'Men',
-        male: 'Men',
-        women: 'Women',
-        woman: 'Women',
-        female: 'Women',
-        mixte: 'Mixte',
-        "mix": 'Mixte',
-        unisex: 'Mixte' // map 'unisex' to 'Mixte' for compatibility with current DB constraint
-    };
-    const key = str.toLowerCase();
-    if (map[key]) return map[key];
-    // If already in correct form (case-insensitive), normalize capitalization
-    const cap = str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-    const allowed = ['Men', 'Women', 'Mixte', 'Unisex'];
-    if (allowed.includes(cap)) return cap === 'Unisex' ? 'Mixte' : cap; // normalize Unisex -> Mixte for compatibility
-    return null;
-};
-
-// Create new perfume (for admin use)
+// Create new perfume (admin)
 const createPerfume = async (req, res) => {
     try {
-        const { reference, name, brand_name, gender, description, price, image_url } = req.body;
+        const perfumeData = req.body;
 
-        // Basic validation and normalization
-        // Normalize gender to values accepted by the DB to avoid constraint violations
-        const normalizedGender = normalizeGender(gender);
-        if (gender && !normalizedGender) {
-            return res.status(400).json({
-                error: 'Invalid gender value',
-                details: "Allowed values: Men, Women, Mixte (also accepts 'unisex', 'male', 'female')"
-            });
+        const { data, error } = await supabase
+            .from('perfumes')
+            .insert([perfumeData])
+            .select()
+            .single();
+
+        if (error) {
+            throw error;
         }
 
-        // Validate price if provided
-        let priceValue = null;
-        if (price !== undefined && price !== null && price !== '') {
-            priceValue = parseFloat(price);
-            if (Number.isNaN(priceValue)) {
-                return res.status(400).json({
-                    error: 'Invalid price value',
-                    details: 'Price must be a valid number'
-                });
-            }
-        }
+        await logActivity('perfume_created', { perfume_id: data.id });
 
-        // Check if brand exists, create if not
-        let brand_id = null;
-        if (brand_name) {
-            const brandSnapshot = await db.collection('brands').where('name', '==', brand_name).limit(1).get();
-
-            if (!brandSnapshot.empty) {
-                brand_id = brandSnapshot.docs[0].id;
-            } else {
-                const newBrandRef = await db.collection('brands').add({
-                    name: brand_name,
-                    created_at: new Date(),
-                    updated_at: new Date()
-                });
-                brand_id = newBrandRef.id;
-            }
-        }
-
-        const perfumeData = {
-            reference,
-            name,
-            brand_id,
-            brand_name,
-            gender: normalizedGender,
-            description,
-            price: priceValue,
-            image_url,
-            is_available: true,
-            created_at: new Date(),
-            updated_at: new Date()
-        };
-
-        const docRef = await db.collection('perfumes').add(perfumeData);
-        const perfume = { id: docRef.id, ...perfumeData };
-
-        // Log activity
-        await logActivity({
-            entityType: 'perfume',
-            entityId: perfume.id,
-            entityName: perfume.name,
-            actionType: 'create',
-            details: {
-                reference: perfume.reference,
-                brand_name: perfume.brand_name,
-                gender: perfume.gender,
-                price: perfume.price
-            },
-            req
-        });
-
-        res.status(201).json(perfume);
+        res.status(201).json({ data });
 
     } catch (error) {
         console.error('Error creating perfume:', error);
@@ -279,65 +164,26 @@ const createPerfume = async (req, res) => {
     }
 };
 
-// Update perfume (for admin use)
+// Update perfume (admin)
 const updatePerfume = async (req, res) => {
     try {
         const { id } = req.params;
-        const updates = req.body;
+        const perfumeData = req.body;
 
-        // Get old perfume data for logging
-        const docRef = db.collection('perfumes').doc(id);
-        const doc = await docRef.get();
+        const { data, error } = await supabase
+            .from('perfumes')
+            .update(perfumeData)
+            .eq('id', id)
+            .select()
+            .single();
 
-        if (!doc.exists) {
-            return res.status(404).json({ error: 'Perfume not found' });
+        if (error) {
+            throw error;
         }
 
-        const oldPerfume = { id: doc.id, ...doc.data() };
+        await logActivity('perfume_updated', { perfume_id: id });
 
-        // Prepare update data
-        const updateData = {
-            ...updates,
-            updated_at: new Date()
-        };
-
-        // Handle brand creation if brand_name is provided and brand doesn't exist
-        if (updates.brand_name && !updates.brand_id) {
-            const brandSnapshot = await db.collection('brands').where('name', '==', updates.brand_name).limit(1).get();
-
-            if (!brandSnapshot.empty) {
-                updateData.brand_id = brandSnapshot.docs[0].id;
-            } else {
-                const newBrandRef = await db.collection('brands').add({
-                    name: updates.brand_name,
-                    created_at: new Date(),
-                    updated_at: new Date()
-                });
-                updateData.brand_id = newBrandRef.id;
-            }
-        }
-
-        await docRef.update(updateData);
-
-        // Get updated perfume
-        const updatedDoc = await docRef.get();
-        const perfume = { id: updatedDoc.id, ...updatedDoc.data() };
-
-        // Log activity
-        await logActivity({
-            entityType: 'perfume',
-            entityId: perfume.id,
-            entityName: perfume.name,
-            actionType: 'update',
-            details: {
-                old: oldPerfume,
-                new: perfume,
-                changes: updates
-            },
-            req
-        });
-
-        res.json(perfume);
+        res.json({ data });
 
     } catch (error) {
         console.error('Error updating perfume:', error);
@@ -345,36 +191,23 @@ const updatePerfume = async (req, res) => {
     }
 };
 
-// Delete perfume (for admin use)
+// Delete perfume (admin)
 const deletePerfume = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Get perfume data before deletion for logging
-        const docRef = db.collection('perfumes').doc(id);
-        const doc = await docRef.get();
+        const { error } = await supabase
+            .from('perfumes')
+            .delete()
+            .eq('id', id);
 
-        if (!doc.exists) {
-            return res.status(404).json({ error: 'Perfume not found' });
+        if (error) {
+            throw error;
         }
 
-        const perfumeToDelete = { id: doc.id, ...doc.data() };
+        await logActivity('perfume_deleted', { perfume_id: id });
 
-        await docRef.delete();
-
-        // Log activity
-        await logActivity({
-            entityType: 'perfume',
-            entityId: perfumeToDelete.id,
-            entityName: perfumeToDelete.name,
-            actionType: 'delete',
-            details: {
-                deleted_perfume: perfumeToDelete
-            },
-            req
-        });
-
-        res.status(204).send();
+        res.json({ message: 'Perfume deleted successfully' });
 
     } catch (error) {
         console.error('Error deleting perfume:', error);

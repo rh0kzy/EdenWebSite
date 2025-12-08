@@ -55,7 +55,6 @@ export class CatalogModule {
         // Listen for brand logos loaded event - refresh display to show new logos
         window.addEventListener('brandLogosLoaded', (event) => {
             if (this.isCatalogPage() && this.filteredPerfumes.length > 0) {
-                console.log('🎨 Brand logos updated, refreshing display...');
                 this.displayPerfumes(true);
             }
         });
@@ -95,36 +94,47 @@ export class CatalogModule {
         try {
             await new Promise(resolve => setTimeout(resolve, 100));
             
-            // Fetch all perfumes using pagination (API caps at 200)
+            // Fetch all perfumes using pagination - REDUCED to avoid quota limits
             let allPerfumes = [];
             let page = 1;
             let hasMore = true;
+            const maxPages = 3; // Limit to 3 pages (600 perfumes) to avoid quota issues
             
-            while (hasMore) {
-                const response = await window.edenAPI.getPerfumes({ 
-                    page: page,
-                    limit: 200 
-                });
+            while (hasMore && page <= maxPages) {
+                try {
+                    const response = await window.edenAPI.getPerfumes({ 
+                        page: page,
+                        limit: 200 
+                    });
 
-                if (!response.success) {
-                    throw new Error('API returned unsuccessful response');
-                }
+                    if (!response.success) {
+                        console.warn(`⚠️ Page ${page} failed, stopping pagination`);
+                        break;
+                    }
 
-                const perfumes = Array.isArray(response.data) ? response.data : [];
-                
-                if (perfumes.length > 0) {
-                    allPerfumes = allPerfumes.concat(perfumes);
-                }
-                
-                // Check if there are more pages
-                // Continue if we got a full page (200 items) - there might be more
-                if (perfumes.length === 200) {
-                    page++;
-                    // Add delay to avoid quota limits (1s)
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                } else {
-                    // Got less than 200, we're done
-                    hasMore = false;
+                    const perfumes = Array.isArray(response.data) ? response.data : [];
+                    
+                    if (perfumes.length > 0) {
+                        allPerfumes = allPerfumes.concat(perfumes);
+                    }
+                    
+                    // Check if there are more pages
+                    // Continue if we got a full page (200 items) and haven't hit max
+                    if (perfumes.length === 200 && page < maxPages) {
+                        page++;
+                        // Add delay to avoid quota limits (2s for safety)
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                    } else {
+                        hasMore = false;
+                    }
+                } catch (error) {
+                    // If quota exceeded, stop gracefully
+                    if (error.message?.includes('Quota') || error.message?.includes('429')) {
+                        console.warn('⚠️ Quota limit reached, using partial data');
+                        hasMore = false;
+                    } else {
+                        throw error;
+                    }
                 }
             }
 
@@ -154,32 +164,13 @@ export class CatalogModule {
             }
             
         } catch (error) {
-            // Check if this is a quota error - don't fall back to offline in live mode
-            if (error.message && error.message.includes('Quota Exceeded')) {
-                console.error('Firebase quota exceeded - cannot load perfumes in live mode');
-                if (window.UserErrorHandler && typeof window.UserErrorHandler.showToast === 'function') {
-                    window.UserErrorHandler.showToast('Daily limit reached. Please try again tomorrow.', 'error');
-                }
-                // Don't fall back to offline data for quota errors
-                throw error;
-            }
+            console.error('❌ Failed to load perfume data from API:', error);
             
-            // Fallback to offline data for other errors
-            if (window.offlinePerfumeData) {
-                window.perfumesDatabase = window.offlinePerfumeData.perfumes;
-                
-                window.dispatchEvent(new CustomEvent('perfumesLoaded', {
-                    detail: { 
-                        perfumes: window.offlinePerfumeData.perfumes,
-                        total: window.offlinePerfumeData.perfumes.length,
-                        offline: true
-                    }
-                }));
-                
-                this.setupCatalogWithData();
-            } else {
-                throw error;
-            }
+            // Show user-friendly message
+            showErrorMessage('Unable to load perfumes. Database quota exceeded. The site will work again tomorrow, or you can upgrade to a paid Firebase plan for unlimited access.', 'warning');
+            
+            // Hide loading indicator
+            hideLoadingIndicator();
         }
     }
 

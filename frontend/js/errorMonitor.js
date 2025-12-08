@@ -68,9 +68,16 @@ class ErrorMonitor {
                 const response = await originalFetch.apply(window, args);
                 const endTime = performance.now();
                 const duration = endTime - startTime;
+                
+                // Extract URL and method for filtering
+                const url = typeof args[0] === 'string' ? args[0] : args[0]?.url || '';
+                const method = args[1]?.method || 'GET';
+                
+                // Skip logging for HEAD requests to photos (logo detection)
+                const isLogoDetection = method === 'HEAD' && url.includes('/photos/');
 
                 // Log slow requests
-                if (duration > 2000) {
+                if (duration > 2000 && !isLogoDetection) {
                     this.logError({
                         type: 'slow_request',
                         message: `Slow API request detected: ${duration.toFixed(2)}ms`,
@@ -80,8 +87,8 @@ class ErrorMonitor {
                     });
                 }
 
-                // Log failed requests
-                if (!response.ok) {
+                // Log failed requests (except logo detection 404s)
+                if (!response.ok && !isLogoDetection) {
                     this.logError({
                         type: 'api_error',
                         message: `API request failed: ${response.status} ${response.statusText}`,

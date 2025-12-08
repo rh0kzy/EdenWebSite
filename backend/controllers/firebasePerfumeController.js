@@ -24,24 +24,37 @@ const getAllPerfumes = async (req, res) => {
         const snapshot = await query.get();
         const perfumes = [];
 
-        // Get brand data for each perfume
-        for (const doc of snapshot.docs) {
-            const perfumeData = doc.data();
-            let brandData = null;
-
-            if (perfumeData.brand_id) {
-                const brandDoc = await db.collection('brands').doc(perfumeData.brand_id).get();
-                if (brandDoc.exists) {
-                    brandData = { id: brandDoc.id, ...brandDoc.data() };
-                }
+        // OPTIMIZATION: Batch brand fetches to reduce reads
+        const brandIds = new Set();
+        const perfumeDataList = [];
+        
+        snapshot.docs.forEach(doc => {
+            const data = doc.data();
+            perfumeDataList.push({ id: doc.id, ...data });
+            if (data.brand_id) {
+                brandIds.add(data.brand_id);
             }
+        });
 
-            perfumes.push({
-                id: doc.id,
-                ...perfumeData,
-                brands: brandData
+        // Fetch all unique brands in one go
+        const brandCache = {};
+        if (brandIds.size > 0) {
+            const brandPromises = Array.from(brandIds).map(async (brandId) => {
+                const brandDoc = await db.collection('brands').doc(brandId).get();
+                if (brandDoc.exists) {
+                    brandCache[brandId] = { id: brandDoc.id, ...brandDoc.data() };
+                }
             });
+            await Promise.all(brandPromises);
         }
+
+        // Assemble perfumes with cached brand data
+        perfumeDataList.forEach(perfumeData => {
+            perfumes.push({
+                ...perfumeData,
+                brands: perfumeData.brand_id ? brandCache[perfumeData.brand_id] : null
+            });
+        });
 
         // Apply search filter if provided (since Firestore doesn't support OR queries easily)
         let filteredPerfumes = perfumes;
@@ -54,22 +67,30 @@ const getAllPerfumes = async (req, res) => {
             );
         }
 
-        // Get total count (this is approximate for Firestore)
-        const totalQuery = db.collection('perfumes');
-        const totalSnapshot = await totalQuery.get();
-        const total = totalSnapshot.size;
+        // IMPORTANT: Use estimated count to avoid extra query
+        // For accurate count, we'd need to fetch all docs which wastes quota
+        const estimatedTotal = 506; // Update this manually or use a counter document
 
         res.json({
             data: filteredPerfumes,
-            total: total,
+            total: estimatedTotal,
             page: Math.floor(offset / limit) + 1,
             limit: parseInt(limit),
-            totalPages: Math.ceil(total / limit)
+            totalPages: Math.ceil(estimatedTotal / limit)
         });
 
     } catch (error) {
         console.error('Error fetching perfumes:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        
+        // Check if it's a quota error
+        if (error.code === 8 || error.message?.includes('Quota exceeded')) {
+            res.status(429).json({ 
+                error: 'Database quota exceeded. Please try again later.',
+                code: 'QUOTA_EXCEEDED'
+            });
+        } else {
+            res.status(500).json({ error: 'Internal server error' });
+        }
     }
 };
 

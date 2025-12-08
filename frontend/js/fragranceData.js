@@ -31,7 +31,7 @@ export class FragranceDataModule {
                 try {
                     data = await window.edenAPI.fetchAPI('/brands', { limit: 1000 });
                 } catch (err) {
-                    console.warn('Failed to load brands via API client:', err);
+                    // Silently handle errors
                 }
             }
             
@@ -41,7 +41,6 @@ export class FragranceDataModule {
                 const response = await fetch(`${baseUrl}/brands?limit=1000`);
                 
                 if (!response.ok) {
-                    console.warn('Could not load brand logos from API');
                     return;
                 }
                 data = await response.json();
@@ -62,19 +61,16 @@ export class FragranceDataModule {
                             }
                             
                             this.dynamicBrandLogos[brand.name] = logoPath;
-                            console.log(`📷 Loaded logo for ${brand.name}: ${logoPath}`);
                         } else {
                             // Try to auto-detect logo from common patterns
                             const detectedLogo = await this.tryDetectBrandLogo(brand.name);
                             if (detectedLogo) {
                                 this.dynamicBrandLogos[brand.name] = detectedLogo;
-                                console.log(`🔍 Auto-detected logo for ${brand.name}: ${detectedLogo}`);
                             }
                         }
                     }
                 }
                 
-                console.log(`✅ Loaded ${Object.keys(this.dynamicBrandLogos).length} brand logos from database`);
                 this.brandsLoaded = true;
                 
                 // Trigger a custom event to notify that brands are loaded
@@ -86,7 +82,7 @@ export class FragranceDataModule {
                 }));
             }
         } catch (error) {
-            console.warn('Error loading brand logos:', error);
+            // Silently handle errors
         }
     }
     
@@ -106,16 +102,24 @@ export class FragranceDataModule {
             brandName.replace(/\s+/g, '')      // No spaces: "DoveLogo"
         ];
         
-        for (const pattern of patterns) {
-            for (const ext of extensions) {
-                const path = `photos/${pattern}.${ext}`;
-                
-                // Quick check without actually loading (will be validated when displayed)
-                const exists = await this.checkImageExists(path);
-                if (exists) {
-                    return path;
+        // Check patterns silently (suppress console errors)
+        const originalConsoleError = console.error;
+        console.error = () => {}; // Temporarily suppress error logs
+        
+        try {
+            for (const pattern of patterns) {
+                for (const ext of extensions) {
+                    const path = `photos/${pattern}.${ext}`;
+                    
+                    // Quick check without actually loading (will be validated when displayed)
+                    const exists = await this.checkImageExists(path);
+                    if (exists) {
+                        return path;
+                    }
                 }
             }
+        } finally {
+            console.error = originalConsoleError; // Restore console.error
         }
         
         return null;
@@ -126,6 +130,7 @@ export class FragranceDataModule {
             const response = await fetch(imagePath, { method: 'HEAD' });
             return response.ok;
         } catch (error) {
+            // Silently handle expected 404s during logo detection
             return false;
         }
     }

@@ -3,21 +3,13 @@ const router = express.Router();
 const {
     getAllBrands,
     getBrandById,
-    getBrandByName,
-    getBrandsWithCount,
     createBrand,
     updateBrand,
     deleteBrand
-} = require('../controllers/firebaseBrandController');
+} = require('../controllers/supabaseBrandController');
 
 // Get all brands
 router.get('/', getAllBrands);
-
-// Get brands with perfume count
-router.get('/with-count', getBrandsWithCount);
-
-// Get brand by name
-router.get('/name/:name', getBrandByName);
 
 // Get brand by ID
 router.get('/:id', getBrandById);
