@@ -1,11 +1,12 @@
 [build]
   # Frontend static site deployment
   publish = "frontend"
-  command = "echo 'Deploying static frontend'"
+  command = "cd netlify/functions && npm install"
 
 [build.environment]
   # Environment settings
   NODE_VERSION = "18"
+  NPM_FLAGS = "--legacy-peer-deps"
 
 # Netlify Functions configuration
 [functions]
