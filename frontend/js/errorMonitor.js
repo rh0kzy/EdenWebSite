@@ -103,15 +103,24 @@ class ErrorMonitor {
             } catch (error) {
                 const endTime = performance.now();
                 const duration = endTime - startTime;
+                
+                // Extract URL and method for filtering
+                const url = typeof args[0] === 'string' ? args[0] : args[0]?.url || '';
+                const method = args[1]?.method || 'GET';
+                
+                // Skip logging for HEAD requests to photos (logo detection)
+                const isLogoDetection = method === 'HEAD' && (url.includes('/photos/') || url.includes('photos/'));
 
-                this.logError({
-                    type: 'network_error',
-                    message: `Network request failed: ${error.message}`,
-                    url: args[0],
-                    error: error.toString(),
-                    duration: duration,
-                    timestamp: new Date().toISOString()
-                });
+                if (!isLogoDetection) {
+                    this.logError({
+                        type: 'network_error',
+                        message: `Network request failed: ${error.message}`,
+                        url: args[0],
+                        error: error.toString(),
+                        duration: duration,
+                        timestamp: new Date().toISOString()
+                    });
+                }
 
                 throw error;
             }
