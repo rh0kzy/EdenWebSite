@@ -1,9 +1,6 @@
-const { initializeFirebase } = require('./firebase-config');
-
-let db;
+const { initializeSupabase } = require('./supabase-config');
 
 exports.handler = async (event, context) => {
-    // Enable CORS
     const headers = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
@@ -11,13 +8,8 @@ exports.handler = async (event, context) => {
         'Content-Type': 'application/json'
     };
 
-    // Handle preflight OPTIONS request
     if (event.httpMethod === 'OPTIONS') {
-        return {
-            statusCode: 200,
-            headers,
-            body: ''
-        };
+        return { statusCode: 200, headers, body: '' };
     }
 
     if (event.httpMethod !== 'GET') {
@@ -28,139 +20,60 @@ exports.handler = async (event, context) => {
         };
     }
 
-    // Initialize Firebase if not already initialized
     try {
-        if (!db) {
-            db = initializeFirebase();
-        }
-    } catch (error) {
-        return {
-            statusCode: 500,
-            headers,
-            body: JSON.stringify({
-                success: false,
-                error: 'Database initialization failed',
-                details: error.message
-            })
-        };
-    }
-    try {
+        const supabase = initializeSupabase();
         const queryParams = event.queryStringParameters || {};
         const { search, brand, gender, category, page = 1, limit = 100 } = queryParams;
 
-        // Cap limits to prevent resource exhaustion
         const MAX_LIMIT = 200;
-        const requestedLimit = parseInt(limit, 10) || 100;
-        const actualLimit = Math.min(requestedLimit, MAX_LIMIT);
+        const actualLimit = Math.min(parseInt(limit, 10) || 100, MAX_LIMIT);
         const pageNum = parseInt(page, 10) || 1;
         const offset = (pageNum - 1) * actualLimit;
-        const limitWasCapped = requestedLimit > MAX_LIMIT;
 
-
-
-        let query = db.collection('perfumes');
+        let query = supabase
+            .from('perfumes')
+            .select('*, brands(id, name, logo_url)', { count: 'exact' });
 
         // Apply filters
-        if (brand && brand !== '') {
-            query = query.where('brand_name', '>=', brand.toLowerCase())
-                         .where('brand_name', '<=', brand.toLowerCase() + '\uf8ff');
+        if (search) {
+            query = query.or(`name.ilike.%${search}%,brand_name.ilike.%${search}%,reference.ilike.%${search}%`);
+        }
+        if (brand) {
+            query = query.ilike('brand_name', `%${brand}%`);
+        }
+        if (gender) {
+            query = query.eq('gender', gender);
         }
 
-        if (gender && gender !== '') {
-            query = query.where('gender', '==', gender);
-        }
+        // Apply pagination
+        query = query.range(offset, offset + actualLimit - 1).order('reference');
 
-        // Apply pagination and sorting
-        query = query.orderBy('reference').limit(actualLimit).offset(offset);
+        const { data, error, count } = await query;
 
-        const snapshot = await query.get();
+        if (error) throw error;
 
-        // Get all perfumes data first
-        const perfumesList = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }));
-
-        // Extract unique brand IDs to minimize database reads
-        // This prevents N+1 problem where we fetch the same brand multiple times
-        const brandIds = [...new Set(perfumesList.map(p => p.brand_id).filter(id => id))];
-        const brandsMap = {};
-
-        // Fetch unique brands in parallel
-        if (brandIds.length > 0) {
-            try {
-                const brandSnapshots = await Promise.all(
-                    brandIds.map(id => db.collection('brands').doc(id).get())
-                );
-                
-                brandSnapshots.forEach(doc => {
-                    if (doc.exists) {
-                        brandsMap[doc.id] = { id: doc.id, ...doc.data() };
-                    }
-                });
-            } catch (error) {
-                // Silent error on brand fetch, continue with perfumes
-            }
-        }
-
-        // Attach brand data to perfumes
-        const perfumes = perfumesList.map(perfume => ({
+        // Transform data to match expected format
+        const perfumes = data.map(perfume => ({
             ...perfume,
-            brands: perfume.brand_id ? brandsMap[perfume.brand_id] : null
+            brand_id: perfume.brands?.id,
+            brand_name: perfume.brands?.name || perfume.brand_name
         }));
-
-        // Apply search filter (client-side since Firestore doesn't support OR queries)
-        let filteredPerfumes = perfumes;
-        if (search && search !== '') {
-            const searchLower = search.toLowerCase();
-            filteredPerfumes = perfumes.filter(p =>
-                p.name?.toLowerCase().includes(searchLower) ||
-                p.brand_name?.toLowerCase().includes(searchLower) ||
-                p.reference?.toLowerCase().includes(searchLower)
-            );
-        }
-
-        // Get total count efficiently
-        let total = snapshot.size + offset;
-        try {
-            if (!limitWasCapped) {
-                const totalSnapshot = await db.collection('perfumes').get();
-                total = totalSnapshot.size;
-            }
-        } catch (err) {
-            // Silent fallback
-        }
 
         return {
             statusCode: 200,
             headers,
             body: JSON.stringify({
                 success: true,
-                data: filteredPerfumes || [],
-                total: total,
+                data: perfumes,
+                total: count,
                 page: pageNum,
                 limit: actualLimit,
-                totalPages: Math.ceil(total / actualLimit),
-                limit_was_capped: limitWasCapped
+                totalPages: Math.ceil(count / actualLimit)
             })
         };
 
     } catch (error) {
         console.error('Error fetching perfumes:', error);
-        
-        // Handle Quota Exceeded specifically
-        if (error.code === 8 || (error.message && error.message.includes('Quota exceeded'))) {
-            return {
-                statusCode: 429, // Too Many Requests
-                headers,
-                body: JSON.stringify({
-                    success: false,
-                    error: 'Daily quota exceeded. Please try again tomorrow.',
-                    details: error.message
-                })
-            };
-        }
-
         return {
             statusCode: 500,
             headers,

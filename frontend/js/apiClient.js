@@ -58,19 +58,10 @@ class EdenParfumAPI {
         const hostname = window.location.hostname;
         
         if (hostname === 'localhost' || hostname === '127.0.0.1') {
-            // Development environment - detect backend port
-            const possiblePorts = [3000, 3001, 5000]; // Removed 8080 to prevent frontend self-referencing
-            const currentPort = parseInt(window.location.port);
-            
-            // If we're already on a known backend port, use it
-            if (possiblePorts.includes(currentPort)) {
-                return `${window.location.protocol}//${hostname}:${currentPort}/api/v2`;
-            }
-            
-            // Otherwise, default to port 3000 (most common backend port)
-            return `http://${hostname}:3000/api/v2`;
+            // Development environment - use local backend
+            return 'http://localhost:3000/api/v2';
         } else {
-            // Production environment - use direct Netlify Functions path
+            // Production environment - use Netlify Functions
             return '/.netlify/functions';
         }
     }
