@@ -13,10 +13,6 @@
   directory = "netlify/functions"
   node_bundler = "esbuild"
 
-# Environment variables (set these in Netlify dashboard)
-[context.production.environment]
-  SUPABASE_URL = "https://ztofzphjvcsuqsjglluk.supabase.co"
-  # SUPABASE_SERVICE_ROLE_KEY - set this in Netlify dashboard (secret)
 # Security headers
 [[headers]]
   for = "/*"
