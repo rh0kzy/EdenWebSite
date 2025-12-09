@@ -61,13 +61,8 @@ export class FragranceDataModule {
                             }
                             
                             this.dynamicBrandLogos[brand.name] = logoPath;
-                        } else {
-                            // Try to auto-detect logo from common patterns
-                            const detectedLogo = await this.tryDetectBrandLogo(brand.name);
-                            if (detectedLogo) {
-                                this.dynamicBrandLogos[brand.name] = detectedLogo;
-                            }
                         }
+                        // Skip auto-detection - only use logos from database
                     }
                 }
                 
