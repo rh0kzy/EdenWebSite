@@ -73,10 +73,10 @@ class ErrorMonitor {
                 const url = typeof args[0] === 'string' ? args[0] : args[0]?.url || '';
                 const method = args[1]?.method || 'GET';
                 
-                // Skip logging for HEAD requests to photos (logo detection)
-                const isLogoDetection = method === 'HEAD' && url.includes('/photos/');
+                // Skip logging for HEAD requests to photos (logo detection) - UPDATED
+                const isLogoDetection = method === 'HEAD' && (url.includes('/photos/') || url.includes('photos/'));
 
-                // Log slow requests
+                // Log slow requests (except logo detection)
                 if (duration > 2000 && !isLogoDetection) {
                     this.logError({
                         type: 'slow_request',
