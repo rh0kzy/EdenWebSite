@@ -34,7 +34,10 @@ exports.handler = async (event, context) => {
             .order('name')
             .range(offsetNum, offsetNum + limitNum - 1);
 
-        if (error) throw error;
+        if (error) {
+            console.error('Supabase error:', error);
+            throw error;
+        }
 
         return {
             statusCode: 200,
@@ -56,57 +59,8 @@ exports.handler = async (event, context) => {
             body: JSON.stringify({
                 success: false,
                 error: 'Failed to fetch brands',
-                details: error.message
-            })
-        };
-    }
-};
-        try {
-            if (!limitWasCapped) {
-                const totalSnapshot = await db.collection('brands').get();
-                total = totalSnapshot.size;
-            }
-        } catch (err) {
-            // Silent fallback
-        }
-
-        return {
-            statusCode: 200,
-            headers,
-            body: JSON.stringify({
-                success: true,
-                data: brands,
-                total: total,
-                page: Math.floor(offsetNum / limitNum) + 1,
-                limit: limitNum,
-                totalPages: limitNum > 0 ? Math.ceil(total / limitNum) : 1,
-                limit_was_capped: limitWasCapped
-            })
-        };
-
-    } catch (error) {
-        console.error('Error fetching brands:', error);
-        
-        // Handle Quota Exceeded specifically
-        if (error.code === 8 || (error.message && error.message.includes('Quota exceeded'))) {
-            return {
-                statusCode: 429, // Too Many Requests
-                headers,
-                body: JSON.stringify({
-                    success: false,
-                    error: 'Daily quota exceeded. Please try again tomorrow.',
-                    details: error.message
-                })
-            };
-        }
-
-        return {
-            statusCode: 500,
-            headers,
-            body: JSON.stringify({
-                success: false,
-                error: 'Failed to fetch brands',
-                details: error.message
+                details: error.message,
+                stack: error.stack
             })
         };
     }
