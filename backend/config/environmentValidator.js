@@ -51,53 +51,28 @@ class EnvironmentValidator {
             },
 
             // Database Configuration (Critical)
-            // Firebase Configuration (NEW - Primary Database)
-            FIREBASE_PROJECT_ID: {
-                required: true,
-                type: 'string',
-                description: 'Firebase project ID',
-                category: 'database',
-                sensitive: false
-            },
-            FIREBASE_PRIVATE_KEY: {
-                required: true,
-                type: 'string',
-                minLength: 100,
-                description: 'Firebase service account private key',
-                category: 'database',
-                sensitive: true
-            },
-            FIREBASE_CLIENT_EMAIL: {
-                required: true,
-                type: 'string',
-                pattern: /.*@.*\.iam\.gserviceaccount\.com$/,
-                description: 'Firebase service account email',
-                category: 'database',
-                sensitive: false
-            },
-            
-            // Supabase Configuration (Legacy - Optional for migration)
+            // Supabase Configuration (Primary Database)
             SUPABASE_URL: {
-                required: false,
+                required: true,
                 type: 'url',
                 pattern: /^https:\/\/.*\.supabase\.co$/,
-                description: 'Supabase project URL (legacy)',
+                description: 'Supabase project URL',
                 category: 'database',
                 sensitive: false
             },
             SUPABASE_ANON_KEY: {
-                required: false,
+                required: true,
                 type: 'string',
                 minLength: 100,
-                description: 'Supabase anonymous access key (legacy)',
+                description: 'Supabase anonymous access key',
                 category: 'database',
                 sensitive: true
             },
             SUPABASE_SERVICE_ROLE_KEY: {
-                required: false,
+                required: true,
                 type: 'string',
                 minLength: 100,
-                description: 'Supabase service role key for admin operations (legacy)',
+                description: 'Supabase service role key for admin operations',
                 category: 'database',
                 sensitive: true
             },
