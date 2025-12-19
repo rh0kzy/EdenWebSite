@@ -60,14 +60,6 @@ class EnvironmentValidator {
                 category: 'database',
                 sensitive: false
             },
-            SUPABASE_ANON_KEY: {
-                required: true,
-                type: 'string',
-                minLength: 100,
-                description: 'Supabase anonymous access key',
-                category: 'database',
-                sensitive: true
-            },
             SUPABASE_SERVICE_ROLE_KEY: {
                 required: true,
                 type: 'string',
@@ -620,7 +612,7 @@ class EnvironmentValidator {
         const summary = {
             nodeEnv: process.env.NODE_ENV || 'development',
             port: process.env.PORT || 3000,
-            databaseConfigured: !!(process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_PRIVATE_KEY),
+            databaseConfigured: !!(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY),
             loggingConfigured: !!process.env.LOG_LEVEL,
             monitoringConfigured: !!process.env.HEALTH_CHECK_INTERVAL,
             notificationsConfigured: !!(process.env.ENABLE_ERROR_EMAIL || process.env.ENABLE_ERROR_WEBHOOKS),

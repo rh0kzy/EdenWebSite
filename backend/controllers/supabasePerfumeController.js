@@ -5,7 +5,8 @@ const { logActivity } = require('../utils/activityLogger');
 const getAllPerfumes = async (req, res) => {
     try {
         const { brand, gender, search, limit = 50, page = 1 } = req.query;
-        const offset = (parseInt(page) - 1) * parseInt(limit);
+        const safeLimit = Math.min(parseInt(limit), 500);
+        const offset = (parseInt(page) - 1) * safeLimit;
 
         let query = supabase
             .from('perfumes')
@@ -35,7 +36,7 @@ const getAllPerfumes = async (req, res) => {
         // Apply sorting and pagination
         query = query
             .order('reference', { ascending: true })
-            .range(offset, offset + parseInt(limit) - 1);
+            .range(offset, offset + safeLimit - 1);
 
         const { data, error, count } = await query;
 
@@ -48,8 +49,8 @@ const getAllPerfumes = async (req, res) => {
             data: data || [],
             total: count || 0,
             page: parseInt(page),
-            limit: parseInt(limit),
-            totalPages: Math.ceil((count || 0) / parseInt(limit))
+            limit: safeLimit,
+            totalPages: Math.ceil((count || 0) / safeLimit)
         });
 
     } catch (error) {

@@ -98,6 +98,39 @@ const brandLogoMap = {
     'Ferrari': 'Ferrari.png',
     'Joop!': 'Joop!.png',
     'Joop': 'Joop!.png',
+    'Roberto Cavalli': 'Roberto-Cavalli-logo.png',
+    'Repetto': 'Repetto.jpg',
+    'Lataffa': 'LATTAFA.svg',
+    'Victoria\'S Secret': "Victoria'S Secret.png",
+    'Kayali': 'Kayali.jpg',
+    'Dolce&Gabanna': 'dolce_gabanna.png',
+    'Arte Profumi': 'Arte Profumi.jpg',
+    'Lolita Land': 'Lolita Land.jpg',
+    'Bdk': 'Bdk.webp',
+    'Laverne': 'Laverne.png',
+    'Kenzo': '61fd47dd1042bd46515add61_logo (1) kenzo.png',
+    'Paco Rabbane': 'PACO RABBANE.png',
+    'Shalis': 'Shalis.png',
+    'Luis Vuitton': 'louis-vuitton-1-logo-black-and-white.png',
+    'Xerjoff': 'Xerjoff.webp',
+    'Solinote': 'Solinote.png',
+    'Banafaa': 'Banafaa.jpg',
+    'Tiziana Tirenzi': 'Tiziana Tirenzi.png',
+    'Parfums de Marly': 'Parfums de Marly.png',
+    'Kurkidjian': 'Kurkidjian.png',
+    'Viktor&Rolf': 'Viktor & Rolf.png',
+    'Polo': 'Polo.png',
+    'Mateu': 'Mateu.jpg',
+    'Nasomatto': 'Nasomatto.jpg',
+    'La Lique': 'La Lique.png',
+    'Nishane': 'Nishane.webp',
+    'Kajal': 'Kajal.avif',
+    'Sospiro': 'Sospiro.avif',
+    'Nicos': 'Nicos.webp',
+    'Evaflor': 'Evaflor.webp',
+    'Nautica': 'Nautica.jpg',
+    'Denhil': 'Denhil.jpg',
+    'Caron': 'Caron.jpg',
     'Viktor & Rolf': 'Viktor & Rolf.png',
     'Narciso Rodriguez': 'narcisco.png',
     'Yves Rocher': 'Yves Rocher.png',
@@ -109,28 +142,66 @@ const brandLogoMap = {
     'Chloé': 'chloe-Converted.png'
 };
 
-// Perfume name to image mapping (simplified - you can extend this)
-function findPerfumeImage(perfumeName, brandName) {
-    // Normalize the perfume name for matching
-    const normalized = perfumeName.toLowerCase()
-        .replace(/[^\w\s]/g, '') // Remove special characters
-        .replace(/\s+/g, ' ')     // Normalize spaces
+// Manual mappings for perfumes that don't match by name
+const manualPerfumeMappings = {
+    "6309": "photos/Fragrances/375x500.6341.2x.avif", // Angelman
+    "6404": "photos/Fragrances/Terre dhermes.avif", // Terre d'Hermès
+    "1205": "photos/Fragrances/Creme Bruller.avif", // Crème Brûlée
+    "1403": "photos/Fragrances/Bamoboo gucci.avif", // Bamboo
+    "1614": "photos/Fragrances/J'adore L'Or.avif", // Jadore L'Or
+    "2102": "photos/Fragrances/privet show.avif", // Private Show
+    "2307": "photos/Fragrances/Narciso for her.avif", // Narciso Rodriguez FOR HER
+    "2312": "photos/Fragrances/L'Eau Couture Elie Saab.avif", // L'Eau Coture
+    "2403": "photos/Fragrances/Ameerat Al Arab.avif", // اميرة العرب
+    "2405": "photos/Fragrances/Sabaya.avif", // صبايا
+    "2501": "photos/Fragrances/Bare vanila.avif", // Bare Vanilla
+    "3312": "photos/Dove.webp", // Palmolive -> Dove
+    "3609": "photos/Fragrances/Coco Melle.avif", // Coco Mademoiselle
+    "4313": "photos/Fragrances/Alexendria Ii.avif", // Alexandria II
+    "4406": "photos/Fragrances/Ageur F.Malles.avif", // Musc Ravageur
+    "4504": "photos/Fragrances/Nishane.avif" // Hacivat
+};
+
+function normalize(text) {
+    if (!text) return '';
+    return text.toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // Remove accents
+        .replace(/[^\w\s\u0600-\u06FF]/g, ' ') // Keep alphanumeric and Arabic characters
+        .replace(/\s+/g, ' ')           // Collapse spaces
         .trim();
+}
+
+// Perfume name to image mapping
+function findPerfumeImage(perfumeName, brandName) {
+    const normName = normalize(perfumeName);
+    if (!normName) return null; // Don't match empty strings
     
-    // Look for exact matches first
+    const normBrand = brandName ? normalize(brandName) : '';
+    
+    // 1. Try exact match on normalized names
     for (const imageFile of perfumeImages) {
-        const imageName = imageFile.toLowerCase().replace(/\.(avif|webp|jpg|png|jpeg)$/, '');
-        if (imageName === normalized || imageName.includes(normalized.split(' ')[0])) {
+        const imgName = normalize(imageFile.replace(/\.(avif|webp|jpg|png|jpeg)$/i, ''));
+        if (imgName && imgName === normName) {
             return `photos/Fragrances/${imageFile}`;
         }
     }
     
-    // Look for partial matches
-    const firstWord = normalized.split(' ')[0];
-    if (firstWord.length > 3) {
+    // 2. Try name + brand match
+    if (brandName) {
         for (const imageFile of perfumeImages) {
-            const imageName = imageFile.toLowerCase().replace(/\.(avif|webp|jpg|png|jpeg)$/, '');
-            if (imageName.includes(firstWord)) {
+            const imgName = normalize(imageFile.replace(/\.(avif|webp|jpg|png|jpeg)$/i, ''));
+            if (imgName && (imgName === `${normName} ${normBrand}` || imgName === `${normBrand} ${normName}`)) {
+                return `photos/Fragrances/${imageFile}`;
+            }
+        }
+    }
+    
+    // 3. Try partial match (only if name is long enough)
+    if (normName.length > 3) {
+        for (const imageFile of perfumeImages) {
+            const imgName = normalize(imageFile.replace(/\.(avif|webp|jpg|png|jpeg)$/i, ''));
+            if (imgName && (imgName.includes(normName) || normName.includes(imgName))) {
                 return `photos/Fragrances/${imageFile}`;
             }
         }
@@ -187,15 +258,18 @@ async function updatePerfumeImages() {
         // Get all perfumes
         const { data: perfumes, error } = await supabase
             .from('perfumes')
-            .select('*')
-            .limit(50); // Start with first 50 for testing
+            .select('*');
             
         if (error) throw error;
         
         let updatedCount = 0;
         
         for (const perfume of perfumes) {
-            const imageUrl = findPerfumeImage(perfume.name, perfume.brand_name);
+            let imageUrl = manualPerfumeMappings[perfume.reference];
+            
+            if (!imageUrl) {
+                imageUrl = findPerfumeImage(perfume.name, perfume.brand_name);
+            }
             
             if (imageUrl) {
                 const { error: updateError } = await supabase

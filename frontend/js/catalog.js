@@ -98,7 +98,7 @@ export class CatalogModule {
             let allPerfumes = [];
             let page = 1;
             let hasMore = true;
-            const maxPages = 3; // Limit to 3 pages (600 perfumes) to avoid quota issues
+            const maxPages = 10; // Increased to allow up to 2000 perfumes
             
             while (hasMore && page <= maxPages) {
                 try {
@@ -122,8 +122,8 @@ export class CatalogModule {
                     // Continue if we got a full page (200 items) and haven't hit max
                     if (perfumes.length === 200 && page < maxPages) {
                         page++;
-                        // Add delay to avoid quota limits (2s for safety)
-                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        // Add delay to avoid quota limits (500ms is enough for Supabase)
+                        await new Promise(resolve => setTimeout(resolve, 500));
                     } else {
                         hasMore = false;
                     }

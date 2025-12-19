@@ -1,6 +1,6 @@
 // Legacy photoController - To be migrated to Firebase
-// const { supabase } = require('../config/supabase');
-const { db } = require('../config/firebase');
+const { supabase } = require('../config/supabase');
+// const { db } = require('../config/firebase');
 
 // Get perfumes with complete photo information
 const getPerfumesWithPhotos = async (req, res) => {
