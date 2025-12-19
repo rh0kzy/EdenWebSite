@@ -6,7 +6,8 @@ import {
     searchInFields, 
     setupSearchShortcuts, 
     getSearchStats,
-    normalizeText
+    normalizeText,
+    highlightSearchTerms
 } from './searchUtils.js';
 
 let allPerfumes = [];
@@ -243,12 +244,17 @@ function displayPerfumes(perfumes) {
             imageUrl = normalizeImageUrl(perfume.image_url);
         }
         
+        const searchTerm = document.getElementById('search-input').value.trim();
+        const highlightedName = highlightSearchTerms(perfume.name, searchTerm);
+        const highlightedBrand = highlightSearchTerms(perfume.brand_name || 'No Brand', searchTerm);
+        const highlightedRef = highlightSearchTerms(perfume.reference, searchTerm);
+        
         card.innerHTML = `
             <img src="${imageUrl}" alt="${perfume.name}" class="perfume-image">
             <div class="perfume-content">
-                <div class="perfume-title">${perfume.name}</div>
-                <div class="perfume-meta"><strong>Brand:</strong> ${perfume.brand_name}</div>
-                <div class="perfume-meta"><strong>Reference:</strong> ${perfume.reference}</div>
+                <div class="perfume-title">${highlightedName}</div>
+                <div class="perfume-meta"><strong>Brand:</strong> ${highlightedBrand}</div>
+                <div class="perfume-meta"><strong>Reference:</strong> ${highlightedRef}</div>
                 <div class="perfume-meta"><strong>Gender:</strong> ${perfume.gender}</div>
                 <div class="perfume-actions">
                     <button class="btn btn-primary" data-action="edit" data-id="${perfume.id}">

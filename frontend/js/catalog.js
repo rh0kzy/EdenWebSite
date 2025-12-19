@@ -6,7 +6,8 @@ import {
     searchInFields, 
     setupSearchShortcuts, 
     getSearchStats,
-    normalizeText
+    normalizeText,
+    highlightSearchTerms
 } from './searchUtils.js';
 
 export class CatalogModule {
@@ -400,8 +401,7 @@ export class CatalogModule {
         this.filteredPerfumes = window.perfumesDatabase.filter(perfume => {
             // Enhanced search - matches name, brand, or reference with accent-insensitive, multi-word support
             const matchesSearch = !this.currentSearchTerm || 
-                searchInFields(perfume, ['name', 'brand'], this.currentSearchTerm) ||
-                (perfume.reference && normalizeText(perfume.reference).includes(normalizeText(this.currentSearchTerm)));
+                searchInFields(perfume, ['name', 'brand', 'reference'], this.currentSearchTerm);
             
             // Brand filter - exact match (case-insensitive)
             const matchesBrand = !this.currentBrandFilter || 
@@ -591,13 +591,17 @@ export class CatalogModule {
             imageUrl = perfume.image;
         }
         
+        const highlightedName = highlightSearchTerms(perfume.name, this.currentSearchTerm);
+        const highlightedBrand = highlightSearchTerms(perfume.brand || 'No Brand', this.currentSearchTerm);
+        const highlightedRef = highlightSearchTerms(perfume.reference, this.currentSearchTerm);
+
         const brandSection = brandLogo 
             ? `<div class="perfume-brand">
                    <img src="${brandLogo}" alt="${perfume.brand}" class="brand-logo" loading="lazy">
-                   <span>${perfume.brand || 'No Brand'}</span>
+                   <span>${highlightedBrand}</span>
                </div>`
             : `<div class="perfume-brand">
-                   <span>${perfume.brand || 'No Brand'}</span>
+                   <span>${highlightedBrand}</span>
                </div>`;
         
         // Create the structure with image container only; image will be attached lazily
@@ -605,8 +609,8 @@ export class CatalogModule {
             ${perfume.multiplier ? `<div class="price-multiplier">${perfume.multiplier}</div>` : ''}
             <div class="perfume-image"></div>
             <div class="perfume-header">
-                <div class="perfume-name">${perfume.name}</div>
-                <div class="perfume-reference">#${perfume.reference}</div>
+                <div class="perfume-name">${highlightedName}</div>
+                <div class="perfume-reference">#${highlightedRef}</div>
             </div>
             <div class="perfume-details">
                 ${brandSection}

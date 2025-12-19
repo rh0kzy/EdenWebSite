@@ -14,7 +14,7 @@ export function normalizeText(text) {
         .toLowerCase()
         .normalize('NFD')  // Decompose accented characters
         .replace(/[\u0300-\u036f]/g, '')  // Remove accent marks
-        .replace(/[^\w\s]/g, ' ')  // Replace special chars with spaces
+        .replace(/[^\w\s\u0600-\u06FF]/g, ' ')  // Replace special chars with spaces, preserving Arabic
         .replace(/\s+/g, ' ')  // Normalize spaces
         .trim();
 }
@@ -50,10 +50,13 @@ export function matchesSearch(text, query) {
 export function searchInFields(item, fields, query) {
     if (!query) return true;
     
-    return fields.some(field => {
-        const value = getNestedValue(item, field);
-        return matchesSearch(value, query);
-    });
+    // Combine all fields into one searchable string for multi-field matching
+    const combinedText = fields
+        .map(field => getNestedValue(item, field))
+        .filter(val => val !== undefined && val !== null)
+        .join(' ');
+        
+    return matchesSearch(combinedText, query);
 }
 
 /**
