@@ -1,4 +1,3 @@
--- Eden Parfum Database Schema for Supabase
 
 -- Enable Row Level Security
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO postgres, anon, authenticated, service_role;
